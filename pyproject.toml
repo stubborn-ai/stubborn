@@ -49,9 +49,6 @@ stubborn-mcp = "stubborn.mcp_server.server:main"
 [tool.hatch.build.targets.wheel]
 packages = ["src/stubborn"]
 
-[tool.hatch.build.targets.wheel.force-include]
-"src/stubborn/store/schema" = "stubborn/store/schema"
-
 [tool.hatch.build.targets.sdist]
 include = ["src/stubborn", "README.md", "LICENSE"]
 
