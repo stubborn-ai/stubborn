@@ -1,7 +1,7 @@
 # ADR-005: Dual output formats — `java-stub` and `stubborn-dsl`
 
 - **Status:** Accepted
-- **Date:** 2026-06-01 (retroactive; formalized 2026-07-02)
+- **Documented:** 2026-07-02
 - **Deciders:** Stubborn maintainers
 
 ## Context

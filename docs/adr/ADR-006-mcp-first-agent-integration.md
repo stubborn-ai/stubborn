@@ -1,7 +1,7 @@
 # ADR-006: MCP-first agent integration
 
 - **Status:** Accepted
-- **Date:** 2026-04-01 (retroactive; formalized 2026-07-02)
+- **Documented:** 2026-07-02
 - **Deciders:** Stubborn maintainers
 
 ## Context

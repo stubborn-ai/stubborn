@@ -4,6 +4,8 @@ Stubborn records **significant, hard-to-reverse** design choices here. Each ADR 
 
 This project is built for **use and for reading**: ADRs are part of the public design story, not internal meeting notes.
 
+**Date field:** `Documented` is when the ADR was written. These records **backfill** architecture already present in code (first public git history from 2026-06-30); they do **not** imply a month-by-month decision timeline before the repo existed.
+
 ## Index
 
 | ADR | Status | Title |
@@ -42,7 +44,7 @@ Skip ADRs for routine refactors, dependency bumps, or CI tweaks — [CHANGELOG.m
 # ADR-NNN: Title
 
 - **Status:** Accepted
-- **Date:** YYYY-MM-DD
+- **Documented:** YYYY-MM-DD
 - **Deciders:** …
 
 ## Context

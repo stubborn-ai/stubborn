@@ -40,7 +40,13 @@ CREATE TABLE IF NOT EXISTS scip_edge (
     from_symbol_id  INTEGER NOT NULL REFERENCES scip_symbol(id),
     to_symbol_id    INTEGER NOT NULL REFERENCES scip_symbol(id),
     edge_kind       TEXT NOT NULL CHECK (
-        edge_kind IN ('reference', 'type', 'implementation', 'definition')
+        edge_kind IN (
+            'reference',
+            'type',
+            'implementation',
+            'definition',
+            'signature-ref'
+        )
     ),
     UNIQUE (index_run_id, from_symbol_id, to_symbol_id, edge_kind)
 );

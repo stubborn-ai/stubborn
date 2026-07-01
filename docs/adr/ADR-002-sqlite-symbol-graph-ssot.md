@@ -1,7 +1,7 @@
 # ADR-002: SQLite symbol graph as SSoT
 
 - **Status:** Accepted
-- **Date:** 2026-03-01 (retroactive; formalized 2026-07-02)
+- **Documented:** 2026-07-02
 - **Deciders:** Stubborn maintainers
 
 ## Context
@@ -23,7 +23,7 @@ Core tables:
 
 - `index_run` — provenance (SCIP source, language, tool version)
 - `scip_symbol` — stable_id, display_name, kind, signature, documentation
-- `scip_edge` — typed relationships between symbols
+- `scip_edge` — typed relationships; kinds include SCIP-native (`reference`, `type`, …) and ingest enrichment (`signature-ref`)
 
 SQLite is the **single source of truth** for all downstream operations. We do not keep a parallel in-memory graph format as the canonical store.
 

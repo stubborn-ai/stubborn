@@ -13,6 +13,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **`--prune-mode`** (`smart` | `strict` | `fast`) on `context`, `metrics`, API, and MCP — user control over neighbor expansion.
 - Ingest signature enrichment edges tagged as `signature-ref` (skipped in `strict` / `fast`).
 
+### Fixed
+
+- **`signature-ref` edges silently dropped on ingest** — schema CHECK omitted `signature-ref`; `INSERT OR IGNORE` swallowed constraint failures. Schema updated; writer uses `INSERT … ON CONFLICT DO NOTHING`; regression test in `test_store.py`.
+- **ADR fabricated retroactive dates** — replaced with `Documented: 2026-07-02` and README disclaimer.
+
 ### Changed
 
 - [POSITIONING.md](docs/POSITIONING.md) — primary/secondary audience, honest competitor comparison, SCIP prerequisite, language scope.

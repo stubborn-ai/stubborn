@@ -1,7 +1,7 @@
 # ADR-003: Type-neighbor BFS pruning with token budget
 
 - **Status:** Accepted
-- **Date:** 2026-05-01 (retroactive; formalized 2026-07-02)
+- **Documented:** 2026-07-02
 - **Deciders:** Stubborn maintainers
 
 ## Context
@@ -44,6 +44,8 @@ CLI / API / MCP: `--prune-mode smart|strict|fast`.
 | Ingest constructor promotion | all modes |
 | Ingest signature enrichment (`edge_kind=signature-ref`) | `smart` only (skipped in `strict` / `fast`) |
 | Prune-time signature regex | `smart` only |
+
+Persisted `signature-ref` edges require schema CHECK to allow the kind ([`v1.sql`](../../src/stubborn/store/schema/v1.sql)); `IndexWriter` uses `ON CONFLICT DO NOTHING` for duplicates — not `INSERT OR IGNORE`, so CHECK violations fail loudly.
 
 Default remains **`smart`** for backward-compatible neighbor richness (CI guard scripts assume it). Users who need graph-only guarantees choose **`strict`**; token-sensitive tasks choose **`fast`** or **`stubborn-dsl`** (ADR-005).
 

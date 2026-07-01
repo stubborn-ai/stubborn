@@ -65,3 +65,45 @@ def test_write_edges(tmp_path: Path) -> None:
     IndexWriter(db).write(snapshot)
     info = read_info(db)
     assert info.edge_count == 1
+
+
+def test_signature_ref_edges_persist_in_sqlite(tmp_path: Path) -> None:
+    """Regression: signature-ref must survive CHECK constraint + INSERT (not OR IGNORE)."""
+    from stubborn.ingest.scip import load_scip_index
+
+    db = tmp_path / "symbols.db"
+    snapshot = load_scip_index(
+        Path(__file__).resolve().parents[1] / "examples" / "fixtures" / "minimal.json"
+    )
+    in_memory = sum(1 for e in snapshot.edges if e.edge_kind == "signature-ref")
+    assert in_memory >= 1
+
+    IndexWriter(db).write(snapshot)
+
+    conn = sqlite3.connect(db)
+    try:
+        count = conn.execute(
+            "SELECT COUNT(*) FROM scip_edge WHERE edge_kind = 'signature-ref'"
+        ).fetchone()[0]
+    finally:
+        conn.close()
+
+    assert count == in_memory
+    assert count >= 1
+
+
+def test_invalid_edge_kind_raises_on_write(tmp_path: Path) -> None:
+    db = tmp_path / "symbols.db"
+    snapshot = IndexSnapshot(
+        scip_source="fixture.json",
+        symbols=[
+            SymbolRecord(stable_id="a", kind="class"),
+            SymbolRecord(stable_id="b", kind="class"),
+        ],
+        edges=[EdgeRecord(from_stable_id="a", to_stable_id="b", edge_kind="not-a-real-kind")],
+    )
+
+    import pytest
+
+    with pytest.raises(sqlite3.IntegrityError):
+        IndexWriter(db).write(snapshot)

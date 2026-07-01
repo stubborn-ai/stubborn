@@ -134,9 +134,11 @@ class IndexWriter:
                     continue
                 conn.execute(
                     """
-                    INSERT OR IGNORE INTO scip_edge (
+                    INSERT INTO scip_edge (
                         index_run_id, from_symbol_id, to_symbol_id, edge_kind
                     ) VALUES (?, ?, ?, ?)
+                    ON CONFLICT(index_run_id, from_symbol_id, to_symbol_id, edge_kind)
+                    DO NOTHING
                     """,
                     (index_run_id, from_id, to_id, edge.edge_kind),
                 )

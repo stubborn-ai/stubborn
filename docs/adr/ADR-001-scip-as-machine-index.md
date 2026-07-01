@@ -1,7 +1,7 @@
 # ADR-001: SCIP as the machine index
 
 - **Status:** Accepted
-- **Date:** 2026-03-01 (retroactive; formalized 2026-07-02)
+- **Documented:** 2026-07-02
 - **Deciders:** Stubborn maintainers
 
 ## Context

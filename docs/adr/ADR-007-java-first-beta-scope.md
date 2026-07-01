@@ -1,7 +1,7 @@
 # ADR-007: Java-first beta scope
 
 - **Status:** Accepted
-- **Date:** 2026-07-01 (formalized 2026-07-02)
+- **Documented:** 2026-07-02
 - **Deciders:** Stubborn maintainers
 
 ## Context

@@ -1,7 +1,7 @@
 # ADR-004: Privacy contract — declarations only
 
 - **Status:** Accepted
-- **Date:** 2026-03-01 (retroactive; formalized 2026-07-02)
+- **Documented:** 2026-07-02
 - **Deciders:** Stubborn maintainers
 
 ## Context
