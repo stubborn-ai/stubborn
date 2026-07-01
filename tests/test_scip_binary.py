@@ -6,10 +6,10 @@ from pathlib import Path
 
 import pytest
 
-from anchor_stubborn.graph.prune import prune_context
-from anchor_stubborn.ingest.scip import load_scip_index
-from anchor_stubborn.ingest.stream import SCIP_MAGIC, parse_index_bytes
-from anchor_stubborn.store.writer import IndexWriter
+from stubborn.graph.prune import prune_context
+from stubborn.ingest.scip import load_scip_index
+from stubborn.ingest.stream import SCIP_MAGIC, parse_index_bytes
+from stubborn.store.writer import IndexWriter
 from scip_fixtures import build_minimal_index, write_streaming_scip
 
 FIXTURE_DIR = Path(__file__).resolve().parents[1] / "examples" / "fixtures"

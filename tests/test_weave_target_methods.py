@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from anchor_stubborn.api import get_context
+from stubborn.api import get_context
 
 DEMO_ROOT = Path(__file__).resolve().parents[1] / "examples" / "demo-spring"
 DB_PATH = DEMO_ROOT / "metadata" / "symbols.db"
@@ -32,6 +32,6 @@ def test_order_service_type_includes_method_signatures() -> None:
 
 
 def test_order_service_anchor_dsl_includes_members_block() -> None:
-    result = get_context(TARGET, db_path=DB_PATH, format="anchor-dsl")
+    result = get_context(TARGET, db_path=DB_PATH, format="stubborn-dsl")
     assert "members:" in result.text
     assert "m OrderService.payOrder" in result.text

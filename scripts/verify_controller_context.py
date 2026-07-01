@@ -6,8 +6,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from anchor_stubborn.api import get_context
-from anchor_stubborn.store.reader import resolve_stable_id
+from stubborn.api import get_context
+from stubborn.store.reader import resolve_stable_id
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEMO_ROOT = REPO_ROOT / "examples" / "demo-spring"

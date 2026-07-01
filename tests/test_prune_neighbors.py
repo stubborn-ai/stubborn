@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from anchor_stubborn.config import ContextBudget
-from anchor_stubborn.graph.prune import prune_context
-from anchor_stubborn.ingest.scip import load_scip_index
-from anchor_stubborn.store.writer import IndexWriter
-from anchor_stubborn.weave.java_stub import weave_java_stub
+from stubborn.config import ContextBudget
+from stubborn.graph.prune import prune_context
+from stubborn.ingest.scip import load_scip_index
+from stubborn.store.writer import IndexWriter
+from stubborn.weave.java_stub import weave_java_stub
 
 FIXTURE = Path(__file__).resolve().parents[1] / "examples" / "fixtures" / "minimal.json"
 

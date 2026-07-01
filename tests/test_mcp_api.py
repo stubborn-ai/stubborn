@@ -7,10 +7,10 @@ from pathlib import Path
 
 import pytest
 
-from anchor_stubborn.api import get_context, get_index_info, get_metrics, list_index_symbols
-from anchor_stubborn.ingest.scip import load_scip_index
-from anchor_stubborn.store.reader import list_symbols, resolve_db_path
-from anchor_stubborn.store.writer import IndexWriter
+from stubborn.api import get_context, get_index_info, get_metrics, list_index_symbols
+from stubborn.ingest.scip import load_scip_index
+from stubborn.store.reader import list_symbols, resolve_db_path
+from stubborn.store.writer import IndexWriter
 
 FIXTURE = Path(__file__).resolve().parents[1] / "examples" / "fixtures" / "minimal.json"
 DEMO_JAVA = (
@@ -31,12 +31,12 @@ def test_resolve_db_path_from_argument(indexed_db: Path) -> None:
 
 
 def test_resolve_db_path_from_env(indexed_db: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("ANCHOR_STUBBORN_DB", str(indexed_db))
+    monkeypatch.setenv("STUBBORN_DB", str(indexed_db))
     assert resolve_db_path(None) == indexed_db
 
 
 def test_resolve_db_path_missing_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("ANCHOR_STUBBORN_DB", raising=False)
+    monkeypatch.delenv("STUBBORN_DB", raising=False)
     with pytest.raises(ValueError, match="db_path is required"):
         resolve_db_path(None)
 
@@ -80,11 +80,11 @@ def test_get_metrics_api(indexed_db: Path) -> None:
 
 def test_mcp_tools_callable(indexed_db: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     pytest.importorskip("mcp")
-    monkeypatch.setenv("ANCHOR_STUBBORN_DB", str(indexed_db))
+    monkeypatch.setenv("STUBBORN_DB", str(indexed_db))
 
-    from anchor_stubborn.mcp_server.server import get_context as mcp_get_context
-    from anchor_stubborn.mcp_server.server import list_symbols as mcp_list_symbols
-    from anchor_stubborn.mcp_server.server import metrics as mcp_metrics
+    from stubborn.mcp_server.server import get_context as mcp_get_context
+    from stubborn.mcp_server.server import list_symbols as mcp_list_symbols
+    from stubborn.mcp_server.server import metrics as mcp_metrics
 
     ctx = mcp_get_context(TARGET)
     assert ctx["text"]

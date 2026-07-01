@@ -26,7 +26,7 @@ Write-Host "== spring-petclinic E2E ==" -ForegroundColor Cyan
 Assert-Command git
 Assert-Command mvn
 Assert-Command scip-java
-Assert-Command anchor-stubborn
+Assert-Command stubborn
 
 if (-not (Test-Path (Join-Path $UpstreamRoot ".git"))) {
     Write-Host "`n[0/6] Clone upstream..." -ForegroundColor Yellow
@@ -46,22 +46,22 @@ Write-Host "`n[2/6] scip-java index..." -ForegroundColor Yellow
 if (Test-Path index.scip) { Remove-Item index.scip }
 scip-java index --build-tool maven
 
-Write-Host "`n[3/6] anchor-stubborn index..." -ForegroundColor Yellow
+Write-Host "`n[3/6] stubborn index..." -ForegroundColor Yellow
 $metadataDir = Join-Path $ExampleRoot "metadata"
 New-Item -ItemType Directory -Force -Path $metadataDir | Out-Null
 $dbPath = Join-Path $metadataDir "symbols.db"
-anchor-stubborn index --scip index.scip --out $dbPath
+stubborn index --scip index.scip --out $dbPath
 
 Write-Host "`n[4/6] index summary..." -ForegroundColor Yellow
-anchor-stubborn info $dbPath
+stubborn info $dbPath
 
 Write-Host "`n[5/6] VetController context..." -ForegroundColor Yellow
 $target = python (Join-Path $RepoRoot "scripts\resolve_symbol.py") $dbPath --display-name VetController
 $stubPath = Join-Path $metadataDir "vet-controller.stub.java"
-anchor-stubborn context $dbPath --target $target --out $stubPath
+stubborn context $dbPath --target $target --out $stubPath
 
 Write-Host "`n[6/6] metrics + verify..." -ForegroundColor Yellow
-anchor-stubborn metrics $dbPath --target $target --sources src/main/java
+stubborn metrics $dbPath --target $target --sources src/main/java
 python (Join-Path $RepoRoot "scripts\verify_petclinic_context.py")
 
 Write-Host "`nDone." -ForegroundColor Green

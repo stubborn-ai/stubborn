@@ -1,6 +1,6 @@
 # Documentation index
 
-**Package version:** `0.9.0b1` (Beta)
+**Package version:** `0.9.0b2` (Beta)
 
 | Doc | Audience | Contents |
 |-----|----------|----------|
@@ -9,20 +9,20 @@
 | [INTEGRATION.md](INTEGRATION.md) | Migration teams | How migration-hub consumes Stubborn |
 | [SCIP-INGEST.md](SCIP-INGEST.md) | Index authors | Supported SCIP formats and ingest behavior |
 | [MCP.md](MCP.md) | Agent / Cursor users | MCP tools, config, workflows |
-| [ANCHOR-DSL-GUIDE.md](ANCHOR-DSL-GUIDE.md) | Prompt authors | When to use java-stub vs anchor-dsl |
-| [ANCHOR-DSL.md](ANCHOR-DSL.md) | LLM context authors | Anchor-DSL v1 grammar and CLI usage |
-| [ANCHOR-DSL-LLM.txt](ANCHOR-DSL-LLM.txt) | Prompt engineers | Short system-prompt snippet for `format=anchor-dsl` |
+| [STUBBORN-DSL-GUIDE.md](STUBBORN-DSL-GUIDE.md) | Prompt authors | When to use java-stub vs stubborn-dsl |
+| [STUBBORN-DSL.md](STUBBORN-DSL.md) | LLM context authors | Stubborn-DSL v1 grammar and CLI usage |
+| [STUBBORN-DSL-LLM.txt](STUBBORN-DSL-LLM.txt) | Prompt engineers | Short system-prompt snippet for `format=stubborn-dsl` |
 
 ## Output formats
 
 | Format | CLI / MCP `format` | When to use |
 |--------|-------------------|-------------|
 | Java stub | `java-stub` (default) | Java / Spring code generation |
-| Anchor-DSL | `anchor-dsl` | Lower tokens, graph-first reasoning; includes inline `# Guide` |
+| Stubborn-DSL | `stubborn-dsl` | Lower tokens, graph-first reasoning; includes inline `# Guide` |
 
 Both formats share the same prune step and privacy contract (declarations only, no method bodies).
 
-**Weave granularity** (CLI / API / MCP): `--member-signatures` and `--javadoc` — see [ANCHOR-DSL-GUIDE.md](ANCHOR-DSL-GUIDE.md#granularity-switches-token-vs-detail).
+**Weave granularity** (CLI / API / MCP): `--member-signatures` and `--javadoc` — see [STUBBORN-DSL-GUIDE.md](STUBBORN-DSL-GUIDE.md#granularity-switches-token-vs-detail).
 
 ## Examples
 

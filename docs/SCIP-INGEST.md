@@ -1,6 +1,6 @@
 # SCIP ingest (v0.2)
 
-Anchor-Stubborn reads standard SCIP indexes produced by industry indexers.
+Stubborn reads standard SCIP indexes produced by industry indexers.
 
 ## Supported formats
 
@@ -8,7 +8,7 @@ Anchor-Stubborn reads standard SCIP indexes produced by industry indexers.
 |-----------|-------------------|-------|
 | `.scip` | scip-java, scip-clang, rust-analyzer | Streaming protobuf (default) |
 | `.scip.ndjson` | scip-java (`TYPED_NDJSON`) | One partial `Index` JSON object per line |
-| `.json` | Anchor-Stubborn fixtures | Test / bootstrap only |
+| `.json` | Stubborn fixtures | Test / bootstrap only |
 
 ## scip-java workflow
 
@@ -17,16 +17,16 @@ Anchor-Stubborn reads standard SCIP indexes produced by industry indexers.
 scip-java index
 # → writes index.scip
 
-anchor-stubborn index --scip index.scip --out metadata/symbols.db
-anchor-stubborn context metadata/symbols.db \
+stubborn index --scip index.scip --out metadata/symbols.db
+stubborn context metadata/symbols.db \
   --target "semanticdb maven com/example/MyService#" \
   --out my-service.stub.java
 
 # Compact graph format (v0.7+)
-anchor-stubborn context metadata/symbols.db \
+stubborn context metadata/symbols.db \
   --target "semanticdb maven com/example/MyService#" \
-  --format anchor-dsl \
-  --out my-service.anchor-dsl
+  --format stubborn-dsl \
+  --out my-service.stubborn-dsl
 ```
 
 ## What gets extracted
@@ -47,4 +47,4 @@ Regenerate Python bindings:
 ./scripts/regenerate_scip_proto.ps1
 ```
 
-Output: `src/anchor_stubborn/ingest/scip_proto/scip_pb2.py`
+Output: `src/stubborn/ingest/scip_proto/scip_pb2.py`

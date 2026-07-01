@@ -1,6 +1,6 @@
 # E2E cases — demo-spring
 
-Catalog of focused scenarios for validating Anchor-Stubborn on this demo app.
+Catalog of focused scenarios for validating Stubborn on this demo app.
 Add a new case by creating a markdown file here and (optionally) a script snippet in `../scripts/`.
 
 | Case | Status | Target symbol | What we learn |
@@ -18,7 +18,7 @@ Add a new case by creating a markdown file here and (optionally) a script snippe
 One sentence.
 
 ## Command
-anchor-stubborn context ... --target "..."
+stubborn context ... --target "..."
 
 ## Expected neighbors
 - ClassA

@@ -7,11 +7,11 @@ Verify **method-level** pruning from `OrderService#payOrder`: includes payment +
 ## Command
 
 ```bash
-anchor-stubborn context metadata/symbols.db \
+stubborn context metadata/symbols.db \
   --target "<OrderService#payOrder stable_id>" \
   --out metadata/pay-order.stub.java
 
-anchor-stubborn metrics metadata/symbols.db \
+stubborn metrics metadata/symbols.db \
   --target "<OrderService#payOrder stable_id>" \
   --sources src/main/java
 ```

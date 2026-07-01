@@ -15,7 +15,7 @@ function Assert-Command($Name) {
 Write-Host "== orders-demo E2E ==" -ForegroundColor Cyan
 Assert-Command mvn
 Assert-Command scip-java
-Assert-Command anchor-stubborn
+Assert-Command stubborn
 
 Write-Host "`n[1/5] Maven compile..." -ForegroundColor Yellow
 mvn -q -DskipTests package
@@ -27,14 +27,14 @@ if (-not (Test-Path index.scip)) {
     throw "index.scip was not created"
 }
 
-Write-Host "`n[3/5] anchor-stubborn index..." -ForegroundColor Yellow
+Write-Host "`n[3/5] stubborn index..." -ForegroundColor Yellow
 New-Item -ItemType Directory -Force -Path metadata | Out-Null
 $dbPath = Join-Path $DemoRoot "metadata\symbols.db"
 if (Test-Path $dbPath) { Remove-Item $dbPath }
-anchor-stubborn index --scip index.scip --out $dbPath
+stubborn index --scip index.scip --out $dbPath
 
 Write-Host "`n[4/5] index summary..." -ForegroundColor Yellow
-anchor-stubborn info $dbPath
+stubborn info $dbPath
 
 Write-Host "`n[5/5] resolve OrderService + emit context..." -ForegroundColor Yellow
 $target = python -c @"
@@ -60,7 +60,7 @@ if (-not $target) {
 
 Write-Host "Target: $target"
 $stubPath = Join-Path $DemoRoot "metadata\order-service.stub.java"
-anchor-stubborn context $dbPath --target $target --out $stubPath
+stubborn context $dbPath --target $target --out $stubPath
 
 Write-Host "`nDone." -ForegroundColor Green
 Write-Host "  SCIP index : $DemoRoot\index.scip"

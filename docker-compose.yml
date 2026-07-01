@@ -1,52 +1,52 @@
 services:
   # Build once: docker compose build
-  anchor-stubborn:
+  stubborn:
     build:
       context: .
       dockerfile: docker/Dockerfile
       args:
         SCIP_JAVA_VERSION: "0.12.3"
-    image: anchor-stubborn:e2e
+    image: stubborn:e2e
 
   e2e:
-    image: anchor-stubborn:e2e
+    image: stubborn:e2e
     entrypoint: ["/bin/bash", "/usr/local/bin/run-demo-e2e"]
     working_dir: /demo
     volumes:
       - ./examples/demo-spring:/demo
 
   petclinic-e2e:
-    image: anchor-stubborn:e2e
+    image: stubborn:e2e
     entrypoint: ["/bin/bash", "/usr/local/bin/run-petclinic-e2e"]
     volumes:
-      - .:/opt/anchor-stubborn
+      - .:/opt/stubborn
     environment:
       PETCLINIC_ROOT: /petclinic
 
   dukesbank-e2e:
-    image: anchor-stubborn:e2e
+    image: stubborn:e2e
     entrypoint: ["/bin/bash", "/usr/local/bin/run-dukesbank-e2e"]
     volumes:
-      - .:/opt/anchor-stubborn
+      - .:/opt/stubborn
       - ../../dukesbank/src/j2eetutorial14/examples/bank:/bank:ro
     environment:
       BANK_ROOT: /bank
-      EXAMPLE_ROOT: /opt/anchor-stubborn/examples/dukesbank
+      EXAMPLE_ROOT: /opt/stubborn/examples/dukesbank
 
   shell:
-    image: anchor-stubborn:e2e
+    image: stubborn:e2e
     entrypoint: ["/bin/bash"]
     stdin_open: true
     tty: true
-    working_dir: /opt/anchor-stubborn
+    working_dir: /opt/stubborn
     volumes:
-      - .:/opt/anchor-stubborn
+      - .:/opt/stubborn
       - ./examples/demo-spring:/demo
 
   cli:
-    image: anchor-stubborn:e2e
-    entrypoint: ["anchor-stubborn"]
+    image: stubborn:e2e
+    entrypoint: ["stubborn"]
     working_dir: /workspace
     volumes:
-      - .:/opt/anchor-stubborn
+      - .:/opt/stubborn
       - ./examples/demo-spring:/demo

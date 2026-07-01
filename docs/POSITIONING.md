@@ -2,7 +2,7 @@
 
 ## One-liner
 
-**Anchor-Stubborn** compiles symbol graphs into deterministic, privacy-safe LLM context.
+**Stubborn** compiles symbol graphs into deterministic, privacy-safe LLM context.
 
 ## What it is
 
@@ -18,9 +18,9 @@ A **code context compiler**:
 | Format | Since | Description |
 |--------|-------|-------------|
 | `java-stub` | v0.1 | Java-like declarations; best for codegen |
-| `anchor-dsl` | v0.7 | Compact type/edge graph; best for token savings |
+| `stubborn-dsl` | v0.7 | Compact type/edge graph; best for token savings |
 
-Target-type **method signatures** in both formats since v0.9 (default `target`; use `--member-signatures neighbors|all` for more). See [ANCHOR-DSL.md](ANCHOR-DSL.md), [ANCHOR-DSL-GUIDE.md](ANCHOR-DSL-GUIDE.md).
+Target-type **method signatures** in both formats since v0.9 (default `target`; use `--member-signatures neighbors|all` for more). See [STUBBORN-DSL.md](STUBBORN-DSL.md), [STUBBORN-DSL-GUIDE.md](STUBBORN-DSL-GUIDE.md).
 
 ## What it is not
 
@@ -48,12 +48,12 @@ anchor-migration (optional consumer)
 
 ## vs java-ast-ssot
 
-| | java-ast-ssot | anchor-stubborn |
+| | java-ast-ssot | stubborn |
 |---|---------------|-----------------|
 | Question answered | "What's in this project?" | "What does the AI need right now?" |
 | Parser | JavaParser | SCIP (industry standard) |
 | Languages | Java | Java first; SCIP-multi-language path |
-| Output | Full AST SQLite | Pruned stub **text** (`java-stub` or `anchor-dsl`) |
+| Output | Full AST SQLite | Pruned stub **text** (`java-stub` or `stubborn-dsl`) |
 | Token awareness | No | Core KPI |
 
 They complement each other. Stubborn does not replace java-ast-ssot for migration crosswalk or Explorer.
@@ -65,4 +65,4 @@ They complement each other. Stubborn does not replace java-ast-ssot for migratio
 
 ## Status
 
-**Beta `0.9.0b1` (Java-first)** — see [BETA.md](BETA.md).
+**Beta `0.9.0b2` (Java-first)** — see [BETA.md](BETA.md).

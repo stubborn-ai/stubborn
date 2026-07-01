@@ -2,7 +2,7 @@
 
 **Deterministic code context from symbol graphs — not vector search.**
 
-> **Status: Beta (Java-first)** — release **`0.9.0b1`** · [BETA.md](docs/BETA.md)
+> **Status: Beta (Java-first)** — release **`0.9.0b2`** · [BETA.md](docs/BETA.md)
 
 Stubborn compiles a live codebase into **type-safe, privacy-preserving stub text** for LLMs and agents. It uses [SCIP](https://github.com/sourcegraph/scip) symbol indexes and dependency graphs instead of vector chunking, so context is **stubborn**: exact, reproducible, and stripped of method bodies.
 
@@ -59,10 +59,10 @@ pip install -e ".[dev]"
 
 ```bash
 # Binary SCIP from scip-java (recommended)
-anchor-stubborn index --scip index.scip --out ./metadata/symbols.db
+stubborn index --scip index.scip --out ./metadata/symbols.db
 
 # Or use the bundled fixture while bootstrapping
-anchor-stubborn index \
+stubborn index \
   --scip examples/fixtures/minimal.scip \
   --out ./metadata/symbols.db
 ```
@@ -70,33 +70,33 @@ anchor-stubborn index \
 ### 2. Inspect
 
 ```bash
-anchor-stubborn info ./metadata/symbols.db
+stubborn info ./metadata/symbols.db
 ```
 
 ### 3. Get LLM context for a target symbol
 
 ```bash
-anchor-stubborn context ./metadata/symbols.db \
+stubborn context ./metadata/symbols.db \
   --target "semanticdb maven com/example/OrderService#process()." \
   --out ./context/order-service.stub.java
 
 # Compact cross-language format (~fewer tokens):
-anchor-stubborn context ./metadata/symbols.db \
+stubborn context ./metadata/symbols.db \
   --target "semanticdb maven com/example/OrderService#process()." \
-  --format anchor-dsl \
-  --out ./context/order-service.anchor-dsl
+  --format stubborn-dsl \
+  --out ./context/order-service.stubborn-dsl
 ```
 
-See [docs/ANCHOR-DSL.md](docs/ANCHOR-DSL.md) for the compact cross-language format.
+See [docs/STUBBORN-DSL.md](docs/STUBBORN-DSL.md) for the compact cross-language format.
 
-Tune output granularity: `--member-signatures off|target|neighbors|all`, `--javadoc off|summary|full` ([guide](docs/ANCHOR-DSL-GUIDE.md#granularity-switches-token-vs-detail)).
+Tune output granularity: `--member-signatures off|target|neighbors|all`, `--javadoc off|summary|full` ([guide](docs/STUBBORN-DSL-GUIDE.md#granularity-switches-token-vs-detail)).
 
-Or use the short CLI alias: `astub`.
+Or use the short CLI alias: `stub`.
 
 ### 4. Reconcile before/after (CI-friendly)
 
 ```bash
-anchor-stubborn diff ./metadata/before.db ./metadata/after.db
+stubborn diff ./metadata/before.db ./metadata/after.db
 # exit 1 if symbols are missing
 ```
 
@@ -104,8 +104,8 @@ anchor-stubborn diff ./metadata/before.db ./metadata/after.db
 
 ```bash
 pip install -e ".[mcp]"
-export ANCHOR_STUBBORN_DB=./metadata/symbols.db
-anchor-stubborn mcp
+export STUBBORN_DB=./metadata/symbols.db
+stubborn mcp
 ```
 
 Tools: `get_context`, `list_symbols`, `metrics`. See [docs/MCP.md](docs/MCP.md) for Cursor configuration.
@@ -117,7 +117,7 @@ Tools: `get_context`, `list_symbols`, `metrics`. See [docs/MCP.md](docs/MCP.md) 
 | `init-db` | Create empty SQLite symbol graph |
 | `index` | Ingest SCIP (`.scip`, `.scip.ndjson`, or `.json` fixture) |
 | `info` | Index run summary |
-| `context` | Prune graph → emit LLM context (`--format java-stub` \| `anchor-dsl`) |
+| `context` | Prune graph → emit LLM context (`--format java-stub` \| `stubborn-dsl`) |
 | `metrics` | Compression KPI: stub vs full Java sources |
 | `mcp` | Run MCP server (stdio) for agents |
 | `diff` | Symbol set reconcile (missing/extra) |
@@ -127,14 +127,14 @@ Tools: `get_context`, `list_symbols`, `metrics`. See [docs/MCP.md](docs/MCP.md) 
 ```
 [Source code] → scip-java / scip-clang / … → index.scip
        ↓
-  anchor-stubborn index → SQLite symbol graph
+  stubborn index → SQLite symbol graph
        ↓
-  anchor-stubborn context → stub text (java-stub or anchor-dsl)
+  stubborn context → stub text (java-stub or stubborn-dsl)
        ↓
   LLM / Agent / CI
 ```
 
-SQLite schema: [`src/anchor_stubborn/store/schema/v1.sql`](src/anchor_stubborn/store/schema/v1.sql)
+SQLite schema: [`src/stubborn/store/schema/v1.sql`](src/stubborn/store/schema/v1.sql)
 
 ## Roadmap
 
@@ -146,10 +146,10 @@ SQLite schema: [`src/anchor_stubborn/store/schema/v1.sql`](src/anchor_stubborn/s
 | **0.4** | MCP server (`get_context`, `list_symbols`, `metrics`) |
 | **0.5** | Type-neighbor pruning, PR symbol-diff Action, context guard |
 | **0.6** | [spring-petclinic](examples/spring-petclinic/) scale-up E2E (~90% savings) |
-| **0.7** | [Anchor-DSL](docs/ANCHOR-DSL.md) weaver (`--format anchor-dsl`) |
+| **0.7** | [Stubborn-DSL](docs/STUBBORN-DSL.md) weaver (`--format stubborn-dsl`) |
 | **0.8** | Java-first beta track — [BETA.md](docs/BETA.md), demo-spring cases |
-| **0.9** | Method signatures, [ANCHOR-DSL-GUIDE](docs/ANCHOR-DSL-GUIDE.md) |
-| **0.9.0b1** (now) | **Java-first Beta** — classifier + weave granularity switches |
+| **0.9** | Method signatures, [STUBBORN-DSL-GUIDE](docs/STUBBORN-DSL-GUIDE.md) |
+| **0.9.0b2** (now) | **Java-first Beta** — classifier + weave granularity switches |
 | **1.0** | Multi-language E2E, stable API |
 
 ## Documentation
@@ -157,9 +157,9 @@ SQLite schema: [`src/anchor_stubborn/store/schema/v1.sql`](src/anchor_stubborn/s
 | Doc | Description |
 |-----|-------------|
 | [docs/README.md](docs/README.md) | Documentation index |
-| [docs/ANCHOR-DSL.md](docs/ANCHOR-DSL.md) | Anchor-DSL grammar |
-| [docs/ANCHOR-DSL-GUIDE.md](docs/ANCHOR-DSL-GUIDE.md) | java-stub vs anchor-dsl decision guide |
-| [docs/ANCHOR-DSL-LLM.txt](docs/ANCHOR-DSL-LLM.txt) | LLM system-prompt snippet |
+| [docs/STUBBORN-DSL.md](docs/STUBBORN-DSL.md) | Stubborn-DSL grammar |
+| [docs/STUBBORN-DSL-GUIDE.md](docs/STUBBORN-DSL-GUIDE.md) | java-stub vs stubborn-dsl decision guide |
+| [docs/STUBBORN-DSL-LLM.txt](docs/STUBBORN-DSL-LLM.txt) | LLM system-prompt snippet |
 | [docs/MCP.md](docs/MCP.md) | Cursor / agent integration |
 | [docs/SCIP-INGEST.md](docs/SCIP-INGEST.md) | SCIP ingest |
 | [examples/README.md](examples/README.md) | E2E examples |
@@ -186,7 +186,7 @@ MCP server:
 
 ```bash
 pip install -e ".[mcp]"
-anchor-stubborn mcp
+stubborn mcp
 ```
 
 ## License

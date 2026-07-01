@@ -7,17 +7,17 @@ Verify that pruning from `OrderService` includes repository, payment, and DTO ty
 ## Command
 
 ```bash
-anchor-stubborn context metadata/symbols.db \
+stubborn context metadata/symbols.db \
   --target "<OrderService stable_id>" \
   --out metadata/order-service.stub.java
 
 # Optional compact format:
-anchor-stubborn context metadata/symbols.db \
+stubborn context metadata/symbols.db \
   --target "<OrderService stable_id>" \
-  --format anchor-dsl \
-  --out metadata/order-service.anchor-dsl
+  --format stubborn-dsl \
+  --out metadata/order-service.stubborn-dsl
 
-anchor-stubborn metrics metadata/symbols.db \
+stubborn metrics metadata/symbols.db \
   --target "<OrderService stable_id>" \
   --sources src/main/java
 ```

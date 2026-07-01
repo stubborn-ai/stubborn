@@ -4,7 +4,7 @@
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
 $ProtoDir = Join-Path $Root "proto"
-$OutDir = Join-Path $Root "src\anchor_stubborn\ingest\scip_proto"
+$OutDir = Join-Path $Root "src\stubborn\ingest\scip_proto"
 
 protoc `
   --python_out=$OutDir `

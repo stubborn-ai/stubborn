@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from anchor_stubborn.ingest.scip_proto import scip_pb2
+from stubborn.ingest.scip_proto import scip_pb2
 
 
 def build_minimal_index() -> scip_pb2.Index:
     index = scip_pb2.Index()
     index.metadata.project_root = "file:///example"
-    index.metadata.tool_info.name = "anchor-stubborn-test"
+    index.metadata.tool_info.name = "stubborn-test"
     index.metadata.tool_info.version = "0.2.0"
 
     document = index.documents.add()

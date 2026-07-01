@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from anchor_stubborn.ingest.models import EdgeRecord, IndexSnapshot, SymbolRecord
-from anchor_stubborn.store.writer import IndexWriter, init_db, read_info
+from stubborn.ingest.models import EdgeRecord, IndexSnapshot, SymbolRecord
+from stubborn.store.writer import IndexWriter, init_db, read_info
 
 
 def test_init_db_creates_schema(tmp_path: Path) -> None:

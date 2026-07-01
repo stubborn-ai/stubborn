@@ -1,6 +1,6 @@
 # Examples
 
-End-to-end scenarios for Anchor-Stubborn.
+End-to-end scenarios for Stubborn.
 
 | Example | Status | Description |
 |---------|--------|-------------|
@@ -15,7 +15,7 @@ End-to-end scenarios for Anchor-Stubborn.
 Both examples support:
 
 - `java-stub` (default) — Java-like declarations for codegen
-- `anchor-dsl` — compact type/edge graph ([docs/ANCHOR-DSL.md](../docs/ANCHOR-DSL.md))
+- `stubborn-dsl` — compact type/edge graph ([docs/STUBBORN-DSL.md](../docs/STUBBORN-DSL.md))
 
 ## Recommended first run
 

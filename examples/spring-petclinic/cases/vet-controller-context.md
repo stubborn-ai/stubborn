@@ -11,15 +11,15 @@ Validate scale-up E2E on the official [spring-petclinic](https://github.com/spri
 docker compose run --rm petclinic-e2e
 
 # Or after host E2E
-anchor-stubborn context examples/spring-petclinic/metadata/symbols.db \
+stubborn context examples/spring-petclinic/metadata/symbols.db \
   --target "<VetController stable_id>" \
   --out examples/spring-petclinic/metadata/vet-controller.stub.java
 
-# Optional: anchor-dsl
-anchor-stubborn context examples/spring-petclinic/metadata/symbols.db \
+# Optional: stubborn-dsl
+stubborn context examples/spring-petclinic/metadata/symbols.db \
   --target "<VetController stable_id>" \
-  --format anchor-dsl \
-  --out examples/spring-petclinic/metadata/vet-controller.anchor-dsl
+  --format stubborn-dsl \
+  --out examples/spring-petclinic/metadata/vet-controller.stubborn-dsl
 ```
 
 ## Expected neighbors

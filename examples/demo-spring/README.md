@@ -1,6 +1,6 @@
-# orders-demo — Anchor-Stubborn E2E
+# orders-demo — Stubborn E2E
 
-A **small, modern** Spring Boot 3 application used as the primary end-to-end example for Anchor-Stubborn.
+A **small, modern** Spring Boot 3 application used as the primary end-to-end example for Stubborn.
 
 | | |
 |---|---|
@@ -31,7 +31,7 @@ Choose **one** path:
 
 ### A. Docker (recommended — no local JDK/Maven/scip-java)
 
-From the **anchor-stubborn repo root**:
+From the **stubborn repo root**:
 
 ```bash
 docker compose build
@@ -45,7 +45,7 @@ See [docker/README.md](../../docker/README.md).
 - **JDK 21+**
 - **Maven 3.9+**
 - **[scip-java](https://github.com/sourcegraph/scip-java)** on `PATH`
-- **Anchor-Stubborn** installed: `pip install -e ".[dev]"` from repo root
+- **Stubborn** installed: `pip install -e ".[dev]"` from repo root
 
 ## Quick E2E (PowerShell, host)
 
@@ -57,19 +57,19 @@ cd examples/demo-spring
 Outputs:
 
 - `index.scip` — SCIP index from scip-java
-- `metadata/symbols.db` — Anchor-Stubborn SQLite graph
+- `metadata/symbols.db` — Stubborn SQLite graph
 - `metadata/order-service.stub.java` — pruned LLM context for `OrderService` (`java-stub`)
 
 Optional compact format:
 
 ```bash
-anchor-stubborn context metadata/symbols.db \
+stubborn context metadata/symbols.db \
   --target "<OrderService stable_id>" \
-  --format anchor-dsl \
-  --out metadata/order-service.anchor-dsl
+  --format stubborn-dsl \
+  --out metadata/order-service.stubborn-dsl
 ```
 
-See [docs/ANCHOR-DSL.md](../../docs/ANCHOR-DSL.md).
+See [docs/STUBBORN-DSL.md](../../docs/STUBBORN-DSL.md).
 
 ## Manual steps
 
@@ -81,13 +81,13 @@ mvn -q -DskipTests package
 scip-java index
 # → index.scip
 
-# 3. Ingest into Anchor-Stubborn
-anchor-stubborn index --scip index.scip --out metadata/symbols.db
-anchor-stubborn info metadata/symbols.db
+# 3. Ingest into Stubborn
+stubborn index --scip index.scip --out metadata/symbols.db
+stubborn info metadata/symbols.db
 
 # 4. Resolve target symbol (display name → stable_id)
 #    Then emit context — exact stable_id depends on scip-java output, e.g.:
-anchor-stubborn context metadata/symbols.db \
+stubborn context metadata/symbols.db \
   --target "<OrderService stable_id from index>" \
   --out metadata/order-service.stub.java
 ```
@@ -96,12 +96,12 @@ Use the E2E script to resolve `OrderService` automatically from the SQLite index
 
 ## Cursor MCP (v0.4)
 
-With the **anchor-stubborn repo root** open as the Cursor workspace:
+With the **stubborn repo root** open as the Cursor workspace:
 
 1. Install: `pip install -e ".[mcp]"` from repo root
 2. Ensure `metadata/symbols.db` exists (`./scripts/run-e2e.ps1` or index step above)
-3. Project config is already at [`.cursor/mcp.json`](../../.cursor/mcp.json) — enables server `anchor-stubborn`
-4. **Cursor Settings → MCP** → enable `anchor-stubborn` (green) → Reload if needed
+3. Project config is already at [`.cursor/mcp.json`](../../.cursor/mcp.json) — enables server `stubborn`
+4. **Cursor Settings → MCP** → enable `stubborn` (green) → Reload if needed
 
 Smoke-test without Cursor:
 

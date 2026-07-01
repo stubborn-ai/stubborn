@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# End-to-end: demo-spring -> scip-java -> anchor-stubborn context
+# End-to-end: demo-spring -> scip-java -> stubborn context
 set -euo pipefail
 
 DEMO_ROOT="${DEMO_ROOT:-/demo}"
@@ -19,14 +19,14 @@ scip-java index
 test -f index.scip
 
 echo
-echo "[3/5] anchor-stubborn index..."
+echo "[3/5] stubborn index..."
 mkdir -p metadata
 rm -f metadata/symbols.db
-anchor-stubborn index --scip index.scip --out metadata/symbols.db
+stubborn index --scip index.scip --out metadata/symbols.db
 
 echo
 echo "[4/5] index summary..."
-anchor-stubborn info metadata/symbols.db
+stubborn info metadata/symbols.db
 
 echo
 echo "[5/5] resolve OrderService + emit context..."
@@ -51,13 +51,13 @@ PY
 )"
 
 echo "Target: ${target}"
-anchor-stubborn context metadata/symbols.db \
+stubborn context metadata/symbols.db \
     --target "${target}" \
     --out metadata/order-service.stub.java
 
 echo
 echo "[metrics] compression vs full sources..."
-anchor-stubborn metrics metadata/symbols.db \
+stubborn metrics metadata/symbols.db \
     --target "${target}" \
     --sources src/main/java \
     --stub-out metadata/order-service.stub.java

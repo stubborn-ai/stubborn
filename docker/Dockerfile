@@ -1,6 +1,6 @@
-# Anchor-Stubborn E2E toolchain image
+# Stubborn E2E toolchain image
 #
-# Includes: JDK 21, Maven, scip-java, Python 3, anchor-stubborn CLI
+# Includes: JDK 21, Maven, scip-java, Python 3, stubborn CLI
 #
 # Build (from repo root):
 #   docker compose build
@@ -39,7 +39,7 @@ RUN curl -fL "https://github.com/coursier/launchers/raw/master/cs-x86_64-pc-linu
         "${SCIP_JAVA_VERSION}" > /usr/local/bin/scip-java \
     && chmod +x /usr/local/bin/scip-java
 
-WORKDIR /opt/anchor-stubborn
+WORKDIR /opt/stubborn
 
 COPY pyproject.toml README.md LICENSE ./
 COPY src ./src
@@ -56,12 +56,12 @@ RUN sed -i 's/\r$//' /usr/local/bin/run-petclinic-e2e && chmod +x /usr/local/bin
 COPY docker/run-dukesbank-e2e.sh /usr/local/bin/run-dukesbank-e2e
 RUN sed -i 's/\r$//' /usr/local/bin/run-dukesbank-e2e && chmod +x /usr/local/bin/run-dukesbank-e2e
 
-COPY examples/spring-petclinic/upstream.pin /opt/anchor-stubborn/examples/spring-petclinic/upstream.pin
+COPY examples/spring-petclinic/upstream.pin /opt/stubborn/examples/spring-petclinic/upstream.pin
 COPY scripts/resolve_symbol.py scripts/verify_petclinic_context.py \
     scripts/verify_demo_context.py scripts/verify_controller_context.py \
     scripts/verify_pay_flow_context.py scripts/verify_dukesbank_context.py \
-    /opt/anchor-stubborn/scripts/
+    /opt/stubborn/scripts/
 
 # Default CLI; compose services override entrypoint/command as needed
-ENTRYPOINT ["anchor-stubborn"]
+ENTRYPOINT ["stubborn"]
 CMD ["--help"]

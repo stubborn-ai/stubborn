@@ -1,6 +1,6 @@
 # Docker environment
 
-Reproducible toolchain for Anchor-Stubborn without installing JDK, Maven, or scip-java locally.
+Reproducible toolchain for Stubborn without installing JDK, Maven, or scip-java locally.
 
 ## Image contents
 
@@ -9,7 +9,7 @@ Reproducible toolchain for Anchor-Stubborn without installing JDK, Maven, or sci
 | JDK | Eclipse Temurin 21 |
 | Maven | distro package (Noble) |
 | scip-java | `0.12.3` (`scip-java_2.13`, via Coursier) |
-| Python | 3.x + `anchor-stubborn` editable install |
+| Python | 3.x + `stubborn` editable install |
 
 ## Quick start
 
@@ -32,12 +32,12 @@ docker compose run --rm dukesbank-e2e
 ls examples/demo-spring/metadata/
 cat examples/demo-spring/metadata/order-service.stub.java
 
-# Anchor-DSL (after indexing):
+# Stubborn-DSL (after indexing):
 docker compose run --rm cli context /demo/metadata/symbols.db \
-  --target "<stable_id>" --format anchor-dsl
+  --target "<stable_id>" --format stubborn-dsl
 ```
 
-See [docs/ANCHOR-DSL.md](../docs/ANCHOR-DSL.md).
+See [docs/STUBBORN-DSL.md](../docs/STUBBORN-DSL.md).
 
 ## Services
 
@@ -46,7 +46,7 @@ See [docs/ANCHOR-DSL.md](../docs/ANCHOR-DSL.md).
 | `e2e` | Runs `docker/run-e2e.sh` on mounted `examples/demo-spring` |
 | `petclinic-e2e` | Clones pinned spring-petclinic, full scale-up pipeline |
 | `shell` | Interactive bash with full toolchain |
-| `cli` | Run arbitrary `anchor-stubborn` commands |
+| `cli` | Run arbitrary `stubborn` commands |
 
 ### Interactive shell
 
@@ -55,7 +55,7 @@ docker compose run --rm shell
 # inside container:
 cd /demo && mvn -q -DskipTests package
 scip-java index
-anchor-stubborn index --scip index.scip --out metadata/symbols.db
+stubborn index --scip index.scip --out metadata/symbols.db
 ```
 
 ### One-off CLI

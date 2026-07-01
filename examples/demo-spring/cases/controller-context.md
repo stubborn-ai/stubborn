@@ -7,17 +7,17 @@ Verify that pruning from `OrderController` includes the web → service chain an
 ## Command
 
 ```bash
-anchor-stubborn context metadata/symbols.db \
+stubborn context metadata/symbols.db \
   --target "<OrderController stable_id>" \
   --out metadata/order-controller.stub.java
 
 # Optional compact format:
-anchor-stubborn context metadata/symbols.db \
+stubborn context metadata/symbols.db \
   --target "<OrderController stable_id>" \
-  --format anchor-dsl \
-  --out metadata/order-controller.anchor-dsl
+  --format stubborn-dsl \
+  --out metadata/order-controller.stubborn-dsl
 
-anchor-stubborn metrics metadata/symbols.db \
+stubborn metrics metadata/symbols.db \
   --target "<OrderController stable_id>" \
   --sources src/main/java
 ```

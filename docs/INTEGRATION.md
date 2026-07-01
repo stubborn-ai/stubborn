@@ -1,6 +1,6 @@
 # Integration with anchor-migration
 
-Anchor-Stubborn is a **horizontal capability**. The migration program is one consumer, not the owner.
+Stubborn is a **horizontal capability**. The migration program is one consumer, not the owner.
 
 ## When migration uses Stubborn
 
@@ -9,23 +9,23 @@ Before asking an LLM to propose rewrite mappings or recipe changes:
 ```bash
 # 1. Generate SCIP (scip-java in the target repo)
 # 2. Index
-anchor-stubborn index --scip index.scip --out metadata/code-context.db
+stubborn index --scip index.scip --out metadata/code-context.db
 
 # 3. Context for a migration target class (Java stub — familiar to codegen models)
-anchor-stubborn context metadata/code-context.db \
+stubborn context metadata/code-context.db \
   --target "semanticdb maven com/sun/ebank/ejb/account/AccountControllerBean#" \
   --out /tmp/account-controller.stub.java
 
 # Or compact graph format (fewer tokens)
-anchor-stubborn context metadata/code-context.db \
+stubborn context metadata/code-context.db \
   --target "semanticdb maven com/sun/ebank/ejb/account/AccountControllerBean#" \
-  --format anchor-dsl \
-  --out /tmp/account-controller.anchor-dsl
+  --format stubborn-dsl \
+  --out /tmp/account-controller.stubborn-dsl
 ```
 
-Feed the output to the LLM instead of raw sources. For `anchor-dsl`, paste [ANCHOR-DSL-LLM.txt](ANCHOR-DSL-LLM.txt) into the system prompt (or rely on the embedded `# Guide` header).
+Feed the output to the LLM instead of raw sources. For `stubborn-dsl`, paste [STUBBORN-DSL-LLM.txt](STUBBORN-DSL-LLM.txt) into the system prompt (or rely on the embedded `# Guide` header).
 
-Or use the MCP server (`anchor-stubborn mcp`) so agents call `get_context` with `format: "java-stub"` or `"anchor-dsl"` — see [MCP.md](MCP.md).
+Or use the MCP server (`stubborn mcp`) so agents call `get_context` with `format: "java-stub"` or `"stubborn-dsl"` — see [MCP.md](MCP.md).
 
 Tune weave output: `--member-signatures off|target|neighbors|all` and `--javadoc off|summary|full` on `context` / `metrics` (and MCP `get_context`).
 
@@ -40,9 +40,9 @@ Tune weave output: `--member-signatures off|target|neighbors|all` and `--javadoc
 
 ```
                     ┌─────────────────────┐
-                    │   anchor-stubborn   │
+                    │   stubborn   │
                     └──────────┬──────────┘
-                               │ stub / anchor-dsl text
+                               │ stub / stubborn-dsl text
      ┌─────────────────────────┼─────────────────────────┐
      ▼                         ▼                         ▼
  LLM mapping draft      rewrite-recipes design      PR diff CI
@@ -58,14 +58,14 @@ Integration is documented in [migration-hub ADR-010](https://github.com/anchor-m
 
 | Workflow | Purpose |
 |----------|---------|
-| `anchor-stubborn diff` | Symbol reconcile between two indexes |
+| `stubborn diff` | Symbol reconcile between two indexes |
 | [pr-symbol-diff.yml](../.github/workflows/pr-symbol-diff.yml) | PR guard for symbol regressions |
 | [petclinic-e2e.yml](../.github/workflows/petclinic-e2e.yml) | Weekly / manual scale-up E2E |
 
 Example:
 
 ```yaml
-- run: anchor-stubborn diff metadata/before.db metadata/after.db
+- run: stubborn diff metadata/before.db metadata/after.db
 ```
 
 Fails if symbols are missing (exit code 1).

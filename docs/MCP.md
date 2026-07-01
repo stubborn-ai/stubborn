@@ -1,6 +1,6 @@
 # MCP server
 
-Anchor-Stubborn exposes three MCP tools over **stdio** for Cursor, Claude Desktop, and other MCP clients.
+Stubborn exposes three MCP tools over **stdio** for Cursor, Claude Desktop, and other MCP clients.
 
 ## Install
 
@@ -14,7 +14,7 @@ pip install -e ".[dev]"
 
 | Tool | Purpose |
 |------|---------|
-| `get_context` | Prune symbol graph → LLM context (`format`: `java-stub` or `anchor-dsl`) |
+| `get_context` | Prune symbol graph → LLM context (`format`: `java-stub` or `stubborn-dsl`) |
 | `list_symbols` | Browse/search indexed symbols to pick a target |
 | `metrics` | Compression KPI: stub vs full Java `sources` tree |
 
@@ -23,15 +23,15 @@ pip install -e ".[dev]"
 Pass `db_path` on each call, or set a default:
 
 ```bash
-export ANCHOR_STUBBORN_DB=/path/to/metadata/symbols.db
+export STUBBORN_DB=/path/to/metadata/symbols.db
 ```
 
 ## Run
 
 ```bash
-anchor-stubborn mcp
+stubborn mcp
 # or
-anchor-stubborn-mcp
+stubborn-mcp
 ```
 
 The server uses stdio transport (default for local IDE integration).
@@ -43,10 +43,10 @@ Add to `.cursor/mcp.json` (project) or Cursor MCP settings:
 ```json
 {
   "mcpServers": {
-    "anchor-stubborn": {
-      "command": "anchor-stubborn-mcp",
+    "stubborn": {
+      "command": "stubborn-mcp",
       "env": {
-        "ANCHOR_STUBBORN_DB": "${workspaceFolder}/examples/demo-spring/metadata/symbols.db"
+        "STUBBORN_DB": "${workspaceFolder}/examples/demo-spring/metadata/symbols.db"
       }
     }
   }
@@ -58,11 +58,11 @@ If the CLI is not on `PATH`, use the module entry:
 ```json
 {
   "mcpServers": {
-    "anchor-stubborn": {
+    "stubborn": {
       "command": "python",
-      "args": ["-m", "anchor_stubborn.mcp_server.server"],
+      "args": ["-m", "stubborn.mcp_server.server"],
       "env": {
-        "ANCHOR_STUBBORN_DB": "${workspaceFolder}/metadata/symbols.db"
+        "STUBBORN_DB": "${workspaceFolder}/metadata/symbols.db"
       }
     }
   }
@@ -71,13 +71,13 @@ If the CLI is not on `PATH`, use the module entry:
 
 ### Typical agent workflow
 
-1. `anchor-stubborn index --scip index.scip --out metadata/symbols.db`
-2. Configure MCP with `ANCHOR_STUBBORN_DB` pointing at that file
+1. `stubborn index --scip index.scip --out metadata/symbols.db`
+2. Configure MCP with `STUBBORN_DB` pointing at that file
 3. Agent calls `list_symbols` with `query: "OrderService"` to find `stable_id`
 4. Agent calls `get_context` with the target stable_id before generating code
    - `format: "java-stub"` — default; Java-like declarations
-   - `format: "anchor-dsl"` — compact graph; see [ANCHOR-DSL-LLM.txt](ANCHOR-DSL-LLM.txt)
-   - `member_signatures` / `javadoc` — tune detail vs tokens ([guide](ANCHOR-DSL-GUIDE.md#granularity-switches-token-vs-detail))
+   - `format: "stubborn-dsl"` — compact graph; see [STUBBORN-DSL-LLM.txt](STUBBORN-DSL-LLM.txt)
+   - `member_signatures` / `javadoc` — tune detail vs tokens ([guide](STUBBORN-DSL-GUIDE.md#granularity-switches-token-vs-detail))
 5. Optional: `metrics` with `sources: src/main/java` for compression reporting
 
 ## Parameters (get_context)
@@ -85,18 +85,18 @@ If the CLI is not on `PATH`, use the module entry:
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `target` | required | SCIP stable_id |
-| `db_path` | `ANCHOR_STUBBORN_DB` | Symbol graph SQLite file |
+| `db_path` | `STUBBORN_DB` | Symbol graph SQLite file |
 | `max_tokens` | 12000 | Output token budget (chars/4) |
 | `max_symbols` | 200 | Graph prune cap |
 | `call_depth` | 2 | Reference closure depth |
-| `format` | `java-stub` | `java-stub` or `anchor-dsl` ([grammar](ANCHOR-DSL.md), [LLM prompt snippet](ANCHOR-DSL-LLM.txt)) |
+| `format` | `java-stub` | `java-stub` or `stubborn-dsl` ([grammar](STUBBORN-DSL.md), [LLM prompt snippet](STUBBORN-DSL-LLM.txt)) |
 | `member_signatures` | `target` | `off` \| `target` \| `neighbors` \| `all` — method lists on types |
-| `javadoc` | format default | `off` \| `summary` \| `full` — doc comments (`summary` for java-stub, `off` for anchor-dsl) |
+| `javadoc` | format default | `off` \| `summary` \| `full` — doc comments (`summary` for java-stub, `off` for stubborn-dsl) |
 
 `metrics` accepts the same `member_signatures` and `javadoc` parameters.
 
 ## Related
 
-- [ANCHOR-DSL.md](ANCHOR-DSL.md) — compact output format
+- [STUBBORN-DSL.md](STUBBORN-DSL.md) — compact output format
 - [INTEGRATION.md](INTEGRATION.md) — how migration programs consume Stubborn
 - [migration-hub ADR-010](https://github.com/anchor-migration/migration-hub/blob/main/docs/ADR-010-anchor-stubborn-integration.md)

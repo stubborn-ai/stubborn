@@ -3,13 +3,13 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "anchor-stubborn"
-version = "0.9.0b1"
+name = "stubborn"
+version = "0.9.0b2"
 description = "Deterministic code context from symbol graphs — not vector search"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
-authors = [{ name = "Anchor Stubborn contributors" }]
+authors = [{ name = "Stubborn contributors" }]
 keywords = [
     "scip",
     "code-context",
@@ -42,18 +42,18 @@ mcp = ["mcp>=1.6,<2"]
 dev = ["pytest>=8.0,<9.0", "mcp>=1.6,<2"]
 
 [project.scripts]
-anchor-stubborn = "anchor_stubborn.cli:app"
-astub = "anchor_stubborn.cli:app"
-anchor-stubborn-mcp = "anchor_stubborn.mcp_server.server:main"
+stubborn = "stubborn.cli:app"
+stub = "stubborn.cli:app"
+stubborn-mcp = "stubborn.mcp_server.server:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/anchor_stubborn"]
+packages = ["src/stubborn"]
 
 [tool.hatch.build.targets.wheel.force-include]
-"src/anchor_stubborn/store/schema" = "anchor_stubborn/store/schema"
+"src/stubborn/store/schema" = "stubborn/store/schema"
 
 [tool.hatch.build.targets.sdist]
-include = ["src/anchor_stubborn", "README.md", "LICENSE"]
+include = ["src/stubborn", "README.md", "LICENSE"]
 
 [project.urls]
 Homepage = "https://github.com/stubborn-ai/stubborn"

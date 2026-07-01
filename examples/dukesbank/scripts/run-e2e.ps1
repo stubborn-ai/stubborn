@@ -1,7 +1,7 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Duke's Bank bank module -> scip-java -> anchor-stubborn context (AccountControllerBean).
+  Duke's Bank bank module -> scip-java -> stubborn context (AccountControllerBean).
 
 .DESCRIPTION
   Expects sibling layout:
@@ -34,12 +34,12 @@ function Assert-Command($Name) {
     }
 }
 
-Write-Host "== Duke's Bank anchor-stubborn E2E ==" -ForegroundColor Cyan
+Write-Host "== Duke's Bank stubborn E2E ==" -ForegroundColor Cyan
 Write-Host "Bank module: $BankRoot"
 
 Assert-Command mvn
 Assert-Command scip-java
-Assert-Command anchor-stubborn
+Assert-Command stubborn
 Assert-Command python
 
 Push-Location $BankRoot
@@ -56,23 +56,23 @@ try {
     New-Item -ItemType Directory -Force -Path (Split-Path $dbPath) | Out-Null
     if (Test-Path $dbPath) { Remove-Item $dbPath }
 
-    Write-Host "`n[3/6] anchor-stubborn index..." -ForegroundColor Yellow
-    anchor-stubborn index --scip index.scip --out $dbPath
+    Write-Host "`n[3/6] stubborn index..." -ForegroundColor Yellow
+    stubborn index --scip index.scip --out $dbPath
 
     Write-Host "`n[4/6] resolve AccountControllerBean..." -ForegroundColor Yellow
     $target = python (Join-Path $RepoRoot "scripts\resolve_symbol.py") $dbPath --display-name AccountControllerBean
     if (-not $target) { throw "AccountControllerBean symbol not found" }
     Write-Host "Target: $target"
 
-    Write-Host "`n[5/6] emit java-stub + anchor-dsl..." -ForegroundColor Yellow
+    Write-Host "`n[5/6] emit java-stub + stubborn-dsl..." -ForegroundColor Yellow
     $stubPath = Join-Path $ExampleRoot "metadata\account-controller.stub.java"
-    $dslPath = Join-Path $ExampleRoot "metadata\account-controller.anchor-dsl"
-    anchor-stubborn context $dbPath --target $target --out $stubPath
-    anchor-stubborn context $dbPath --target $target --format anchor-dsl `
+    $dslPath = Join-Path $ExampleRoot "metadata\account-controller.stubborn-dsl"
+    stubborn context $dbPath --target $target --out $stubPath
+    stubborn context $dbPath --target $target --format stubborn-dsl `
         --member-signatures neighbors --javadoc summary --out $dslPath
 
     Write-Host "`n[6/6] metrics..." -ForegroundColor Yellow
-    anchor-stubborn metrics $dbPath --target $target --sources src
+    stubborn metrics $dbPath --target $target --sources src
 }
 finally {
     Pop-Location
@@ -81,5 +81,5 @@ finally {
 Write-Host "`nDone." -ForegroundColor Green
 Write-Host "  SQLite graph : $dbPath"
 Write-Host "  java-stub    : $stubPath"
-Write-Host "  anchor-dsl   : $dslPath"
+Write-Host "  stubborn-dsl   : $dslPath"
 Write-Host "`nVerify: python scripts/verify_dukesbank_context.py (from repo root)"

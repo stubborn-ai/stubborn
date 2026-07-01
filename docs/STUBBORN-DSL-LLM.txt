@@ -1,0 +1,14 @@
+Stubborn-DSL — LLM quick guide (paste into system prompt when using format=stubborn-dsl)
+
+---
+You will receive stubborn-dsl/1.0 blocks: a pruned dependency graph around one target symbol. This is context, not runnable code. There are no method bodies or implementations.
+
+Lines:
+- target <Name> — focus symbol (Type or Type.method)
+- policy declarations-only — signatures/types only
+- types: — c=class, i=interface, e=enum, r=record; optional @Annotation tokens
+- member m <Type.method> <sig> — present when the target is a method
+- edges: — ref=references, type=type dependency, impl=implements, def=defines
+
+Use this graph for reasoning about APIs and dependencies. When generating Java, prefer matching names and annotations shown here.
+---

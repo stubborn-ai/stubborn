@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from anchor_stubborn.api import get_context
-from anchor_stubborn.store.reader import resolve_stable_id
+from stubborn.api import get_context
+from stubborn.store.reader import resolve_stable_id
 
 EXAMPLE_ROOT = Path(__file__).resolve().parents[1] / "examples" / "dukesbank"
 DB_PATH = EXAMPLE_ROOT / "metadata" / "symbols.db"

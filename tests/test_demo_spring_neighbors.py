@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from anchor_stubborn.api import get_context, get_metrics
+from stubborn.api import get_context, get_metrics
 
 DEMO_ROOT = Path(__file__).resolve().parents[1] / "examples" / "demo-spring"
 DB_PATH = DEMO_ROOT / "metadata" / "symbols.db"

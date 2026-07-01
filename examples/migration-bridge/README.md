@@ -1,6 +1,6 @@
 # Migration bridge example
 
-How [anchor-migration](https://github.com/anchor-migration/migration-hub) can consume Anchor-Stubborn without tight coupling.
+How [anchor-migration](https://github.com/anchor-migration/migration-hub) can consume Stubborn without tight coupling.
 
 ## Scenario
 
@@ -16,21 +16,21 @@ scip-java index
 # produces index.scip (binary protobuf)
 
 # Index into Stubborn SQLite
-anchor-stubborn index --scip index.scip --out metadata/context.db
+stubborn index --scip index.scip --out metadata/context.db
 
 # Emit privacy-safe context (Java stub)
-anchor-stubborn context metadata/context.db \
+stubborn context metadata/context.db \
   --target "semanticdb maven com/sun/ebank/ejb/account/AccountControllerBean#" \
   --out account-controller.stub.java
 
 # Or compact graph format
-anchor-stubborn context metadata/context.db \
+stubborn context metadata/context.db \
   --target "semanticdb maven com/sun/ebank/ejb/account/AccountControllerBean#" \
-  --format anchor-dsl \
-  --out account-controller.anchor-dsl
+  --format stubborn-dsl \
+  --out account-controller.stubborn-dsl
 ```
 
-Paste the output into your agent prompt instead of entire source trees. For `anchor-dsl`, see [docs/ANCHOR-DSL-LLM.txt](../../docs/ANCHOR-DSL-LLM.txt).
+Paste the output into your agent prompt instead of entire source trees. For `stubborn-dsl`, see [docs/STUBBORN-DSL-LLM.txt](../../docs/STUBBORN-DSL-LLM.txt).
 
 Or use MCP: `get_context` with the same `target` and optional `format`.
 
@@ -41,7 +41,7 @@ Or use MCP: `get_context` with the same `target` and optional `format`.
 | Full code SSOT + EJB profiles | java-ast-ssot |
 | Schema SSOT | db-metadata |
 | Crosswalk + Explorer | java-ast-ssot + anchor-explorer |
-| **LLM context only** | **anchor-stubborn** |
+| **LLM context only** | **stubborn** |
 | Apply rewrites | rewrite-recipes |
 
 ## CI hook
@@ -49,7 +49,7 @@ Or use MCP: `get_context` with the same `target` and optional `format`.
 Symbol reconcile after refactors:
 
 ```yaml
-- run: anchor-stubborn diff metadata/before.db metadata/after.db
+- run: stubborn diff metadata/before.db metadata/after.db
 ```
 
 See [pr-symbol-diff.yml](../../.github/workflows/pr-symbol-diff.yml) and [docs/INTEGRATION.md](../../docs/INTEGRATION.md).

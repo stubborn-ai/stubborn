@@ -1,6 +1,6 @@
 # Beta readiness (Java-first)
 
-**Current: Beta `0.9.0b1`** — Java/Spring E2E validated; `Development Status :: 4 - Beta`.
+**Current: Beta `0.9.0b2`** — Java/Spring E2E validated; `Development Status :: 4 - Beta`.
 
 Pre-beta (`0.9.0a1`) completed the checklist; this tag flips the PyPI classifier and version line.
 
@@ -9,7 +9,7 @@ Pre-beta (`0.9.0a1`) completed the checklist; this tag flips the PyPI classifier
 | Stage | Version | Classifier |
 |-------|---------|------------|
 | Pre-beta | `0.9.0a1` | Alpha |
-| **Beta (now)** | **`0.9.0b1`** | **Beta** |
+| **Beta (now)** | **`0.9.0b2`** | **Beta** |
 | Stable | `1.0.0` | Stable |
 
 ## Beta checklist (complete)
@@ -19,7 +19,7 @@ Pre-beta (`0.9.0a1`) completed the checklist; this tag flips the PyPI classifier
 - [x] SCIP binary + NDJSON + JSON fixture ingest
 - [x] SQLite symbol graph + CLI + MCP
 - [x] Type-neighbor pruning + token budget
-- [x] `java-stub` + `anchor-dsl` weavers
+- [x] `java-stub` + `stubborn-dsl` weavers
 - [x] Target-type method signatures (v0.9); neighbor/all + Javadoc via weave switches
 
 ### E2E validation
@@ -31,7 +31,7 @@ Pre-beta (`0.9.0a1`) completed the checklist; this tag flips the PyPI classifier
 
 ### Agent / docs
 
-- [x] ANCHOR-DSL grammar, LLM snippet, format guide
+- [x] STUBBORN-DSL grammar, LLM snippet, format guide
 - [x] migration-hub ADR-010 synced
 
 ### Quality bar
@@ -39,7 +39,7 @@ Pre-beta (`0.9.0a1`) completed the checklist; this tag flips the PyPI classifier
 - [x] `language: java` from SCIP
 - [x] pytest 3.11–3.13
 - [x] PR symbol-diff workflow
-- [x] `pyproject.toml` classifier → **Beta** (`0.9.0b1`)
+- [x] `pyproject.toml` classifier → **Beta** (`0.9.0b2`)
 
 ## Out of scope for 1.0
 
@@ -56,8 +56,8 @@ Pre-beta (`0.9.0a1`) completed the checklist; this tag flips the PyPI classifier
 1. **Java-first** — validated with scip-java.
 2. **Method signatures** — default `target` only; use `--member-signatures neighbors|all` for more.
 3. **Token estimate** — chars/4 heuristic.
-4. **Javadoc** — default summary (java-stub) / off (anchor-dsl); `--javadoc full` for `@param` tags.
-5. **Anchor-DSL** — see [ANCHOR-DSL-GUIDE.md](ANCHOR-DSL-GUIDE.md).
+4. **Javadoc** — default summary (java-stub) / off (stubborn-dsl); `--javadoc full` for `@param` tags.
+5. **Stubborn-DSL** — see [STUBBORN-DSL-GUIDE.md](STUBBORN-DSL-GUIDE.md).
 6. **SCIP is the index** — Stubborn compiles pruned graphs to LLM text.
 
 ## KPI baselines

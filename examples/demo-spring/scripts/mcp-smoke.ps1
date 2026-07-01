@@ -7,14 +7,14 @@ $DbPath = Join-Path $DemoRoot "metadata\symbols.db"
 $Sources = Join-Path $DemoRoot "src\main\java"
 
 if (-not (Test-Path $DbPath)) {
-    Write-Host "symbols.db missing — run scripts/run-e2e.ps1 first (or: anchor-stubborn index --scip index.scip --out metadata/symbols.db)" -ForegroundColor Red
+    Write-Host "symbols.db missing — run scripts/run-e2e.ps1 first (or: stubborn index --scip index.scip --out metadata/symbols.db)" -ForegroundColor Red
     exit 1
 }
 
-$env:ANCHOR_STUBBORN_DB = $DbPath
+$env:STUBBORN_DB = $DbPath
 
 python -c @"
-from anchor_stubborn.mcp_server.server import get_context, list_symbols, metrics
+from stubborn.mcp_server.server import get_context, list_symbols, metrics
 
 listing = list_symbols(query='OrderService', limit=3)
 print('list_symbols:', listing['returned'], 'hit(s)')
@@ -32,4 +32,4 @@ print('compression_ratio:', kpi['compression_ratio'])
 print('token_savings_percent:', kpi['token_savings_percent'])
 "@
 
-Write-Host "`nMCP smoke OK. In Cursor: open anchor-stubborn repo root, enable MCP server 'anchor-stubborn'." -ForegroundColor Green
+Write-Host "`nMCP smoke OK. In Cursor: open stubborn repo root, enable MCP server 'stubborn'." -ForegroundColor Green

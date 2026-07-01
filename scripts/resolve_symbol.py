@@ -7,7 +7,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from anchor_stubborn.store.reader import resolve_stable_id
+from stubborn.store.reader import resolve_stable_id
 
 
 def main() -> int:

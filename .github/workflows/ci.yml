@@ -13,19 +13,19 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build toolchain image
-        run: docker compose build anchor-stubborn
+        run: docker compose build stubborn
 
       - name: Run demo-spring E2E
         run: docker compose run --rm e2e
 
       - name: Verify OrderService context guard
-        run: docker compose run --rm shell python /opt/anchor-stubborn/scripts/verify_demo_context.py
+        run: docker compose run --rm shell python /opt/stubborn/scripts/verify_demo_context.py
 
       - name: Verify OrderController context guard
-        run: docker compose run --rm shell python /opt/anchor-stubborn/scripts/verify_controller_context.py
+        run: docker compose run --rm shell python /opt/stubborn/scripts/verify_controller_context.py
 
       - name: Verify payOrder context guard
-        run: docker compose run --rm shell python /opt/anchor-stubborn/scripts/verify_pay_flow_context.py
+        run: docker compose run --rm shell python /opt/stubborn/scripts/verify_pay_flow_context.py
 
       - uses: actions/upload-artifact@v4
         with:

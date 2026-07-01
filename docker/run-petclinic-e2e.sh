@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# End-to-end: spring-petclinic (upstream clone) -> scip-java -> anchor-stubborn
+# End-to-end: spring-petclinic (upstream clone) -> scip-java -> stubborn
 set -euo pipefail
 
 PETCLINIC_ROOT="${PETCLINIC_ROOT:-/petclinic}"
-EXAMPLE_ROOT="${EXAMPLE_ROOT:-/opt/anchor-stubborn/examples/spring-petclinic}"
+EXAMPLE_ROOT="${EXAMPLE_ROOT:-/opt/stubborn/examples/spring-petclinic}"
 PIN_FILE="${EXAMPLE_ROOT}/upstream.pin"
 METADATA_DIR="${EXAMPLE_ROOT}/metadata"
 TARGET_NAME="${PETCLINIC_TARGET:-VetController}"
@@ -38,35 +38,35 @@ scip-java index --build-tool maven
 test -f index.scip
 
 echo
-echo "[3/6] anchor-stubborn index..."
+echo "[3/6] stubborn index..."
 mkdir -p "${METADATA_DIR}"
 rm -f "${METADATA_DIR}/symbols.db"
-anchor-stubborn index --scip index.scip --out "${METADATA_DIR}/symbols.db"
+stubborn index --scip index.scip --out "${METADATA_DIR}/symbols.db"
 
 echo
 echo "[4/6] index summary..."
-anchor-stubborn info "${METADATA_DIR}/symbols.db"
+stubborn info "${METADATA_DIR}/symbols.db"
 
 echo
 echo "[5/6] resolve ${TARGET_NAME} + emit context..."
-target="$(python3 /opt/anchor-stubborn/scripts/resolve_symbol.py \
+target="$(python3 /opt/stubborn/scripts/resolve_symbol.py \
     "${METADATA_DIR}/symbols.db" \
     --display-name "${TARGET_NAME}")"
 echo "Target: ${target}"
 
 stub_path="${METADATA_DIR}/vet-controller.stub.java"
-anchor-stubborn context "${METADATA_DIR}/symbols.db" \
+stubborn context "${METADATA_DIR}/symbols.db" \
     --target "${target}" \
     --out "${stub_path}"
 
 echo
 echo "[6/6] metrics + verify..."
-anchor-stubborn metrics "${METADATA_DIR}/symbols.db" \
+stubborn metrics "${METADATA_DIR}/symbols.db" \
     --target "${target}" \
     --sources src/main/java \
     --stub-out "${stub_path}"
 
-python3 /opt/anchor-stubborn/scripts/verify_petclinic_context.py
+python3 /opt/stubborn/scripts/verify_petclinic_context.py
 
 echo
 echo "Done."

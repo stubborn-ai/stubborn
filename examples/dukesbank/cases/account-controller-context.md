@@ -23,26 +23,26 @@ github/
 cd dukesbank/src/j2eetutorial14/examples/bank
 mvn -q -DskipTests package
 scip-java index
-anchor-stubborn index --scip index.scip --out /path/to/metadata/symbols.db
+stubborn index --scip index.scip --out /path/to/metadata/symbols.db
 
-anchor-stubborn context metadata/symbols.db \
+stubborn context metadata/symbols.db \
   --target "<AccountControllerBean stable_id>" \
   --out metadata/account-controller.stub.java
 
 # Mapping / scoping (fewer tokens, graph-first):
-anchor-stubborn context metadata/symbols.db \
+stubborn context metadata/symbols.db \
   --target "<AccountControllerBean stable_id>" \
-  --format anchor-dsl \
+  --format stubborn-dsl \
   --member-signatures neighbors \
   --javadoc summary \
-  --out metadata/account-controller.anchor-dsl
+  --out metadata/account-controller.stubborn-dsl
 
-anchor-stubborn metrics metadata/symbols.db \
+stubborn metrics metadata/symbols.db \
   --target "<AccountControllerBean stable_id>" \
   --sources src
 ```
 
-Docker (from `anchor-stubborn` repo root):
+Docker (from `stubborn` repo root):
 
 ```bash
 docker compose build
@@ -65,7 +65,7 @@ Types in the pruned graph should include:
 
 | Task | Flags |
 |------|-------|
-| Recipe / mapping draft | `--format anchor-dsl --member-signatures neighbors --javadoc summary` |
+| Recipe / mapping draft | `--format stubborn-dsl --member-signatures neighbors --javadoc summary` |
 | Java codegen on controller | `--format java-stub --member-signatures target` |
 | Minimum tokens | `--member-signatures off --javadoc off` |
 

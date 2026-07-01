@@ -1,6 +1,6 @@
 # Spring PetClinic — scale-up E2E
 
-Official [spring-petclinic](https://github.com/spring-projects/spring-petclinic) indexed via **scip-java** + Anchor-Stubborn. Validates compression and neighbor coverage on a ~30-file Spring Boot app (vs ~14 in demo-spring).
+Official [spring-petclinic](https://github.com/spring-projects/spring-petclinic) indexed via **scip-java** + Stubborn. Validates compression and neighbor coverage on a ~30-file Spring Boot app (vs ~14 in demo-spring).
 
 | | demo-spring | spring-petclinic |
 |---|-------------|------------------|
@@ -15,7 +15,7 @@ Official [spring-petclinic](https://github.com/spring-projects/spring-petclinic)
 From repo root:
 
 ```bash
-docker compose build anchor-stubborn
+docker compose build stubborn
 docker compose run --rm petclinic-e2e
 ```
 
@@ -28,7 +28,7 @@ Outputs (gitignored locally):
 
 ## Host E2E (PowerShell)
 
-Requires JDK 21+, Maven, scip-java, anchor-stubborn on PATH.
+Requires JDK 21+, Maven, scip-java, stubborn on PATH.
 
 ```powershell
 cd examples/spring-petclinic

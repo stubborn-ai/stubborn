@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from anchor_stubborn.reconcile.diff import format_report, reconcile
-from anchor_stubborn.reconcile.entities import SymbolEntity
+from stubborn.reconcile.diff import format_report, reconcile
+from stubborn.reconcile.entities import SymbolEntity
 
 
 def test_reconcile_ok() -> None:
