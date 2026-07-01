@@ -8,6 +8,10 @@ Stubborn compiles a live codebase into **type-safe, privacy-preserving stub text
 
 Independent project under [stubborn-ai](https://github.com/stubborn-ai). Works with any SCIP-indexed codebase — Spring, monorepos, agents, and CI.
 
+This repo is a **personal showcase of architecture-led, AI-assisted engineering**: the developer defines system design, boundary protocols, and acceptance criteria; AI implements most of the code; the shipped artifact is **deterministic Python** — reproducible, test-gated, and verifiable (same SCIP → same context).
+
+> [Development model →](docs/DEVELOPMENT-MODEL.md) — human vs AI roles, deterministic core, boundary protocols.
+
 ## Why Stubborn?
 
 | Problem | Vector RAG | Stubborn |
@@ -180,6 +184,7 @@ SQLite schema: [`src/stubborn/store/schema/v1.sql`](src/stubborn/store/schema/v1
 
 | Doc | Description |
 |-----|-------------|
+| [docs/DEVELOPMENT-MODEL.md](docs/DEVELOPMENT-MODEL.md) | Architecture-led, AI-assisted development model |
 | [docs/adr/README.md](docs/adr/README.md) | Architecture Decision Records (design rationale) |
 | [docs/README.md](docs/README.md) | Documentation index |
 | [docs/STUBBORN-DSL.md](docs/STUBBORN-DSL.md) | Stubborn-DSL grammar |

@@ -4,6 +4,7 @@
 
 | Doc | Audience | Contents |
 |-----|----------|----------|
+| [DEVELOPMENT-MODEL.md](DEVELOPMENT-MODEL.md) | Contributors, readers | Architecture-led, AI-assisted build; deterministic deliverables |
 | [adr/README.md](adr/README.md) | Contributors, architects | Architecture Decision Records (ADR index) |
 | [BETA.md](BETA.md) | Release owners | Java-first beta checklist and known limitations |
 | [POSITIONING.md](POSITIONING.md) | Architects | What Stubborn is / is not; ecosystem placement |

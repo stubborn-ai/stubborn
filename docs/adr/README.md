@@ -76,6 +76,7 @@ What we chose, in one or two paragraphs.
 
 | Doc | Role |
 |-----|------|
+| [DEVELOPMENT-MODEL.md](../DEVELOPMENT-MODEL.md) | Architecture-led, AI-assisted build; human vs AI roles |
 | [POSITIONING.md](../POSITIONING.md) | Product positioning (what it is / is not) |
 | [BETA.md](../BETA.md) | Release scope and KPI baselines |
 | [SCIP-INGEST.md](../SCIP-INGEST.md) | Ingest behavior spec |
