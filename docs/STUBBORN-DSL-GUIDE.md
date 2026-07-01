@@ -1,5 +1,13 @@
 # When to use `java-stub` vs `stubborn-dsl`
 
+**User choice** — both formats share the same prune step; pick per task:
+
+| Situation | Format |
+|-----------|--------|
+| Pure Java / Spring — editing or generating source | `java-stub` |
+| Mixed-language repo, migration mapping, architecture audit | `stubborn-dsl` |
+| Tight token budget on a large graph | `stubborn-dsl` + consider `--prune-mode fast` |
+
 Quick decision guide for agents and prompt authors.
 
 ## Decision tree

@@ -8,9 +8,10 @@ from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
 
-from stubborn.config import DEFAULT_CONTEXT_BUDGET, ContextBudget
+from stubborn.config import DEFAULT_CONTEXT_BUDGET, ContextBudget, apply_prune_mode
 
 _SIGNATURE_TYPE_RE = re.compile(r"\b([A-Z][\w]*)\b")
+_INFERRED_EDGE_KINDS = frozenset({"signature-ref"})
 
 
 @dataclass(frozen=True)
@@ -126,7 +127,8 @@ def prune_context(
     index_run_id: int | None = None,
 ) -> PrunedGraph:
     """BFS prune from target symbol using call/type edge kinds."""
-    budget = budget or DEFAULT_CONTEXT_BUDGET
+    budget = apply_prune_mode(budget or DEFAULT_CONTEXT_BUDGET)
+    use_heuristics = budget.use_signature_heuristics
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     try:
@@ -189,6 +191,8 @@ def prune_context(
             current_row = symbols_by_id[current_id]
 
             for ref_id in _signature_type_ref_ids(current_row, type_name_index):
+                if not use_heuristics:
+                    continue
                 if current_depth > 0:
                     continue
                 if ref_id in seen:
@@ -202,6 +206,9 @@ def prune_context(
 
             for neighbor_id, edge_kind in adjacency.get(current_id, []):
                 if neighbor_id in seen:
+                    continue
+
+                if not use_heuristics and edge_kind in _INFERRED_EDGE_KINDS:
                     continue
 
                 neighbor = symbols_by_id[neighbor_id]

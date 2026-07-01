@@ -29,7 +29,7 @@ def test_signature_edges_add_return_and_parameter_types() -> None:
     pairs = _edge_pairs(snapshot)
     find_by_id = "semanticdb maven com/example/OrderRepository#findById()."
     order = "semanticdb maven com/example/Order#"
-    assert (find_by_id, order, "reference") in pairs
+    assert (find_by_id, order, "signature-ref") in pairs
 
 
 def test_occurrences_skip_local_enclosing_for_constructor_refs() -> None:

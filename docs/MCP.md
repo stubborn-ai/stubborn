@@ -20,7 +20,7 @@ pip install -e ".[dev]"
 
 | Tool | Purpose |
 |------|---------|
-| `get_context` | Prune symbol graph → LLM context (`format`: `java-stub` or `stubborn-dsl`) |
+| `get_context` | Prune symbol graph → LLM context (`format`: `java-stub` or `stubborn-dsl`; `prune_mode`: `smart`, `strict`, `fast`) |
 | `list_symbols` | Browse/search indexed symbols to pick a target |
 | `metrics` | Compression KPI: stub vs full Java `sources` tree |
 

@@ -114,7 +114,22 @@ stubborn context ./metadata/symbols.db \
 
 See [docs/STUBBORN-DSL.md](docs/STUBBORN-DSL.md) for the compact cross-language format.
 
+**Choose output format:**
+
+| Project | Suggested `--format` |
+|---------|---------------------|
+| Pure Java / Spring codegen | `java-stub` (default) |
+| Mixed-language or token-sensitive / graph-first | `stubborn-dsl` |
+
 Tune output granularity: `--member-signatures off|target|neighbors|all`, `--javadoc off|summary|full` ([guide](docs/STUBBORN-DSL-GUIDE.md#granularity-switches-token-vs-detail)).
+
+**Choose neighbor expansion (`--prune-mode`):**
+
+| Mode | When |
+|------|------|
+| `smart` (default) | Richest type neighbors; CI guards assume this |
+| `strict` | SCIP-proven edges only — no signature heuristics |
+| `fast` | Smaller neighborhood + no heuristics — tight token budget |
 
 Or use the short CLI alias: `stub`.
 
@@ -142,7 +157,7 @@ Tools: `get_context`, `list_symbols`, `metrics`. See [docs/MCP.md](docs/MCP.md) 
 | `init-db` | Create empty SQLite symbol graph |
 | `index` | Ingest SCIP (`.scip`, `.scip.ndjson`, or `.json` fixture) |
 | `info` | Index run summary |
-| `context` | Prune graph → emit LLM context (`--format java-stub` \| `stubborn-dsl`) |
+| `context` | Prune graph → emit LLM context (`--format java-stub` \| `stubborn-dsl`; `--prune-mode smart` \| `strict` \| `fast`) |
 | `metrics` | Compression KPI: stub vs full Java sources |
 | `mcp` | Run MCP server (stdio) for agents |
 | `diff` | Symbol set reconcile (missing/extra) |

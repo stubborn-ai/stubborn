@@ -34,7 +34,7 @@ stubborn context metadata/symbols.db \
 - **Symbols** — `SymbolInformation` from each document + `external_symbols`
 - **Edges** — `Relationship` fields (`type`, `reference`, `implementation`, `definition`)
 - **Occurrence refs** — non-definition occurrences linked to the nearest non-`local` enclosing symbol (lambda-safe)
-- **Signature refs** — return/parameter types parsed from `signature_documentation` (e.g. `OrderResponse`, `CreateOrderRequest`)
+- **Signature refs** — return/parameter types parsed from signatures, stored as `signature-ref` edges (used in `smart` prune mode; skipped in `strict` / `fast`)
 - **Constructor promotion** — `Foo#<init>()` references also emit `Foo#` type references
 
 ## Protobuf bindings

@@ -6,7 +6,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-from stubborn.config import ContextBudget
+from stubborn.config import ContextBudget, apply_prune_mode
 from stubborn.graph.prune import prune_context
 from stubborn.metrics import compute_compression
 from stubborn.store.reader import list_symbols, resolve_db_path
@@ -30,11 +30,15 @@ def _budget(
     max_symbols: int,
     call_depth: int,
     max_tokens: int,
+    prune_mode: str = "smart",
 ) -> ContextBudget:
-    return ContextBudget(
-        call_closure_depth=call_depth,
-        max_symbols=max_symbols,
-        max_tokens=max_tokens,
+    return apply_prune_mode(
+        ContextBudget(
+            call_closure_depth=call_depth,
+            max_symbols=max_symbols,
+            max_tokens=max_tokens,
+            prune_mode=prune_mode,
+        )
     )
 
 
@@ -48,6 +52,7 @@ def get_context(
     max_tokens: int = 12_000,
     member_signatures: str = "target",
     javadoc: str | None = None,
+    prune_mode: str = "smart",
 ) -> ContextResult:
     """Prune symbol graph and weave LLM context for a target symbol."""
     path = resolve_db_path(db_path)
@@ -55,6 +60,7 @@ def get_context(
         max_symbols=max_symbols,
         call_depth=call_depth,
         max_tokens=max_tokens,
+        prune_mode=prune_mode,
     )
     weave_options = WeaveOptions(member_signatures=member_signatures, javadoc=javadoc)
     graph = prune_context(path, target, budget=budget)
@@ -124,6 +130,7 @@ def get_metrics(
     format: str = "java-stub",
     member_signatures: str = "target",
     javadoc: str | None = None,
+    prune_mode: str = "smart",
 ) -> dict[str, Any]:
     """Return compression KPI as a JSON-serializable dict."""
     path = resolve_db_path(db_path)
@@ -131,6 +138,7 @@ def get_metrics(
         max_symbols=max_symbols,
         call_depth=call_depth,
         max_tokens=max_tokens,
+        prune_mode=prune_mode,
     )
     weave_options = WeaveOptions(member_signatures=member_signatures, javadoc=javadoc)
     report = compute_compression(

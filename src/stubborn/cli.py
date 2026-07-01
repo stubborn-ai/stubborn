@@ -7,7 +7,7 @@ from typing import Optional
 
 import typer
 
-from stubborn.config import ContextBudget
+from stubborn.config import ContextBudget, apply_prune_mode, normalize_prune_mode
 from stubborn.graph.prune import prune_context
 from stubborn.ingest.scip import load_scip_index
 from stubborn.metrics import compute_compression
@@ -101,6 +101,11 @@ def context_cmd(
         "--javadoc",
         help="Javadoc in output: off | summary | full (default: summary for java-stub, off for stubborn-dsl)",
     ),
+    prune_mode: str = typer.Option(
+        "smart",
+        "--prune-mode",
+        help="Neighbor expansion: smart (SCIP + signature heuristics) | strict (SCIP edges only) | fast (smaller neighborhood)",
+    ),
     out: Optional[Path] = typer.Option(
         None,
         "--out",
@@ -109,10 +114,18 @@ def context_cmd(
     ),
 ) -> None:
     """Prune the symbol graph and emit type-safe LLM context text."""
-    budget = ContextBudget(
-        call_closure_depth=call_depth,
-        max_symbols=max_symbols,
-        max_tokens=max_tokens,
+    try:
+        normalize_prune_mode(prune_mode)
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+
+    budget = apply_prune_mode(
+        ContextBudget(
+            call_closure_depth=call_depth,
+            max_symbols=max_symbols,
+            max_tokens=max_tokens,
+            prune_mode=prune_mode,
+        )
     )
     graph = prune_context(db_path, target, budget=budget)
 
@@ -161,6 +174,11 @@ def metrics_cmd(
         "--javadoc",
         help="Javadoc in output: off | summary | full",
     ),
+    prune_mode: str = typer.Option(
+        "smart",
+        "--prune-mode",
+        help="Neighbor expansion: smart | strict | fast",
+    ),
     stub_out: Optional[Path] = typer.Option(
         None,
         "--stub-out",
@@ -169,10 +187,18 @@ def metrics_cmd(
     ),
 ) -> None:
     """Compare pruned stub size against full Java sources (compression KPI)."""
-    budget = ContextBudget(
-        call_closure_depth=call_depth,
-        max_symbols=max_symbols,
-        max_tokens=max_tokens,
+    try:
+        normalize_prune_mode(prune_mode)
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+
+    budget = apply_prune_mode(
+        ContextBudget(
+            call_closure_depth=call_depth,
+            max_symbols=max_symbols,
+            max_tokens=max_tokens,
+            prune_mode=prune_mode,
+        )
     )
     report = compute_compression(
         db_path,

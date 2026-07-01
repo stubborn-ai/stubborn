@@ -30,6 +30,8 @@ Shared rules:
 
 Each `stubborn-dsl` block embeds a short `# Guide` header (~30 tokens) so models see the legend inline; [STUBBORN-DSL-LLM.txt](../STUBBORN-DSL-LLM.txt) is optional for system prompts.
 
+**User choice:** callers pick `--format` per invocation. Pure Java projects default to `java-stub`; mixed-language or token-sensitive tasks opt into `stubborn-dsl`. Long-term polyglot value is the primary strategic reason to keep DSL alongside language-specific weavers (see [STUBBORN-DSL-GUIDE.md](../STUBBORN-DSL-GUIDE.md)).
+
 ## Consequences
 
 ### Positive

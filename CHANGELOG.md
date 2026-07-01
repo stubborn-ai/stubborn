@@ -10,6 +10,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Architecture Decision Records (`docs/adr/`) — ADR-001 through ADR-008.
 - [DEVELOPMENT-MODEL.md](docs/DEVELOPMENT-MODEL.md) — architecture-led, AI-assisted engineering declaration.
+- **`--prune-mode`** (`smart` | `strict` | `fast`) on `context`, `metrics`, API, and MCP — user control over neighbor expansion.
+- Ingest signature enrichment edges tagged as `signature-ref` (skipped in `strict` / `fast`).
 
 ## [0.9.0b3] - 2026-07-02
 

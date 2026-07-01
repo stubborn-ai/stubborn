@@ -251,7 +251,7 @@ def _edges_from_signatures(symbols: dict[str, SymbolRecord]) -> list[EdgeRecord]
                 if target_id == record.stable_id or target_id in seen_targets:
                     continue
                 seen_targets.add(target_id)
-                edges.append(EdgeRecord(record.stable_id, target_id, "reference"))
+                edges.append(EdgeRecord(record.stable_id, target_id, "signature-ref"))
 
     return edges
 
