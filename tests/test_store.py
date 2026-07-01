@@ -92,6 +92,21 @@ def test_signature_ref_edges_persist_in_sqlite(tmp_path: Path) -> None:
     assert count >= 1
 
 
+def test_list_symbols_includes_documentation(tmp_path: Path) -> None:
+    from stubborn.ingest.scip import load_scip_index
+    from stubborn.store.reader import list_symbols
+
+    db = tmp_path / "symbols.db"
+    fixture = Path(__file__).resolve().parents[1] / "examples" / "fixtures" / "minimal.json"
+    IndexWriter(db).write(load_scip_index(fixture))
+
+    symbols = list_symbols(db, query="OrderService", limit=5)
+    assert symbols
+    assert hasattr(symbols[0], "documentation")
+    # fixture may omit docs; field must be present (None or str)
+    assert symbols[0].documentation is None or isinstance(symbols[0].documentation, str)
+
+
 def test_invalid_edge_kind_raises_on_write(tmp_path: Path) -> None:
     db = tmp_path / "symbols.db"
     snapshot = IndexSnapshot(

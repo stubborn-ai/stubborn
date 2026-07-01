@@ -13,17 +13,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **`--prune-mode`** (`smart` | `strict` | `fast`) on `context`, `metrics`, API, and MCP — user control over neighbor expansion.
 - Ingest signature enrichment edges tagged as `signature-ref` (skipped in `strict` / `fast`).
 
-### Fixed
-
-- **`signature-ref` edges silently dropped on ingest** — schema CHECK omitted `signature-ref`; `INSERT OR IGNORE` swallowed constraint failures. Schema updated; writer uses `INSERT … ON CONFLICT DO NOTHING`; regression test in `test_store.py`.
-- **ADR fabricated retroactive dates** — replaced with `Documented: 2026-07-02` and README disclaimer.
-
 ### Changed
 
+- Renamed store read model `SymbolRecord` → `SymbolSummary` (distinct from ingest `SymbolRecord`).
+- `list_symbols` / MCP `list_symbols` now include `documentation` in results.
 - [POSITIONING.md](docs/POSITIONING.md) — primary/secondary audience, honest competitor comparison, SCIP prerequisite, language scope.
 - [README.md](README.md) — three-axis comparison (not RAG-only); dual use cases; requirements table.
 - [BETA.md](docs/BETA.md) — audience fit, expanded limitations, out-of-scope for zero-config indexing.
 - [examples/README.md](examples/README.md) — Java-only validated examples note.
+
+### Fixed
+
+- **`signature-ref` edges silently dropped on ingest** — schema CHECK omitted `signature-ref`; `INSERT OR IGNORE` swallowed constraint failures. Schema updated; writer uses `INSERT … ON CONFLICT DO NOTHING`; regression test in `test_store.py`.
+- **ADR fabricated retroactive dates** — replaced with `Documented: 2026-07-02` and README disclaimer.
 
 ## [0.9.0b3] - 2026-07-02
 

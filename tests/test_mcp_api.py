@@ -68,6 +68,7 @@ def test_list_index_symbols_api(indexed_db: Path) -> None:
     symbols = list_index_symbols(db_path=indexed_db, query="Order", limit=5)
     assert symbols
     assert "stable_id" in symbols[0]
+    assert "documentation" in symbols[0]
 
 
 def test_get_metrics_api(indexed_db: Path) -> None:

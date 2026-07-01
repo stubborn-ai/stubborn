@@ -9,11 +9,14 @@ from pathlib import Path
 
 
 @dataclass(frozen=True)
-class SymbolRecord:
+class SymbolSummary:
+    """Symbol row returned from list/browse queries (read model)."""
+
     stable_id: str
     display_name: str | None
     kind: str | None
     signature: str | None
+    documentation: str | None
 
 
 def resolve_db_path(db_path: str | Path | None) -> Path:
@@ -48,7 +51,7 @@ def list_symbols(
     kind: str | None = None,
     limit: int = 50,
     index_run_id: int | None = None,
-) -> list[SymbolRecord]:
+) -> list[SymbolSummary]:
     """List symbols from the latest (or specific) index run."""
     if limit < 1:
         raise ValueError("limit must be >= 1")
@@ -58,7 +61,7 @@ def list_symbols(
     try:
         run_id = _latest_index_run_id(conn, index_run_id)
         sql = """
-            SELECT stable_id, display_name, kind, signature
+            SELECT stable_id, display_name, kind, signature, documentation
             FROM scip_symbol
             WHERE index_run_id = ?
         """
@@ -78,11 +81,12 @@ def list_symbols(
 
         rows = conn.execute(sql, params).fetchall()
         return [
-            SymbolRecord(
+            SymbolSummary(
                 stable_id=row["stable_id"],
                 display_name=row["display_name"],
                 kind=row["kind"],
                 signature=row["signature"],
+                documentation=row["documentation"],
             )
             for row in rows
         ]
