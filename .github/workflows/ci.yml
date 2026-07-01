@@ -18,14 +18,22 @@ jobs:
       - name: Run demo-spring E2E
         run: docker compose run --rm e2e
 
+      - name: Set up Python for context guards
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install package
+        run: pip install -e ".[dev]"
+
       - name: Verify OrderService context guard
-        run: docker compose run --rm shell bash -lc "pip install -q -e /opt/stubborn && python /opt/stubborn/scripts/verify_demo_context.py"
+        run: python scripts/verify_demo_context.py
 
       - name: Verify OrderController context guard
-        run: docker compose run --rm shell bash -lc "pip install -q -e /opt/stubborn && python /opt/stubborn/scripts/verify_controller_context.py"
+        run: python scripts/verify_controller_context.py
 
       - name: Verify payOrder context guard
-        run: docker compose run --rm shell bash -lc "pip install -q -e /opt/stubborn && python /opt/stubborn/scripts/verify_pay_flow_context.py"
+        run: python scripts/verify_pay_flow_context.py
 
       - uses: actions/upload-artifact@v4
         with:

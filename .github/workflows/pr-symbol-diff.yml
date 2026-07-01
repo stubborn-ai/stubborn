@@ -20,8 +20,15 @@ jobs:
       - name: Run demo-spring E2E
         run: docker compose run --rm e2e
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install package
+        run: pip install -e ".[dev]"
+
       - name: Verify OrderService context neighbors
-        run: docker compose run --rm shell python /opt/stubborn/scripts/verify_demo_context.py
+        run: python scripts/verify_demo_context.py
 
   fixture-symbol-diff:
     runs-on: ubuntu-latest
