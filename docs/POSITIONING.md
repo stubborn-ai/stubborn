@@ -46,6 +46,8 @@ anchor-migration (optional consumer)
 **Same philosophy** as db-metadata: SQLite snapshots, stable IDs, reconcile reports.  
 **Different consumer**: LLMs and agents, not schema explorers.
 
+Key design decisions: [docs/adr/README.md](adr/README.md).
+
 ## vs java-ast-ssot
 
 | | java-ast-ssot | stubborn |

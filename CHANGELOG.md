@@ -4,6 +4,12 @@ All notable changes to this project are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+
+- Architecture Decision Records (`docs/adr/`) — ADR-001 through ADR-008.
+
 ## [0.9.0b3] - 2026-07-02
 
 ### Changed

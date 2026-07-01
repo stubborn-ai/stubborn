@@ -145,6 +145,8 @@ Tools: `get_context`, `list_symbols`, `metrics`. See [docs/MCP.md](docs/MCP.md) 
 
 ## Architecture
 
+Design rationale is recorded as [Architecture Decision Records (docs/adr/)](docs/adr/README.md). Pipeline overview:
+
 ```
 [Source code] → scip-java / scip-clang / … → index.scip
        ↓
@@ -178,6 +180,7 @@ SQLite schema: [`src/stubborn/store/schema/v1.sql`](src/stubborn/store/schema/v1
 
 | Doc | Description |
 |-----|-------------|
+| [docs/adr/README.md](docs/adr/README.md) | Architecture Decision Records (design rationale) |
 | [docs/README.md](docs/README.md) | Documentation index |
 | [docs/STUBBORN-DSL.md](docs/STUBBORN-DSL.md) | Stubborn-DSL grammar |
 | [docs/STUBBORN-DSL-GUIDE.md](docs/STUBBORN-DSL-GUIDE.md) | java-stub vs stubborn-dsl decision guide |

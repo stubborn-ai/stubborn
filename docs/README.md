@@ -4,6 +4,7 @@
 
 | Doc | Audience | Contents |
 |-----|----------|----------|
+| [adr/README.md](adr/README.md) | Contributors, architects | Architecture Decision Records (ADR index) |
 | [BETA.md](BETA.md) | Release owners | Java-first beta checklist and known limitations |
 | [POSITIONING.md](POSITIONING.md) | Architects | What Stubborn is / is not; ecosystem placement |
 | [INTEGRATION.md](INTEGRATION.md) | Optional adopters | How anchor-migration consumes Stubborn |
