@@ -1,12 +1,14 @@
 # Stubborn
 
-**Deterministic code context from symbol graphs — not vector search.**
+**Deterministic code context from symbol graphs — for SCIP-indexed codebases.**
 
-> **Status: Beta (Java-first)** — release **`0.9.0b3`** · [BETA.md](docs/BETA.md) · [CHANGELOG](CHANGELOG.md)
+> **Status: Beta (Java-first)** — release **`0.9.0b3`** · [BETA.md](docs/BETA.md) · [POSITIONING.md](docs/POSITIONING.md) · [CHANGELOG](CHANGELOG.md)
 
-Stubborn compiles a live codebase into **type-safe, privacy-preserving stub text** for LLMs and agents. It uses [SCIP](https://github.com/sourcegraph/scip) symbol indexes and dependency graphs instead of vector chunking, so context is **stubborn**: exact, reproducible, and stripped of method bodies.
+Stubborn compiles a **SCIP symbol index** into **type-safe, privacy-preserving stub text** for LLMs and agents. Same index + target + options → same context: reproducible, token-bounded, and stripped of method bodies.
 
-Independent project under [stubborn-ai](https://github.com/stubborn-ai). Works with any SCIP-indexed codebase — Spring, monorepos, agents, and CI.
+**Primary fit:** Java / Spring repos (especially legacy modernization) where teams already run or can run **scip-java**. **Also:** Cursor/MCP users with a `symbols.db` who want deterministic context — not a zero-config repo map.
+
+Independent project under [stubborn-ai](https://github.com/stubborn-ai). Full positioning: [docs/POSITIONING.md](docs/POSITIONING.md).
 
 This repo is a **personal showcase of architecture-led, AI-assisted engineering**: the developer defines system design, boundary protocols, and acceptance criteria; AI implements most of the code; the shipped artifact is **deterministic Python** — reproducible, test-gated, and verifiable (same SCIP → same context).
 
@@ -14,27 +16,49 @@ This repo is a **personal showcase of architecture-led, AI-assisted engineering*
 
 ## Why Stubborn?
 
-| Problem | Vector RAG | Stubborn |
-|---------|------------|---------------|
-| Type hallucinations | Common | Stub signatures from symbol graph |
-| Token cost | Full files / arbitrary chunks | Pruned declaration stubs (~80–90% savings target) |
-| Privacy | May leak business logic | No method bodies by design |
-| Reproducibility | Embedding drift | Same SCIP → same context |
+Real pain points: **type hallucinations** when LLMs lack declarations, **token waste** from whole files, **privacy** from leaking implementations, **non-reproducible** embedding chunks.
+
+Stubborn addresses these when you already have (or can build) a **SCIP index**. Compare on three axes — not “us vs vector RAG” alone:
+
+| | Stubborn | Vector chunk RAG | Low-friction symbol maps (e.g. Aider repo-map) |
+|---|----------|------------------|-----------------------------------------------|
+| **Determinism** | Same SCIP → same stub | Chunk / embedding drift | Varies |
+| **Type structure** | Symbol graph + signatures | Arbitrary text spans | Repo structure / tags |
+| **Setup friction** | **SCIP index required** | Index / embed pipeline | **Open repo** |
+| **Token KPI** | Built-in `metrics`, ~80–90% vs sources (Java E2E) | Unpredictable | Not a design goal |
+| **Privacy** | No method bodies by design | May include full files | Full files possible |
+| **CI reconcile** | `diff`, symbol guards | Hard to baseline | Uncommon |
 
 **Stub** = skeleton declarations (like header files).  
-**Stubborn** = refuses to guess — only ships what the symbol graph proves.
+**Stubborn** = compiles symbol graphs into bounded stub text; use **`--prune-mode strict`** when you want SCIP-proven neighbors only ([ADR-003](docs/adr/ADR-003-type-neighbor-pruning.md)).
 
 ## Use cases
 
-- **Copilot / Cursor agents** — `getContext(class)` before code generation
+**Primary (Java / Spring + SCIP workflow):**
+
+- **Legacy / modernization** — scoped context for large estates ([examples/migration-bridge](examples/migration-bridge/), [dukesbank](examples/dukesbank/))
+- **PR semantic audit** — `diff` two SCIP indexes; CI symbol guards
+- **Program runbooks** — reproducible stub artifacts with compression KPIs
+
+**Secondary (agents / individuals):**
+
+- **Cursor / MCP** — `get_context` before codegen on a pre-built `symbols.db`
 - **Large-repo onboarding** — dependency skeleton for one target symbol
-- **PR semantic audit** — `diff` two SCIP indexes after a refactor
-- **Refactor / legacy modernization** — scoped context for large Java estates (see [examples/migration-bridge](examples/migration-bridge/))
+
+Start with [30-second fixture](#try-in-30-seconds-no-java-required) or [Docker E2E](#docker-quick-start); production Java path requires **scip-java** (see [Requirements](#requirements)).
 
 ## Requirements
 
 - Python 3.11+ (or use [Docker](docker/README.md))
-- A SCIP index for your project (e.g. [scip-java](https://github.com/sourcegraph/scip-java))
+- A **SCIP index** for your project — Stubborn does not index source directly
+
+| Goal | You need |
+|------|----------|
+| Try Stubborn (no Java) | Bundled fixture only — [below](#try-in-30-seconds-no-java-required) |
+| Real Java / Spring repo | **[scip-java](https://github.com/sourcegraph/scip-java)** (or CI that produces `index.scip`) + `stubborn index` |
+| Reproduce project E2E | Docker Desktop — [docker/README.md](docker/README.md) |
+
+**Beta scope:** weave quality and KPIs are **Java-validated**. Other SCIP languages may ingest; output quality is not guaranteed until language-specific E2E ships ([BETA.md](docs/BETA.md)).
 
 ### Docker quick start
 
@@ -201,7 +225,8 @@ SQLite schema: [`src/stubborn/store/schema/v1.sql`](src/stubborn/store/schema/v1
 |-----|-------------|
 | [docs/DEVELOPMENT-MODEL.md](docs/DEVELOPMENT-MODEL.md) | Architecture-led, AI-assisted development model |
 | [docs/adr/README.md](docs/adr/README.md) | Architecture Decision Records (design rationale) |
-| [docs/README.md](docs/README.md) | Documentation index |
+| [docs/POSITIONING.md](docs/POSITIONING.md) | Product positioning — audience, competitors, honest scope |
+| [docs/BETA.md](docs/BETA.md) | Beta checklist, limitations, KPI baselines |
 | [docs/STUBBORN-DSL.md](docs/STUBBORN-DSL.md) | Stubborn-DSL grammar |
 | [docs/STUBBORN-DSL-GUIDE.md](docs/STUBBORN-DSL-GUIDE.md) | java-stub vs stubborn-dsl decision guide |
 | [docs/STUBBORN-DSL-LLM.txt](docs/STUBBORN-DSL-LLM.txt) | LLM system-prompt snippet |

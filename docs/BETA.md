@@ -4,6 +4,16 @@
 
 Pre-beta (`0.9.0a1`) completed the checklist; this tag flips the PyPI classifier and version line.
 
+## Who this beta serves
+
+| Audience | Beta fit |
+|----------|----------|
+| **Primary** — Java/Spring teams with SCIP in CI or runbooks | **Strong** — E2E, KPIs, `diff`, verify guards |
+| **Secondary** — Cursor/MCP individuals | **Good** if you accept SCIP/index setup; start with fixture or Docker |
+| **Any language via SCIP** | **Experimental ingest only** — no weave/E2E claim |
+
+See [POSITIONING.md](POSITIONING.md) for the full primary/secondary split.
+
 ## Versioning
 
 | Stage | Version | Classifier |
@@ -18,8 +28,8 @@ Pre-beta (`0.9.0a1`) completed the checklist; this tag flips the PyPI classifier
 
 - [x] SCIP binary + NDJSON + JSON fixture ingest
 - [x] SQLite symbol graph + CLI + MCP
-- [x] Type-neighbor pruning + token budget
-- [x] `java-stub` + `stubborn-dsl` weavers
+- [x] Type-neighbor pruning + token budget + `--prune-mode`
+- [x] `java-stub` + `stubborn-dsl` weavers (user choice)
 - [x] Target-type method signatures (v0.9); neighbor/all + Javadoc via weave switches
 
 ### E2E validation
@@ -32,35 +42,41 @@ Pre-beta (`0.9.0a1`) completed the checklist; this tag flips the PyPI classifier
 ### Agent / docs
 
 - [x] STUBBORN-DSL grammar, LLM snippet, format guide
-- [x] PyPI `stubborn-stub` published (`0.9.0b2`)
+- [x] PyPI `stubborn-stub` published (`0.9.0b3`)
+- [x] ADRs + honest positioning ([POSITIONING.md](POSITIONING.md))
 
 ### Quality bar
 
 - [x] `language: java` from SCIP
-- [x] pytest 3.11–3.13
+- [x] pytest 3.11–3.13 + ruff CI
 - [x] PR symbol-diff workflow
-- [x] `pyproject.toml` classifier → **Beta** (`0.9.0b2`)
+- [x] `pyproject.toml` classifier → **Beta**
 
 ## Out of scope for 1.0
 
 | Item | Target |
 |------|--------|
-| PyPI publish | **Done** — `pip install stubborn-stub` |
-| scip-clang / TypeScript E2E | v1.0+ |
-| Method signatures on non-target types | v1.0+ — use `--member-signatures neighbors|all` (beta) |
+| Zero-config repo indexing (no SCIP) | Out of scope — use IDE/repo-map tools |
+| scip-clang / TypeScript **weave E2E** | v1.0+ |
+| Polyglot merged index story | v1.0+ ADR + E2E |
+| Method signatures on non-target types by default | v1.0+ — use `--member-signatures neighbors|all` (beta) |
 | Rich Javadoc in output | v1.0+ — use `--javadoc full` (beta) |
 | Petclinic on every PR | Weekly (cost) |
 
 ## Known limitations (beta)
 
-1. **Java-first** — validated with scip-java.
-2. **Method signatures** — default `target` only; use `--member-signatures neighbors|all` for more.
-3. **Token estimate** — chars/4 heuristic.
-4. **Javadoc** — default summary (java-stub) / off (stubborn-dsl); `--javadoc full` for `@param` tags.
-5. **Stubborn-DSL** — see [STUBBORN-DSL-GUIDE.md](STUBBORN-DSL-GUIDE.md).
-6. **SCIP is the index** — Stubborn compiles pruned graphs to LLM text.
+1. **Java-first** — production claims apply to scip-java path only; other languages ingest at your own risk.
+2. **SCIP prerequisite** — every real project needs an indexer before Stubborn; not plug-and-play vs repo-map tools.
+3. **Neighbor honesty** — default `--prune-mode smart` uses signature heuristics; use **`strict`** for SCIP-only edges ([ADR-003](adr/ADR-003-type-neighbor-pruning.md)).
+4. **Method signatures** — default `target` only; use `--member-signatures neighbors|all` for more.
+5. **Token estimate** — chars/4 heuristic.
+6. **Javadoc** — default summary (java-stub) / off (stubborn-dsl); `--javadoc full` for `@param` tags.
+7. **Stubborn-DSL** — user choice for token/graph tasks; `java-stub` default for Java codegen ([STUBBORN-DSL-GUIDE.md](STUBBORN-DSL-GUIDE.md)).
+8. **Dual audience** — reconcile/CI features target enterprise migration workflows; MCP targets agents — see [POSITIONING.md](POSITIONING.md).
 
 ## KPI baselines
+
+Java E2E only (`--prune-mode smart`):
 
 | Example | Target | Token savings |
 |---------|--------|---------------|
@@ -74,3 +90,4 @@ Pre-beta (`0.9.0a1`) completed the checklist; this tag flips the PyPI classifier
 
 - [POSITIONING.md](POSITIONING.md)
 - [INTEGRATION.md](INTEGRATION.md)
+- [adr/README.md](adr/README.md)

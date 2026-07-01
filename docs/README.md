@@ -7,7 +7,7 @@
 | [DEVELOPMENT-MODEL.md](DEVELOPMENT-MODEL.md) | Contributors, readers | Architecture-led, AI-assisted build; deterministic deliverables |
 | [adr/README.md](adr/README.md) | Contributors, architects | Architecture Decision Records (ADR index) |
 | [BETA.md](BETA.md) | Release owners | Java-first beta checklist and known limitations |
-| [POSITIONING.md](POSITIONING.md) | Architects | What Stubborn is / is not; ecosystem placement |
+| [POSITIONING.md](POSITIONING.md) | Architects, adopters | Primary/secondary audience; honest comparison; SCIP prerequisite |
 | [INTEGRATION.md](INTEGRATION.md) | Optional adopters | How anchor-migration consumes Stubborn |
 | [SCIP-INGEST.md](SCIP-INGEST.md) | Index authors | Supported SCIP formats and ingest behavior |
 | [MCP.md](MCP.md) | Agent / Cursor users | MCP tools, config, workflows |

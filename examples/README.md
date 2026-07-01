@@ -1,6 +1,8 @@
 # Examples
 
-End-to-end scenarios for Stubborn.
+End-to-end scenarios for Stubborn. All validated examples are **Java / Spring** — matching [beta scope](../docs/BETA.md).
+
+**Primary audience:** teams running SCIP in CI or migration runbooks. **Secondary:** try Docker E2E or fixtures without a local JDK.
 
 | Example | Status | Description |
 |---------|--------|-------------|

@@ -29,6 +29,8 @@ PyPI classifier: `Development Status :: 4 - Beta`. Target stable: **1.0** with m
 
 Users may ingest non-Java SCIP experimentally; output quality is **best-effort** until an ADR supersedes this scope.
 
+**Marketing rule:** do not describe Stubborn as “any language, production-ready” in beta. Use **“Java/Spring validated; SCIP ingest experimental for other languages.”** See [POSITIONING.md](../POSITIONING.md).
+
 ## Consequences
 
 ### Positive

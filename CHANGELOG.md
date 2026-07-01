@@ -13,6 +13,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **`--prune-mode`** (`smart` | `strict` | `fast`) on `context`, `metrics`, API, and MCP — user control over neighbor expansion.
 - Ingest signature enrichment edges tagged as `signature-ref` (skipped in `strict` / `fast`).
 
+### Changed
+
+- [POSITIONING.md](docs/POSITIONING.md) — primary/secondary audience, honest competitor comparison, SCIP prerequisite, language scope.
+- [README.md](README.md) — three-axis comparison (not RAG-only); dual use cases; requirements table.
+- [BETA.md](docs/BETA.md) — audience fit, expanded limitations, out-of-scope for zero-config indexing.
+- [examples/README.md](examples/README.md) — Java-only validated examples note.
+
 ## [0.9.0b3] - 2026-07-02
 
 ### Changed
