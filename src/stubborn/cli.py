@@ -35,7 +35,9 @@ def init_db_cmd(
 
 @app.command("index")
 def index_cmd(
-    scip: Path = typer.Option(..., "--scip", help="SCIP index (.scip, .scip.ndjson, or .json fixture)"),
+    scip: Path = typer.Option(
+        ..., "--scip", help="SCIP index (.scip, .scip.ndjson, or .json fixture)"
+    ),
     out: Path = typer.Option(..., "--out", "-o", help="Output SQLite file path"),
     project_root: Optional[str] = typer.Option(
         None,
@@ -200,9 +202,7 @@ def diff_cmd(
     def _load_symbols(db: Path) -> set[SymbolEntity]:
         conn = sqlite3.connect(db)
         try:
-            run_id = conn.execute(
-                "SELECT id FROM index_run ORDER BY id DESC LIMIT 1"
-            ).fetchone()
+            run_id = conn.execute("SELECT id FROM index_run ORDER BY id DESC LIMIT 1").fetchone()
             if run_id is None:
                 return set()
             rows = conn.execute(
@@ -236,7 +236,5 @@ def mcp_cmd() -> None:
     try:
         from stubborn.mcp_server import main as run_mcp
     except ImportError as exc:
-        raise typer.BadParameter(
-            "MCP support requires: pip install 'stubborn-stub[mcp]'"
-        ) from exc
+        raise typer.BadParameter("MCP support requires: pip install 'stubborn-stub[mcp]'") from exc
     run_mcp()

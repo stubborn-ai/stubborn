@@ -46,9 +46,7 @@ def read_info(db_path: str | Path, index_run_id: int | None = None) -> IndexInfo
     conn.row_factory = sqlite3.Row
     try:
         if index_run_id is None:
-            row = conn.execute(
-                "SELECT id FROM index_run ORDER BY id DESC LIMIT 1"
-            ).fetchone()
+            row = conn.execute("SELECT id FROM index_run ORDER BY id DESC LIMIT 1").fetchone()
             if row is None:
                 raise ValueError(f"No index runs found in {db_path}")
             index_run_id = row["id"]

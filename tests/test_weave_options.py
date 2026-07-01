@@ -8,7 +8,6 @@ import pytest
 
 from stubborn.api import get_context
 from stubborn.graph.prune import PrunedGraph, PrunedSymbol
-from stubborn.weave.stubborn_dsl import weave_stubborn_dsl
 from stubborn.weave.java_stub import weave_java_stub
 from stubborn.weave.members import (
     format_java_javadoc_prefix,
@@ -16,6 +15,7 @@ from stubborn.weave.members import (
     type_includes_method_signatures,
 )
 from stubborn.weave.options import DEFAULT_WEAVE_OPTIONS, WeaveOptions
+from stubborn.weave.stubborn_dsl import weave_stubborn_dsl
 
 DEMO_ROOT = Path(__file__).resolve().parents[1] / "examples" / "demo-spring"
 DEMO_DB = DEMO_ROOT / "metadata" / "symbols.db"
@@ -162,14 +162,14 @@ def test_java_stub_javadoc_full() -> None:
     assert "// @param id order id" in result.text
 
 
-def test_anchor_dsl_member_signatures_all() -> None:
+def test_stubborn_dsl_member_signatures_all() -> None:
     graph = _sample_graph()
     result = weave_stubborn_dsl(graph, options=WeaveOptions(member_signatures="all"))
     assert "m OrderService.create" in result.text
     assert "m OrderRepository.findById" in result.text
 
 
-def test_anchor_dsl_javadoc_summary_when_explicit() -> None:
+def test_stubborn_dsl_javadoc_summary_when_explicit() -> None:
     graph = _sample_graph()
     result = weave_stubborn_dsl(
         graph,

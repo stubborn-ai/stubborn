@@ -65,4 +65,4 @@ They complement each other. Stubborn does not replace java-ast-ssot for migratio
 
 ## Status
 
-**Beta `0.9.0b2` (Java-first)** — see [BETA.md](BETA.md).
+**Beta `0.9.0b3` (Java-first)** — see [BETA.md](BETA.md).

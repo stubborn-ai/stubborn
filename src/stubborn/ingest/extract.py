@@ -153,21 +153,13 @@ def _edges_from_relationships(symbol_info: scip_pb2.SymbolInformation) -> list[E
         if not relationship.symbol:
             continue
         if relationship.is_type_definition:
-            edges.append(
-                EdgeRecord(symbol_info.symbol, relationship.symbol, "type")
-            )
+            edges.append(EdgeRecord(symbol_info.symbol, relationship.symbol, "type"))
         if relationship.is_implementation:
-            edges.append(
-                EdgeRecord(symbol_info.symbol, relationship.symbol, "implementation")
-            )
+            edges.append(EdgeRecord(symbol_info.symbol, relationship.symbol, "implementation"))
         if relationship.is_reference:
-            edges.append(
-                EdgeRecord(symbol_info.symbol, relationship.symbol, "reference")
-            )
+            edges.append(EdgeRecord(symbol_info.symbol, relationship.symbol, "reference"))
         if relationship.is_definition:
-            edges.append(
-                EdgeRecord(symbol_info.symbol, relationship.symbol, "definition")
-            )
+            edges.append(EdgeRecord(symbol_info.symbol, relationship.symbol, "definition"))
     return edges
 
 

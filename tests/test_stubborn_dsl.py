@@ -11,14 +11,14 @@ from stubborn.config import ContextBudget
 from stubborn.graph.prune import prune_context
 from stubborn.ingest.scip import load_scip_index
 from stubborn.store.writer import IndexWriter
-from stubborn.weave.stubborn_dsl import weave_stubborn_dsl
 from stubborn.weave.dispatch import weave_context
 from stubborn.weave.java_stub import weave_java_stub
+from stubborn.weave.stubborn_dsl import weave_stubborn_dsl
 
 FIXTURE = Path(__file__).resolve().parents[1] / "examples" / "fixtures" / "minimal.json"
 
 
-def test_anchor_dsl_header_and_types(tmp_path: Path) -> None:
+def test_stubborn_dsl_header_and_types(tmp_path: Path) -> None:
     db = tmp_path / "symbols.db"
     IndexWriter(db).write(load_scip_index(FIXTURE))
 
@@ -43,7 +43,7 @@ def test_anchor_dsl_header_and_types(tmp_path: Path) -> None:
     assert "edges:" in text
 
 
-def test_anchor_dsl_more_compact_than_java_stub(tmp_path: Path) -> None:
+def test_stubborn_dsl_more_compact_than_java_stub(tmp_path: Path) -> None:
     db = tmp_path / "symbols.db"
     IndexWriter(db).write(load_scip_index(FIXTURE))
 
@@ -73,7 +73,7 @@ def test_dispatch_rejects_unknown_format() -> None:
         weave_context(graph, format="yaml")
 
 
-def test_api_get_context_anchor_dsl(tmp_path: Path) -> None:
+def test_api_get_context_stubborn_dsl(tmp_path: Path) -> None:
     db = tmp_path / "symbols.db"
     IndexWriter(db).write(load_scip_index(FIXTURE))
 

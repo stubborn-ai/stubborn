@@ -5,8 +5,6 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-import pytest
-
 from stubborn.ingest.models import EdgeRecord, IndexSnapshot, SymbolRecord
 from stubborn.store.writer import IndexWriter, init_db, read_info
 
@@ -18,10 +16,7 @@ def test_init_db_creates_schema(tmp_path: Path) -> None:
     conn = sqlite3.connect(db)
     try:
         tables = {
-            row[0]
-            for row in conn.execute(
-                "SELECT name FROM sqlite_master WHERE type='table'"
-            )
+            row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
         }
         assert "index_run" in tables
         assert "scip_symbol" in tables

@@ -8,7 +8,7 @@ from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
 
-from stubborn.config import ContextBudget, DEFAULT_CONTEXT_BUDGET
+from stubborn.config import DEFAULT_CONTEXT_BUDGET, ContextBudget
 
 _SIGNATURE_TYPE_RE = re.compile(r"\b([A-Z][\w]*)\b")
 
@@ -131,9 +131,7 @@ def prune_context(
     conn.row_factory = sqlite3.Row
     try:
         if index_run_id is None:
-            row = conn.execute(
-                "SELECT id FROM index_run ORDER BY id DESC LIMIT 1"
-            ).fetchone()
+            row = conn.execute("SELECT id FROM index_run ORDER BY id DESC LIMIT 1").fetchone()
             if row is None:
                 raise ValueError(f"No index runs found in {db_path}")
             index_run_id = row["id"]

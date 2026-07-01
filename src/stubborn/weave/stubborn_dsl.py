@@ -15,7 +15,6 @@ from stubborn.weave._shared import (
     sort_key,
     trim_for_token_budget,
 )
-from stubborn.weave.stubborn_dsl_llm import LLM_GUIDE_LINES
 from stubborn.weave.members import (
     format_stubborn_dsl_doc_lines,
     method_members_for_type,
@@ -24,6 +23,7 @@ from stubborn.weave.members import (
     type_includes_method_signatures,
 )
 from stubborn.weave.options import DEFAULT_WEAVE_OPTIONS, WeaveOptions
+from stubborn.weave.stubborn_dsl_llm import LLM_GUIDE_LINES
 from stubborn.weave.types import WeaveResult
 
 _STUBBORN_DSL_VERSION = "1.0"
@@ -121,16 +121,12 @@ def weave_stubborn_dsl(
     if target_symbol is not None and _is_method_like(target_symbol):
         stable_ids.add(target_symbol.stable_id)
 
-    pruned_edges = [
-        edge for edge in graph.edges if edge[0] in stable_ids and edge[1] in stable_ids
-    ]
+    pruned_edges = [edge for edge in graph.edges if edge[0] in stable_ids and edge[1] in stable_ids]
     if pruned_edges:
         lines.append("edges:")
         for from_id, to_id, edge_kind in sorted(pruned_edges):
             abbrev = _EDGE_ABBREV.get(edge_kind, edge_kind)
-            lines.append(
-                f"  {abbrev} {short_target_name(from_id)} -> {short_target_name(to_id)}"
-            )
+            lines.append(f"  {abbrev} {short_target_name(from_id)} -> {short_target_name(to_id)}")
 
     text = "\n".join(lines).rstrip() + "\n"
     return WeaveResult(

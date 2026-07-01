@@ -55,8 +55,7 @@ def load_scip_index(
         return _load_scip_protobuf(path, project_root=project_root)
 
     raise ValueError(
-        f"Unsupported SCIP input: {path}. "
-        "Use .scip, .scip.ndjson, or .json (fixture)."
+        f"Unsupported SCIP input: {path}. Use .scip, .scip.ndjson, or .json (fixture)."
     )
 
 

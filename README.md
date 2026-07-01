@@ -2,7 +2,7 @@
 
 **Deterministic code context from symbol graphs — not vector search.**
 
-> **Status: Beta (Java-first)** — release **`0.9.0b2`** · [BETA.md](docs/BETA.md)
+> **Status: Beta (Java-first)** — release **`0.9.0b3`** · [BETA.md](docs/BETA.md) · [CHANGELOG](CHANGELOG.md)
 
 Stubborn compiles a live codebase into **type-safe, privacy-preserving stub text** for LLMs and agents. It uses [SCIP](https://github.com/sourcegraph/scip) symbol indexes and dependency graphs instead of vector chunking, so context is **stubborn**: exact, reproducible, and stripped of method bodies.
 
@@ -57,6 +57,19 @@ From source (development):
 git clone https://github.com/stubborn-ai/stubborn.git
 cd stubborn
 pip install -e ".[dev]"
+```
+
+### Try in 30 seconds (no Java required)
+
+Uses the bundled minimal SCIP fixture — no JDK, Maven, or scip-java needed:
+
+```bash
+pip install stubborn-stub
+stubborn index --scip examples/fixtures/minimal.scip --out /tmp/symbols.db
+stubborn info /tmp/symbols.db
+stubborn context /tmp/symbols.db \
+  --target "semanticdb maven com/example/OrderService#" \
+  --out /tmp/order-service.stub.java
 ```
 
 ## Quick start
@@ -157,7 +170,8 @@ SQLite schema: [`src/stubborn/store/schema/v1.sql`](src/stubborn/store/schema/v1
 | **0.7** | [Stubborn-DSL](docs/STUBBORN-DSL.md) weaver (`--format stubborn-dsl`) |
 | **0.8** | Java-first beta track — [BETA.md](docs/BETA.md), demo-spring cases |
 | **0.9** | Method signatures, [STUBBORN-DSL-GUIDE](docs/STUBBORN-DSL-GUIDE.md) |
-| **0.9.0b2** (now) | **Java-first Beta** — classifier + weave granularity switches |
+| **0.9.0b3** (now) | **Standalone cleanup** — rename debt removed, ruff CI, CLI smoke tests |
+| **0.9.0b2** | **Java-first Beta** — classifier + weave granularity switches |
 | **1.0** | Multi-language E2E, stable API |
 
 ## Documentation
@@ -190,6 +204,8 @@ See [docs/POSITIONING.md](docs/POSITIONING.md).
 ```bash
 pip install -e ".[dev]"
 pytest -v
+ruff check src tests
+ruff format --check src tests
 ```
 
 MCP server:

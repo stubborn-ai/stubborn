@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "stubborn-stub"
-version = "0.9.0b2"
+version = "0.9.0b3"
 description = "Deterministic code context from symbol graphs — not vector search"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -39,7 +39,7 @@ dependencies = [
 
 [project.optional-dependencies]
 mcp = ["mcp>=1.6,<2"]
-dev = ["pytest>=8.0,<9.0", "mcp>=1.6,<2"]
+dev = ["pytest>=8.0,<9.0", "mcp>=1.6,<2", "ruff>=0.9,<1"]
 
 [project.scripts]
 stubborn = "stubborn.cli:app"
@@ -63,3 +63,18 @@ PyPI = "https://pypi.org/project/stubborn-stub/"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src", "tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["F", "I"]
+ignore = ["B008"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/stubborn/ingest/scip_proto/scip_pb2.py" = ["ALL"]
+
+[tool.ruff.format]
+exclude = ["src/stubborn/ingest/scip_proto/scip_pb2.py"]

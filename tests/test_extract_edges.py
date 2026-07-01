@@ -4,11 +4,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from stubborn.graph.prune import prune_context
 from stubborn.config import ContextBudget
+from stubborn.graph.prune import prune_context
 from stubborn.ingest.extract import parsed_index_to_snapshot
 from stubborn.ingest.scip import load_scip_index
-from stubborn.ingest.scip_proto import scip_pb2
 from stubborn.ingest.stream import parse_index_bytes
 from stubborn.store.writer import IndexWriter
 from stubborn.weave.java_stub import weave_java_stub
@@ -22,9 +21,7 @@ ORDER_SERVICE = (
 
 
 def _edge_pairs(snapshot) -> set[tuple[str, str, str]]:
-    return {
-        (e.from_stable_id, e.to_stable_id, e.edge_kind) for e in snapshot.edges
-    }
+    return {(e.from_stable_id, e.to_stable_id, e.edge_kind) for e in snapshot.edges}
 
 
 def test_signature_edges_add_return_and_parameter_types() -> None:

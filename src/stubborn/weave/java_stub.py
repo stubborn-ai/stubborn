@@ -81,9 +81,7 @@ def weave_java_stub(
             lines.append("")
 
     stable_ids = {s.stable_id for s in selected}
-    pruned_edges = [
-        edge for edge in graph.edges if edge[0] in stable_ids and edge[1] in stable_ids
-    ]
+    pruned_edges = [edge for edge in graph.edges if edge[0] in stable_ids and edge[1] in stable_ids]
     if pruned_edges:
         lines.append("// --- dependencies ---")
         for from_id, to_id, edge_kind in sorted(pruned_edges):
@@ -110,7 +108,11 @@ def _is_constructor(symbol: PrunedSymbol) -> bool:
 
 def _is_method(symbol: PrunedSymbol) -> bool:
     kind = (symbol.kind or "").lower()
-    return kind in _METHOD_KINDS or "#" in symbol.stable_id and "(" in symbol.stable_id.split("#", 1)[-1]
+    return (
+        kind in _METHOD_KINDS
+        or "#" in symbol.stable_id
+        and "(" in symbol.stable_id.split("#", 1)[-1]
+    )
 
 
 def _is_annotation_only(symbol: PrunedSymbol) -> bool:

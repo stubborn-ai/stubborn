@@ -92,7 +92,14 @@ def type_includes_method_signatures(
 
 
 def _strip_javadoc_line(line: str) -> str:
-    return line.strip().removeprefix("/**").removeprefix("*/").removeprefix("*").removesuffix("*/").strip()
+    return (
+        line.strip()
+        .removeprefix("/**")
+        .removeprefix("*/")
+        .removeprefix("*")
+        .removesuffix("*/")
+        .strip()
+    )
 
 
 def javadoc_first_line(documentation: str | None) -> str | None:
@@ -111,7 +118,9 @@ def javadoc_lines(documentation: str | None, level: str) -> list[str]:
     if level == "summary":
         line = javadoc_first_line(documentation)
         return [line] if line else []
-    return [stripped for line in documentation.splitlines() if (stripped := _strip_javadoc_line(line))]
+    return [
+        stripped for line in documentation.splitlines() if (stripped := _strip_javadoc_line(line))
+    ]
 
 
 def format_java_javadoc_prefix(documentation: str | None, level: str) -> str:

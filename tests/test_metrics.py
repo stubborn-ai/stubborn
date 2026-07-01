@@ -6,9 +6,9 @@ from pathlib import Path
 
 from stubborn.config import ContextBudget
 from stubborn.graph.prune import PrunedGraph, PrunedSymbol
-from stubborn.metrics import collect_source_stats, compute_compression
-from stubborn.store.writer import IndexWriter
 from stubborn.ingest.scip import load_scip_index
+from stubborn.metrics import compute_compression
+from stubborn.store.writer import IndexWriter
 from stubborn.tokens import estimate_tokens
 from stubborn.weave.java_stub import weave_java_stub
 

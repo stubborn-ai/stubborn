@@ -6,9 +6,13 @@ from typing import Any
 
 from stubborn.api import (
     get_context as build_context,
+)
+from stubborn.api import (
     get_index_info,
-    get_metrics as build_metrics,
     list_index_symbols,
+)
+from stubborn.api import (
+    get_metrics as build_metrics,
 )
 from stubborn.weave.stubborn_dsl_llm import llm_guide_text
 

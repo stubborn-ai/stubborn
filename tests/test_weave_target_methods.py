@@ -31,7 +31,7 @@ def test_order_service_type_includes_method_signatures() -> None:
     assert "cancelOrder(UUID id)" in text
 
 
-def test_order_service_anchor_dsl_includes_members_block() -> None:
+def test_order_service_stubborn_dsl_includes_members_block() -> None:
     result = get_context(TARGET, db_path=DB_PATH, format="stubborn-dsl")
     assert "members:" in result.text
     assert "m OrderService.payOrder" in result.text

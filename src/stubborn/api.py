@@ -9,7 +9,7 @@ from typing import Any
 from stubborn.config import ContextBudget
 from stubborn.graph.prune import prune_context
 from stubborn.metrics import compute_compression
-from stubborn.store.reader import SymbolRecord, list_symbols, resolve_db_path
+from stubborn.store.reader import list_symbols, resolve_db_path
 from stubborn.store.writer import IndexInfo, read_info
 from stubborn.weave.dispatch import weave_context
 from stubborn.weave.options import WeaveOptions
