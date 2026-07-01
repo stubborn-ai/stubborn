@@ -16,7 +16,7 @@ try:
     from mcp.server.fastmcp import FastMCP
 except ImportError as exc:  # pragma: no cover - exercised via optional extra
     raise ImportError(
-        "MCP support requires the mcp package. Install with: pip install 'stubborn[mcp]'"
+        "MCP support requires the mcp package. Install with: pip install 'stubborn-stub[mcp]'"
     ) from exc
 
 mcp = FastMCP(

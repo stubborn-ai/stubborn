@@ -5,6 +5,12 @@ Stubborn exposes three MCP tools over **stdio** for Cursor, Claude Desktop, and 
 ## Install
 
 ```bash
+pip install stubborn-stub[mcp]
+```
+
+From a git checkout:
+
+```bash
 pip install -e ".[mcp]"
 # or for development
 pip install -e ".[dev]"

@@ -237,6 +237,6 @@ def mcp_cmd() -> None:
         from stubborn.mcp_server import main as run_mcp
     except ImportError as exc:
         raise typer.BadParameter(
-            "MCP support requires: pip install 'stubborn[mcp]'"
+            "MCP support requires: pip install 'stubborn-stub[mcp]'"
         ) from exc
     run_mcp()

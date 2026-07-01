@@ -45,6 +45,14 @@ See [docker/README.md](docker/README.md).
 
 ## Installation
 
+**PyPI:** `stubborn-stub` · **CLI:** `stubborn` (alias: `stub`)
+
+```bash
+pip install stubborn-stub[mcp]
+```
+
+From source (development):
+
 ```bash
 git clone https://github.com/stubborn-ai/stubborn.git
 cd stubborn

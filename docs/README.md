@@ -1,6 +1,6 @@
 # Documentation index
 
-**Package version:** `0.9.0b2` (Beta)
+**PyPI package:** `stubborn-stub` · **version:** `0.9.0b2` (Beta) · **CLI:** `stubborn`
 
 | Doc | Audience | Contents |
 |-----|----------|----------|
