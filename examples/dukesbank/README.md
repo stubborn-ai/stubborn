@@ -2,17 +2,18 @@
 
 Indexes the **external** [Duke's Bank](https://github.com/jiananwang/dukesbank) bank module via `scip-java` and emits LLM context for migration tasks (e.g. `AccountControllerBean` → Spring service).
 
-This is the **formal runbook** companion to [migration-bridge](../migration-bridge/) and [migration-hub DUKESBANK-DEMO Step 7](https://github.com/anchor-migration/migration-hub/blob/main/docs/DUKESBANK-DEMO.md#step-7--llm-context-stubborn).
+This is the **formal runbook** for Duke's Bank LLM context. See also [migration-bridge](../migration-bridge/) and [INTEGRATION.md](../../docs/INTEGRATION.md).
 
 ## Layout contract
 
 ```
 github/   (or C:\github\)
 ├── stubborn-ai/stubborn/examples/dukesbank/   ← this folder (metadata output only)
-├── anchor-migration/demo-dukesbank/scripts/run-stubborn-context.ps1
 └── dukesbank/
     └── src/j2eetutorial14/examples/bank/     ← Java sources indexed by scip-java
 ```
+
+Optional cross-program runbook: [anchor-migration/demo-dukesbank](https://github.com/anchor-migration/demo-dukesbank) Step 7.
 
 ## Quick start (host)
 
@@ -45,5 +46,4 @@ Set `DUKESBANK_ROOT` if the bank module is not at `../../dukesbank/...` relative
 
 ## Program integration
 
-- [ADR-010](https://github.com/anchor-migration/migration-hub/blob/main/docs/ADR-010-anchor-stubborn-integration.md) — horizontal LLM context
-- [demo-dukesbank runbook](https://github.com/anchor-migration/demo-dukesbank#optional--llm-context-stubborn) — optional Step 7 after SSOT E2E
+- [INTEGRATION.md](../../docs/INTEGRATION.md) — optional anchor-migration program integration

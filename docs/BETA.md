@@ -32,7 +32,7 @@ Pre-beta (`0.9.0a1`) completed the checklist; this tag flips the PyPI classifier
 ### Agent / docs
 
 - [x] STUBBORN-DSL grammar, LLM snippet, format guide
-- [x] migration-hub ADR-010 synced
+- [x] PyPI `stubborn-stub` published (`0.9.0b2`)
 
 ### Quality bar
 
@@ -45,7 +45,7 @@ Pre-beta (`0.9.0a1`) completed the checklist; this tag flips the PyPI classifier
 
 | Item | Target |
 |------|--------|
-| PyPI publish | Optional post-beta |
+| PyPI publish | **Done** — `pip install stubborn-stub` |
 | scip-clang / TypeScript E2E | v1.0+ |
 | Method signatures on non-target types | v1.0+ — use `--member-signatures neighbors|all` (beta) |
 | Rich Javadoc in output | v1.0+ — use `--javadoc full` (beta) |

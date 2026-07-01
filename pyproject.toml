@@ -16,8 +16,8 @@ keywords = [
     "llm",
     "stub",
     "dependency-graph",
-    "rag",
-    "migration",
+    "symbol-graph",
+    "mcp",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -57,6 +57,8 @@ Homepage = "https://github.com/stubborn-ai/stubborn"
 Repository = "https://github.com/stubborn-ai/stubborn"
 Issues = "https://github.com/stubborn-ai/stubborn/issues"
 Documentation = "https://github.com/stubborn-ai/stubborn#readme"
+Changelog = "https://github.com/stubborn-ai/stubborn/releases"
+PyPI = "https://pypi.org/project/stubborn-stub/"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

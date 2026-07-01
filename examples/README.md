@@ -8,7 +8,7 @@ End-to-end scenarios for Stubborn.
 | [fixtures](fixtures/) | Active | Minimal JSON / binary SCIP for unit tests |
 | [spring-petclinic](spring-petclinic/) | **Active** | Scale-up E2E vs official PetClinic (~375 symbols, ~90% savings) |
 | [dukesbank](dukesbank/) | **Active** | Duke's Bank Step 7 — external clone + E2E |
-| [migration-bridge](migration-bridge/) | Active | Minimal anchor-migration consumer sketch |
+| [migration-bridge](migration-bridge/) | Active | Optional anchor-migration consumer sketch |
 
 ## Output formats
 

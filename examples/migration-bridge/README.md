@@ -1,6 +1,6 @@
-# Migration bridge example
+# Optional: anchor-migration consumer pattern
 
-How [anchor-migration](https://github.com/anchor-migration/migration-hub) can consume Stubborn without tight coupling.
+How the [anchor-migration](https://github.com/anchor-migration/migration-hub) program can consume Stubborn without tight coupling. **Not required** for general Stubborn use.
 
 ## Scenario
 

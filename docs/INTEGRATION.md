@@ -1,6 +1,6 @@
-# Integration with anchor-migration
+# Optional: anchor-migration program
 
-Stubborn is a **horizontal capability**. The migration program is one consumer, not the owner.
+Stubborn is a **standalone** product. The [anchor-migration](https://github.com/anchor-migration/migration-hub) program is one optional consumer — not the owner of this repo.
 
 ## When migration uses Stubborn
 
@@ -52,7 +52,7 @@ Stubborn is **not** drawn inside migration-hub Layers 1–4. It sits above them 
 
 ## Program contract
 
-Integration is documented in [migration-hub ADR-010](https://github.com/anchor-migration/migration-hub/blob/main/docs/ADR-010-anchor-stubborn-integration.md). This file remains repo-local workflow detail.
+Cross-program contract (external): [migration-hub ADR-010](https://github.com/anchor-migration/migration-hub/blob/main/docs/ADR-010-anchor-stubborn-integration.md). This file is the repo-local summary.
 
 ## CI hooks (shipped)
 

@@ -104,5 +104,4 @@ If the CLI is not on `PATH`, use the module entry:
 ## Related
 
 - [STUBBORN-DSL.md](STUBBORN-DSL.md) — compact output format
-- [INTEGRATION.md](INTEGRATION.md) — how migration programs consume Stubborn
-- [migration-hub ADR-010](https://github.com/anchor-migration/migration-hub/blob/main/docs/ADR-010-anchor-stubborn-integration.md)
+- [INTEGRATION.md](INTEGRATION.md) — optional anchor-migration program integration

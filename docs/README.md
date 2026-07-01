@@ -5,8 +5,8 @@
 | Doc | Audience | Contents |
 |-----|----------|----------|
 | [BETA.md](BETA.md) | Release owners | Java-first beta checklist and known limitations |
-| [POSITIONING.md](POSITIONING.md) | Architects | What Stubborn is / is not; Anchor family placement |
-| [INTEGRATION.md](INTEGRATION.md) | Migration teams | How migration-hub consumes Stubborn |
+| [POSITIONING.md](POSITIONING.md) | Architects | What Stubborn is / is not; ecosystem placement |
+| [INTEGRATION.md](INTEGRATION.md) | Optional adopters | How anchor-migration consumes Stubborn |
 | [SCIP-INGEST.md](SCIP-INGEST.md) | Index authors | Supported SCIP formats and ingest behavior |
 | [MCP.md](MCP.md) | Agent / Cursor users | MCP tools, config, workflows |
 | [STUBBORN-DSL-GUIDE.md](STUBBORN-DSL-GUIDE.md) | Prompt authors | When to use java-stub vs stubborn-dsl |
@@ -30,9 +30,9 @@ Both formats share the same prune step and privacy contract (declarations only, 
 |------|-------------|
 | [examples/demo-spring](../examples/demo-spring/) | Primary in-repo E2E (~14 files, ~81% savings) |
 | [examples/spring-petclinic](../examples/spring-petclinic/) | Scale-up E2E vs upstream PetClinic (~375 symbols, ~90% savings) |
-| [examples/migration-bridge](../examples/migration-bridge/) | Legacy migration consumer pattern |
+| [examples/migration-bridge](../examples/migration-bridge/) | Optional anchor-migration consumer pattern |
 | [docker/README.md](../docker/README.md) | Reproducible Docker toolchain |
 
 ## External
 
-- [migration-hub ADR-010](https://github.com/anchor-migration/migration-hub/blob/main/docs/ADR-010-anchor-stubborn-integration.md) — program integration contract
+- [INTEGRATION.md](INTEGRATION.md) — optional anchor-migration program integration

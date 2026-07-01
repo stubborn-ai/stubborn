@@ -19,13 +19,13 @@ jobs:
         run: docker compose run --rm e2e
 
       - name: Verify OrderService context guard
-        run: docker compose run --rm shell python /opt/stubborn/scripts/verify_demo_context.py
+        run: docker compose run --rm shell bash -lc "pip install -q -e /opt/stubborn && python /opt/stubborn/scripts/verify_demo_context.py"
 
       - name: Verify OrderController context guard
-        run: docker compose run --rm shell python /opt/stubborn/scripts/verify_controller_context.py
+        run: docker compose run --rm shell bash -lc "pip install -q -e /opt/stubborn && python /opt/stubborn/scripts/verify_controller_context.py"
 
       - name: Verify payOrder context guard
-        run: docker compose run --rm shell python /opt/stubborn/scripts/verify_pay_flow_context.py
+        run: docker compose run --rm shell bash -lc "pip install -q -e /opt/stubborn && python /opt/stubborn/scripts/verify_pay_flow_context.py"
 
       - uses: actions/upload-artifact@v4
         with:

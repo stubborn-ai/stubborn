@@ -6,7 +6,7 @@
 
 Stubborn compiles a live codebase into **type-safe, privacy-preserving stub text** for LLMs and agents. It uses [SCIP](https://github.com/sourcegraph/scip) symbol indexes and dependency graphs instead of vector chunking, so context is **stubborn**: exact, reproducible, and stripped of method bodies.
 
-Independent project under [stubborn-ai](https://github.com/stubborn-ai). **Not migration-only** — any live project benefits. Optional integration with [anchor-migration](https://github.com/anchor-migration/migration-hub) (see [examples/migration-bridge](examples/migration-bridge/)).
+Independent project under [stubborn-ai](https://github.com/stubborn-ai). Works with any SCIP-indexed codebase — Spring, monorepos, agents, and CI.
 
 ## Why Stubborn?
 
@@ -25,7 +25,7 @@ Independent project under [stubborn-ai](https://github.com/stubborn-ai). **Not m
 - **Copilot / Cursor agents** — `getContext(class)` before code generation
 - **Large-repo onboarding** — dependency skeleton for one target symbol
 - **PR semantic audit** — `diff` two SCIP indexes after a refactor
-- **Legacy migration** — optional consumer of [anchor-migration](https://github.com/anchor-migration/migration-hub) (see [examples/migration-bridge](examples/migration-bridge/))
+- **Refactor / legacy modernization** — scoped context for large Java estates (see [examples/migration-bridge](examples/migration-bridge/))
 
 ## Requirements
 
@@ -111,7 +111,7 @@ stubborn diff ./metadata/before.db ./metadata/after.db
 ### 5. MCP server (Cursor / agents)
 
 ```bash
-pip install -e ".[mcp]"
+pip install stubborn-stub[mcp]
 export STUBBORN_DB=./metadata/symbols.db
 stubborn mcp
 ```
@@ -172,16 +172,18 @@ SQLite schema: [`src/stubborn/store/schema/v1.sql`](src/stubborn/store/schema/v1
 | [docs/SCIP-INGEST.md](docs/SCIP-INGEST.md) | SCIP ingest |
 | [examples/README.md](examples/README.md) | E2E examples |
 
-## Related projects
+## Optional ecosystem integrations
+
+Stubborn is standalone. Some teams also use it alongside the [anchor-migration](https://github.com/anchor-migration/migration-hub) program:
 
 | Repo | Role |
 |------|------|
-| [db-metadata](https://github.com/anchor-migration/db-metadata) | Database schema SSOT |
-| [java-ast-ssot](https://github.com/anchor-migration/java-ast-ssot) | Full Java AST SSOT (human + rewrite) |
 | **stubborn** (this repo) | **LLM context compiler** |
-| [migration-hub](https://github.com/anchor-migration/migration-hub) | Program docs; [ADR-010](https://github.com/anchor-migration/migration-hub/blob/main/docs/ADR-010-anchor-stubborn-integration.md) integration contract |
+| [migration-hub](https://github.com/anchor-migration/migration-hub) | Optional program docs — [integration guide](docs/INTEGRATION.md) |
+| [java-ast-ssot](https://github.com/anchor-migration/java-ast-ssot) | Full Java AST SSOT (complementary) |
+| [db-metadata](https://github.com/anchor-migration/db-metadata) | Database schema SSOT (complementary) |
 
-See [docs/POSITIONING.md](docs/POSITIONING.md) and [docs/INTEGRATION.md](docs/INTEGRATION.md).
+See [docs/POSITIONING.md](docs/POSITIONING.md).
 
 ## Development
 

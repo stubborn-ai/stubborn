@@ -25,7 +25,7 @@ if (-not $BankRoot) {
     $BankRoot = Join-Path $RepoRoot "..\..\dukesbank\src\j2eetutorial14\examples\bank"
 }
 if (-not (Test-Path $BankRoot)) {
-    throw "Duke's Bank module not found. Clone dukesbank as sibling of anchor-migration or pass -BankRoot."
+    throw "Duke's Bank module not found. Clone dukesbank as a sibling of this repo (or pass -BankRoot)."
 }
 
 function Assert-Command($Name) {

@@ -33,5 +33,6 @@ examples/**/upstream/
 
 # pytest
 .pytest_cache/
+pytest-cache-files-*/
 .coverage
 htmlcov/

@@ -119,10 +119,10 @@ def format_java_javadoc_prefix(documentation: str | None, level: str) -> str:
     return "\n".join(lines) + ("\n" if lines else "")
 
 
-def quote_anchor_doc(text: str) -> str:
+def quote_stubborn_dsl_doc(text: str) -> str:
     escaped = text.replace("\\", "\\\\").replace('"', '\\"')
     return f'"{escaped}"'
 
 
 def format_stubborn_dsl_doc_lines(documentation: str | None, level: str) -> list[str]:
-    return [f"  doc {quote_anchor_doc(line)}" for line in javadoc_lines(documentation, level)]
+    return [f"  doc {quote_stubborn_dsl_doc(line)}" for line in javadoc_lines(documentation, level)]

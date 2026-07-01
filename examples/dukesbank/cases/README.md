@@ -1,6 +1,6 @@
 # Duke's Bank context cases
 
-Validated against an external `dukesbank` clone (sibling of `anchor-migration`). See [../README.md](../README.md).
+Validated against an external `dukesbank` clone (sibling of this repo). See [../README.md](../README.md).
 
 | Case | Target | Doc |
 |------|--------|-----|

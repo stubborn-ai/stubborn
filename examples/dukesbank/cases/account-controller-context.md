@@ -8,7 +8,7 @@ Typical migration task: Session→Service or CMP→JPA recipe design for the acc
 
 ## Prerequisites
 
-External [Duke's Bank](https://github.com/jiananwang/dukesbank) clone as **sibling** of `anchor-migration`:
+External [Duke's Bank](https://github.com/jiananwang/dukesbank) clone as **sibling** of this repo:
 
 ```
 github/
@@ -79,4 +79,4 @@ Target: **≥70%** token savings vs full `src/` tree (legacy EJB module is large
 
 - Bank module uses Maven (`pom.xml`) for `scip-java` indexing; Ant `build.xml` remains for legacy deploy.
 - Stable id encoding varies by SCIP/Maven coordinates — E2E scripts resolve by `display_name`.
-- This case is **horizontal** to SSOT → rewrite → parity (Steps 1–6 in [DUKESBANK-DEMO](https://github.com/anchor-migration/migration-hub/blob/main/docs/DUKESBANK-DEMO.md)).
+- Optional cross-program context: see [INTEGRATION.md](../../docs/INTEGRATION.md) and [migration-bridge](../../migration-bridge/).
