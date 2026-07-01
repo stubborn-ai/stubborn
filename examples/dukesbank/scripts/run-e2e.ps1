@@ -5,7 +5,7 @@
 
 .DESCRIPTION
   Expects sibling layout:
-    .../anchor-migration/anchor-stubborn/examples/dukesbank/  (this script)
+    .../stubborn-ai/stubborn/examples/dukesbank/  (this script)
     .../dukesbank/src/j2eetutorial14/examples/bank/
 
 .EXAMPLE

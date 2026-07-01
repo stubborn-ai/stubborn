@@ -12,7 +12,7 @@ External [Duke's Bank](https://github.com/jiananwang/dukesbank) clone as **sibli
 
 ```
 github/
-├── anchor-migration/anchor-stubborn/
+├── stubborn-ai/stubborn/
 └── dukesbank/src/j2eetutorial14/examples/bank/
 ```
 

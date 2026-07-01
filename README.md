@@ -1,16 +1,16 @@
-# Anchor-Stubborn
+# Stubborn
 
 **Deterministic code context from symbol graphs — not vector search.**
 
 > **Status: Beta (Java-first)** — release **`0.9.0b1`** · [BETA.md](docs/BETA.md)
 
-Anchor-Stubborn compiles a live codebase into **type-safe, privacy-preserving stub text** for LLMs and agents. It uses [SCIP](https://github.com/sourcegraph/scip) symbol indexes and dependency graphs instead of vector chunking, so context is **stubborn**: exact, reproducible, and stripped of method bodies.
+Stubborn compiles a live codebase into **type-safe, privacy-preserving stub text** for LLMs and agents. It uses [SCIP](https://github.com/sourcegraph/scip) symbol indexes and dependency graphs instead of vector chunking, so context is **stubborn**: exact, reproducible, and stripped of method bodies.
 
-Part of the [Anchor](https://github.com/anchor-migration/migration-hub) family. **Not migration-only** — any live project benefits.
+Independent project under [stubborn-ai](https://github.com/stubborn-ai). **Not migration-only** — any live project benefits. Optional integration with [anchor-migration](https://github.com/anchor-migration/migration-hub) (see [examples/migration-bridge](examples/migration-bridge/)).
 
 ## Why Stubborn?
 
-| Problem | Vector RAG | Anchor-Stubborn |
+| Problem | Vector RAG | Stubborn |
 |---------|------------|---------------|
 | Type hallucinations | Common | Stub signatures from symbol graph |
 | Token cost | Full files / arbitrary chunks | Pruned declaration stubs (~80–90% savings target) |
@@ -46,8 +46,8 @@ See [docker/README.md](docker/README.md).
 ## Installation
 
 ```bash
-git clone https://github.com/anchor-migration/anchor-stubborn.git
-cd anchor-stubborn
+git clone https://github.com/stubborn-ai/stubborn.git
+cd stubborn
 pip install -e ".[dev]"
 ```
 
@@ -170,7 +170,7 @@ SQLite schema: [`src/anchor_stubborn/store/schema/v1.sql`](src/anchor_stubborn/s
 |------|------|
 | [db-metadata](https://github.com/anchor-migration/db-metadata) | Database schema SSOT |
 | [java-ast-ssot](https://github.com/anchor-migration/java-ast-ssot) | Full Java AST SSOT (human + rewrite) |
-| **anchor-stubborn** | **LLM context compiler** (this repo) |
+| **stubborn** (this repo) | **LLM context compiler** |
 | [migration-hub](https://github.com/anchor-migration/migration-hub) | Program docs; [ADR-010](https://github.com/anchor-migration/migration-hub/blob/main/docs/ADR-010-anchor-stubborn-integration.md) integration contract |
 
 See [docs/POSITIONING.md](docs/POSITIONING.md) and [docs/INTEGRATION.md](docs/INTEGRATION.md).

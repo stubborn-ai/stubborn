@@ -8,9 +8,8 @@ This is the **formal runbook** companion to [migration-bridge](../migration-brid
 
 ```
 github/   (or C:\github\)
-├── anchor-migration/
-│   ├── anchor-stubborn/examples/dukesbank/   ← this folder (metadata output only)
-│   └── demo-dukesbank/scripts/run-stubborn-context.ps1
+├── stubborn-ai/stubborn/examples/dukesbank/   ← this folder (metadata output only)
+├── anchor-migration/demo-dukesbank/scripts/run-stubborn-context.ps1
 └── dukesbank/
     └── src/j2eetutorial14/examples/bank/     ← Java sources indexed by scip-java
 ```

@@ -30,15 +30,17 @@ Target-type **method signatures** in both formats since v0.9 (default `target`; 
 - Not migration-only
 - Not a replacement for SCIP (SCIP is the machine index; Stubborn is the LLM-facing compiler output)
 
-## Anchor family placement
+## Ecosystem placement
 
 ```
-anchor-migration org
+stubborn-ai
+└── stubborn           → LLM context compiler (any live repo)  ← this repo
+
+anchor-migration (optional consumer)
 ├── db-metadata        → data layer SSOT
 ├── java-ast-ssot      → full Java AST SSOT (migration depth)
-├── anchor-stubborn    → LLM context compiler (any live repo)  ← this
 ├── rewrite-recipes    → OpenRewrite migration recipes
-└── migration-hub      → program docs (Stubborn = horizontal, not a pipeline layer)
+└── migration-hub      → program docs (ADR-010 integration contract)
 ```
 
 **Same philosophy** as db-metadata: SQLite snapshots, stable IDs, reconcile reports.  

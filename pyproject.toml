@@ -56,10 +56,10 @@ packages = ["src/anchor_stubborn"]
 include = ["src/anchor_stubborn", "README.md", "LICENSE"]
 
 [project.urls]
-Homepage = "https://github.com/anchor-migration/anchor-stubborn"
-Repository = "https://github.com/anchor-migration/anchor-stubborn"
-Issues = "https://github.com/anchor-migration/anchor-stubborn/issues"
-Documentation = "https://github.com/anchor-migration/anchor-stubborn#readme"
+Homepage = "https://github.com/stubborn-ai/stubborn"
+Repository = "https://github.com/stubborn-ai/stubborn"
+Issues = "https://github.com/stubborn-ai/stubborn/issues"
+Documentation = "https://github.com/stubborn-ai/stubborn#readme"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
