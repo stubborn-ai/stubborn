@@ -74,9 +74,17 @@ def compute_compression(
     budget: ContextBudget | None = None,
     format: str = "java-stub",
     options: WeaveOptions | None = None,
+    workspace: str | None = None,
+    repo_key: str | None = None,
 ) -> CompressionReport:
     budget = budget or ContextBudget()
-    graph = prune_context(db_path, target_stable_id, budget=budget)
+    graph = prune_context(
+        db_path,
+        target_stable_id,
+        budget=budget,
+        workspace=workspace,
+        repo_key=repo_key,
+    )
     stub = weave_context(
         graph,
         format=format,

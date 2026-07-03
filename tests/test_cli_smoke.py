@@ -95,3 +95,36 @@ def test_cli_index_merge(tmp_path: Path) -> None:
     info = runner.invoke(app, ["info", str(db)])
     assert info.exit_code == 0
     assert "Mode:           merged" in info.stdout
+
+
+def test_cli_workspace_scope(tmp_path: Path) -> None:
+    runner = CliRunner()
+    db = tmp_path / "symbols.db"
+
+    index = runner.invoke(
+        app,
+        [
+            "index",
+            "--scip",
+            str(FIXTURE_JSON),
+            "--out",
+            str(db),
+            "--workspace",
+            "acme",
+            "--repo",
+            "orders",
+        ],
+    )
+    assert index.exit_code == 0, index.stdout + index.stderr
+
+    info = runner.invoke(app, ["info", str(db)])
+    assert info.exit_code == 0, info.stdout + info.stderr
+    assert "Workspace:      acme" in info.stdout
+    assert "Repo:           orders" in info.stdout
+
+    listed = runner.invoke(
+        app,
+        ["list-symbols", str(db), "--workspace", "acme", "--query", "OrderService"],
+    )
+    assert listed.exit_code == 0, listed.stdout + listed.stderr
+    assert "OrderService" in listed.stdout

@@ -50,7 +50,7 @@ Optional **downstream** LLM use (Cursor, Copilot, custom agents) is out of scope
 A **boundary protocol** is a published contract at each tool boundary:
 
 1. **Input** — supported SCIP formats ([SCIP-INGEST.md](SCIP-INGEST.md))
-2. **Store** — schema v1 ([`v1.sql`](../src/stubborn/store/schema/v1.sql))
+2. **Store** — schema v3 ([`v3.sql`](../src/stubborn/store/schema/v3.sql))
 3. **Output** — weave formats and version headers ([STUBBORN-DSL.md](STUBBORN-DSL.md))
 4. **Agent surface** — MCP tool schemas ([MCP.md](MCP.md))
 5. **Errors** — fail-closed CLI; missing symbols or budget overrun surfaced explicitly

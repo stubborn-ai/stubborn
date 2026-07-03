@@ -13,7 +13,8 @@ from stubborn.ingest.scip import load_scip_index
 from stubborn.metrics import compute_compression
 from stubborn.reconcile.diff import format_report, reconcile
 from stubborn.reconcile.entities import SymbolEntity
-from stubborn.store.writer import IndexWriter, init_db, read_info
+from stubborn.store.reader import list_symbols
+from stubborn.store.writer import IndexWriter, init_db, read_info, register_repo
 from stubborn.weave.dispatch import weave_context
 from stubborn.weave.options import WeaveOptions
 
@@ -22,6 +23,36 @@ app = typer.Typer(
     help="Deterministic code context from symbol graphs — not vector search.",
     no_args_is_help=True,
 )
+workspace_app = typer.Typer(help="Manage multi-repo workspace metadata.")
+app.add_typer(workspace_app, name="workspace")
+
+
+@workspace_app.command("init")
+def workspace_init_cmd(
+    db_path: Path = typer.Option(..., "--db", help="SQLite symbol graph file path"),
+) -> None:
+    """Initialize a workspace-capable symbol graph database."""
+    init_db(db_path)
+    typer.echo(f"Initialized workspace database {db_path}")
+
+
+@workspace_app.command("register-repo")
+def workspace_register_repo_cmd(
+    db_path: Path = typer.Option(..., "--db", help="SQLite symbol graph file path"),
+    repo: str = typer.Option(..., "--repo", help="Stable repo key inside the workspace"),
+    workspace: str = typer.Option("default", "--workspace", help="Workspace name"),
+    root: Optional[str] = typer.Option(None, "--root", help="Repo root path"),
+    language: Optional[str] = typer.Option(None, "--language", help="Primary language"),
+) -> None:
+    """Register or update a repo entry without indexing."""
+    repo_id = register_repo(
+        db_path,
+        repo_key=repo,
+        workspace=workspace,
+        root=root,
+        language=language,
+    )
+    typer.echo(f"Registered repo {repo!r} in workspace {workspace!r} (repo_id={repo_id})")
 
 
 @app.command("init-db")
@@ -54,6 +85,16 @@ def index_cmd(
         "--paths",
         help="Comma-separated relative_path values to merge (default: all paths in SCIP)",
     ),
+    workspace: Optional[str] = typer.Option(
+        None,
+        "--workspace",
+        help="Workspace name for multi-repo indexing",
+    ),
+    repo: Optional[str] = typer.Option(
+        None,
+        "--repo",
+        help="Repo key for multi-repo indexing; merge updates latest run for this repo",
+    ),
 ) -> None:
     """Ingest a SCIP index into a local symbol graph SQLite database."""
     snapshot = load_scip_index(scip, project_root=project_root)
@@ -63,7 +104,12 @@ def index_cmd(
         path_set = {part.strip() for part in paths.split(",") if part.strip()}
 
     if merge:
-        index_run_id = writer.merge(snapshot, paths=path_set)
+        index_run_id = writer.merge(
+            snapshot,
+            paths=path_set,
+            workspace=workspace,
+            repo_key=repo,
+        )
         info = read_info(out, index_run_id=index_run_id)
         typer.echo(
             f"Merged {len(snapshot.symbols)} input symbol(s), "
@@ -74,7 +120,7 @@ def index_cmd(
     else:
         if path_set is not None:
             raise typer.BadParameter("--paths requires --merge")
-        index_run_id = writer.write(snapshot)
+        index_run_id = writer.write(snapshot, workspace=workspace, repo_key=repo)
         typer.echo(
             f"Indexed {len(snapshot.symbols)} symbol(s), "
             f"{len(snapshot.edges)} edge(s) -> {out} "
@@ -100,6 +146,10 @@ def info_cmd(
     typer.echo(f"Symbols:        {info.symbol_count}")
     typer.echo(f"Edges:          {info.edge_count}")
     typer.echo(f"Mode:           {info.mode}")
+    if info.workspace:
+        typer.echo(f"Workspace:      {info.workspace}")
+    if info.repo_key:
+        typer.echo(f"Repo:           {info.repo_key}")
     if info.merge_count:
         typer.echo(f"Merge count:    {info.merge_count}")
 
@@ -142,6 +192,16 @@ def context_cmd(
         "-o",
         help="Write context text to file (default: stdout)",
     ),
+    workspace: Optional[str] = typer.Option(
+        None,
+        "--workspace",
+        help="Workspace name; query latest run for every repo in that workspace",
+    ),
+    repo: Optional[str] = typer.Option(
+        None,
+        "--repo",
+        help="Repo key; query latest run for one repo",
+    ),
 ) -> None:
     """Prune the symbol graph and emit type-safe LLM context text."""
     try:
@@ -157,7 +217,13 @@ def context_cmd(
             prune_mode=prune_mode,
         )
     )
-    graph = prune_context(db_path, target, budget=budget)
+    graph = prune_context(
+        db_path,
+        target,
+        budget=budget,
+        workspace=workspace,
+        repo_key=repo,
+    )
 
     try:
         weave_options = WeaveOptions(member_signatures=member_signatures, javadoc=javadoc)
@@ -215,6 +281,16 @@ def metrics_cmd(
         "-o",
         help="Optional path to write stub text",
     ),
+    workspace: Optional[str] = typer.Option(
+        None,
+        "--workspace",
+        help="Workspace name; query latest run for every repo in that workspace",
+    ),
+    repo: Optional[str] = typer.Option(
+        None,
+        "--repo",
+        help="Repo key; query latest run for one repo",
+    ),
 ) -> None:
     """Compare pruned stub size against full Java sources (compression KPI)."""
     try:
@@ -236,10 +312,43 @@ def metrics_cmd(
         sources,
         budget=budget,
         options=WeaveOptions(member_signatures=member_signatures, javadoc=javadoc),
+        workspace=workspace,
+        repo_key=repo,
     )
     if stub_out:
         stub_out.write_text(report.stub.text, encoding="utf-8")
     typer.echo(report.format_summary())
+
+
+@app.command("list-symbols")
+def list_symbols_cmd(
+    db_path: Path = typer.Argument(..., help="SQLite symbol graph file path"),
+    query: Optional[str] = typer.Option(None, "--query", "-q", help="Name/signature filter"),
+    kind: Optional[str] = typer.Option(None, "--kind", help="Symbol kind filter"),
+    limit: int = typer.Option(50, "--limit", help="Maximum symbols to print"),
+    workspace: Optional[str] = typer.Option(
+        None,
+        "--workspace",
+        help="Workspace name; query latest run for every repo in that workspace",
+    ),
+    repo: Optional[str] = typer.Option(
+        None,
+        "--repo",
+        help="Repo key; query latest run for one repo",
+    ),
+) -> None:
+    """List symbols from a legacy, repo, or workspace view."""
+    for symbol in list_symbols(
+        db_path,
+        query=query,
+        kind=kind,
+        limit=limit,
+        workspace=workspace,
+        repo_key=repo,
+    ):
+        name = symbol.display_name or "(anonymous)"
+        kind_text = symbol.kind or "(unknown)"
+        typer.echo(f"{symbol.stable_id}\t{name}\t{kind_text}")
 
 
 @app.command("diff")

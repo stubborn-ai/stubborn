@@ -9,12 +9,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - **ADR-009 incremental merge** — schema v2 (`relative_path`, `index_run.mode`, `merge_count`), `IndexWriter.merge()`, CLI `stubborn index --merge` and `--paths`.
+- **ADR-010 workspace graph** — schema v3 workspace/repo metadata and workspace-scoped `context` / `list-symbols` queries for source-available multi-repo projects.
 - JSON fixture `documents[]` format with per-document `relative_path`.
 - [`stubborn-watch`](https://github.com/stubborn-ai/stubborn-watch) — debounced file watch → scip-java → merge (new repo).
 
 ### Changed
 
-- New databases initialize schema **v2**; v1 databases auto-migrate on open.
+- New databases initialize schema **v3**; v1/v2 databases auto-migrate on open.
 - Core `examples/` now contains only fixtures; runnable demo and validation projects live in [`stubborn-demo`](https://github.com/stubborn-ai/stubborn-demo).
 
 ### Removed

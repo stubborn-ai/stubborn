@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from stubborn.config import DEFAULT_CONTEXT_BUDGET, ContextBudget, apply_prune_mode
+from stubborn.store.reader import latest_index_run_ids
 
 _SIGNATURE_TYPE_RE = re.compile(r"\b([A-Z][\w]*)\b")
 _INFERRED_EDGE_KINDS = frozenset({"signature-ref"})
@@ -44,6 +45,20 @@ def _type_member_stable_ids(target_stable_id: str, stable_to_id: dict[str, int])
         for stable_id in stable_to_id
         if stable_id.startswith(target_stable_id) and stable_id != target_stable_id
     ]
+
+
+def _best_symbol_row(rows: list[sqlite3.Row]) -> sqlite3.Row:
+    """Prefer source-defined symbols over external leaves, then deterministic repo order."""
+    return sorted(
+        rows,
+        key=lambda row: (
+            row["relative_path"] is None,
+            row["repo_priority"] if row["repo_priority"] is not None else 0,
+            row["repo_key"] or "",
+            -int(row["index_run_id"]),
+            row["stable_id"],
+        ),
+    )[0]
 
 
 def _build_type_name_index(symbols_by_id: dict[int, sqlite3.Row]) -> dict[str, list[int]]:
@@ -125,6 +140,8 @@ def prune_context(
     budget: ContextBudget | None = None,
     *,
     index_run_id: int | None = None,
+    workspace: str | None = None,
+    repo_key: str | None = None,
 ) -> PrunedGraph:
     """BFS prune from target symbol using call/type edge kinds."""
     budget = apply_prune_mode(budget or DEFAULT_CONTEXT_BUDGET)
@@ -132,36 +149,47 @@ def prune_context(
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     try:
-        if index_run_id is None:
-            row = conn.execute("SELECT id FROM index_run ORDER BY id DESC LIMIT 1").fetchone()
-            if row is None:
-                raise ValueError(f"No index runs found in {db_path}")
-            index_run_id = row["id"]
+        run_ids = latest_index_run_ids(
+            conn,
+            index_run_id=index_run_id,
+            workspace=workspace,
+            repo_key=repo_key,
+        )
+        run_placeholders = ",".join("?" * len(run_ids))
 
         symbols_by_id: dict[int, sqlite3.Row] = {}
-        stable_to_id: dict[str, int] = {}
+        stable_to_rows: dict[str, list[sqlite3.Row]] = {}
         for row in conn.execute(
-            """
-            SELECT id, stable_id, display_name, kind, signature, documentation
-            FROM scip_symbol
-            WHERE index_run_id = ?
+            f"""
+            SELECT s.id, s.index_run_id, s.stable_id, s.display_name, s.kind,
+                   s.signature, s.documentation, s.relative_path,
+                   r.repo_key, r.priority AS repo_priority
+            FROM scip_symbol s
+            JOIN index_run ir ON ir.id = s.index_run_id
+            LEFT JOIN repo r ON r.id = ir.repo_id
+            WHERE s.index_run_id IN ({run_placeholders})
             """,
-            (index_run_id,),
+            run_ids,
         ):
             symbols_by_id[row["id"]] = row
-            stable_to_id[row["stable_id"]] = row["id"]
+            stable_to_rows.setdefault(row["stable_id"], []).append(row)
+
+        stable_to_id = {
+            stable_id: int(_best_symbol_row(rows)["id"])
+            for stable_id, rows in stable_to_rows.items()
+        }
 
         if target_stable_id not in stable_to_id:
             raise ValueError(f"Symbol not found in index: {target_stable_id}")
 
         adjacency: dict[int, list[tuple[int, str]]] = {}
         for row in conn.execute(
-            """
+            f"""
             SELECT from_symbol_id, to_symbol_id, edge_kind
             FROM scip_edge
-            WHERE index_run_id = ?
+            WHERE index_run_id IN ({run_placeholders})
             """,
-            (index_run_id,),
+            run_ids,
         ):
             adjacency.setdefault(row["from_symbol_id"], []).append(
                 (row["to_symbol_id"], row["edge_kind"])
@@ -191,27 +219,37 @@ def prune_context(
             current_row = symbols_by_id[current_id]
 
             for ref_id in _signature_type_ref_ids(current_row, type_name_index):
+                ref_row = symbols_by_id[ref_id]
+                canonical_ref_id = stable_to_id[ref_row["stable_id"]]
                 if not use_heuristics:
                     continue
                 if current_depth > 0:
                     continue
-                if ref_id in seen:
+                if canonical_ref_id in seen:
                     continue
-                ref_row = symbols_by_id[ref_id]
+                ref_row = symbols_by_id[canonical_ref_id]
                 if _should_exclude(ref_row["stable_id"], budget.exclude_patterns):
                     continue
                 if not _depth_limit_for_edge("type", current_depth, budget):
                     continue
-                _enqueue_symbol(ref_id, current_depth + 1, seen=seen, queue=queue, budget=budget)
+                _enqueue_symbol(
+                    canonical_ref_id,
+                    current_depth + 1,
+                    seen=seen,
+                    queue=queue,
+                    budget=budget,
+                )
 
             for neighbor_id, edge_kind in adjacency.get(current_id, []):
-                if neighbor_id in seen:
+                neighbor_row = symbols_by_id[neighbor_id]
+                canonical_neighbor_id = stable_to_id[neighbor_row["stable_id"]]
+                if canonical_neighbor_id in seen:
                     continue
 
                 if not use_heuristics and edge_kind in _INFERRED_EDGE_KINDS:
                     continue
 
-                neighbor = symbols_by_id[neighbor_id]
+                neighbor = symbols_by_id[canonical_neighbor_id]
                 if _should_exclude(neighbor["stable_id"], budget.exclude_patterns):
                     continue
 
@@ -222,7 +260,7 @@ def prune_context(
                     continue
 
                 _enqueue_symbol(
-                    neighbor_id,
+                    canonical_neighbor_id,
                     current_depth + 1,
                     seen=seen,
                     queue=queue,
@@ -245,18 +283,21 @@ def prune_context(
 
         stable_ids = {s.stable_id for s in pruned_symbols}
         pruned_edges: list[tuple[str, str, str]] = []
+        seen_edges: set[tuple[str, str, str]] = set()
         for row in conn.execute(
-            """
+            f"""
             SELECT fs.stable_id, ts.stable_id, e.edge_kind
             FROM scip_edge e
             JOIN scip_symbol fs ON fs.id = e.from_symbol_id
             JOIN scip_symbol ts ON ts.id = e.to_symbol_id
-            WHERE e.index_run_id = ?
+            WHERE e.index_run_id IN ({run_placeholders})
             """,
-            (index_run_id,),
+            run_ids,
         ):
-            if row[0] in stable_ids and row[1] in stable_ids:
-                pruned_edges.append((row[0], row[1], row[2]))
+            edge = (row[0], row[1], row[2])
+            if row[0] in stable_ids and row[1] in stable_ids and edge not in seen_edges:
+                seen_edges.add(edge)
+                pruned_edges.append(edge)
 
         return PrunedGraph(
             target_stable_id=target_stable_id,

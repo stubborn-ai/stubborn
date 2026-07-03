@@ -29,14 +29,18 @@ def _schema_version(conn: sqlite3.Connection) -> int | None:
 
 
 def ensure_schema(conn: sqlite3.Connection) -> None:
-    """Create or upgrade schema to v2."""
+    """Create or upgrade schema to v3."""
     version = _schema_version(conn)
     if version is None:
-        with open(_schema_path("v2.sql"), encoding="utf-8") as f:
+        with open(_schema_path("v3.sql"), encoding="utf-8") as f:
             conn.executescript(f.read())
         return
     if version < 2:
         with open(_schema_path("migrate_v1_to_v2.sql"), encoding="utf-8") as f:
+            conn.executescript(f.read())
+        version = 2
+    if version < 3:
+        with open(_schema_path("migrate_v2_to_v3.sql"), encoding="utf-8") as f:
             conn.executescript(f.read())
 
 
@@ -52,6 +56,33 @@ def init_db(db_path: str | Path) -> None:
         conn.close()
 
 
+def register_repo(
+    db_path: str | Path,
+    *,
+    repo_key: str,
+    workspace: str = "default",
+    root: str | None = None,
+    language: str | None = None,
+) -> int:
+    """Create or update workspace/repo metadata without indexing."""
+    path = Path(db_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(path)
+    try:
+        ensure_schema(conn)
+        repo_id = _ensure_repo(
+            conn,
+            workspace=workspace,
+            repo_key=repo_key,
+            root=root,
+            language=language,
+        )
+        conn.commit()
+        return repo_id
+    finally:
+        conn.close()
+
+
 @dataclass
 class IndexInfo:
     index_run_id: int
@@ -62,6 +93,72 @@ class IndexInfo:
     edge_count: int
     mode: str = "snapshot"
     merge_count: int = 0
+    workspace: str | None = None
+    repo_key: str | None = None
+
+
+def _ensure_workspace(
+    conn: sqlite3.Connection,
+    *,
+    workspace: str,
+    root: str | None = None,
+) -> int:
+    conn.execute(
+        """
+        INSERT INTO workspace (name, root)
+        VALUES (?, ?)
+        ON CONFLICT(name) DO UPDATE SET root = COALESCE(excluded.root, workspace.root)
+        """,
+        (workspace, root),
+    )
+    row = conn.execute("SELECT id FROM workspace WHERE name = ?", (workspace,)).fetchone()
+    assert row is not None
+    return int(row[0])
+
+
+def _ensure_repo(
+    conn: sqlite3.Connection,
+    *,
+    workspace: str,
+    repo_key: str,
+    root: str | None = None,
+    language: str | None = None,
+) -> int:
+    workspace_id = _ensure_workspace(conn, workspace=workspace, root=None)
+    conn.execute(
+        """
+        INSERT INTO repo (workspace_id, repo_key, root, language)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(workspace_id, repo_key) DO UPDATE SET
+            root = COALESCE(excluded.root, repo.root),
+            language = COALESCE(excluded.language, repo.language)
+        """,
+        (workspace_id, repo_key, root, language),
+    )
+    row = conn.execute(
+        "SELECT id FROM repo WHERE workspace_id = ? AND repo_key = ?",
+        (workspace_id, repo_key),
+    ).fetchone()
+    assert row is not None
+    return int(row[0])
+
+
+def _repo_id_for_write(
+    conn: sqlite3.Connection,
+    snapshot: IndexSnapshot,
+    *,
+    repo_key: str | None,
+    workspace: str | None,
+) -> int | None:
+    if repo_key is None:
+        return None
+    return _ensure_repo(
+        conn,
+        workspace=workspace or "default",
+        repo_key=repo_key,
+        root=snapshot.project_root,
+        language=snapshot.language,
+    )
 
 
 def read_info(db_path: str | Path, index_run_id: int | None = None) -> IndexInfo:
@@ -80,8 +177,12 @@ def read_info(db_path: str | Path, index_run_id: int | None = None) -> IndexInfo
 
         run = conn.execute(
             """
-            SELECT id, scip_source, language, indexed_at, mode, merge_count
-            FROM index_run WHERE id = ?
+            SELECT ir.id, ir.scip_source, ir.language, ir.indexed_at, ir.mode, ir.merge_count,
+                   w.name AS workspace, r.repo_key
+            FROM index_run ir
+            LEFT JOIN repo r ON r.id = ir.repo_id
+            LEFT JOIN workspace w ON w.id = r.workspace_id
+            WHERE ir.id = ?
             """,
             (index_run_id,),
         ).fetchone()
@@ -106,6 +207,8 @@ def read_info(db_path: str | Path, index_run_id: int | None = None) -> IndexInfo
             edge_count=edge_count,
             mode=run["mode"] or "snapshot",
             merge_count=int(run["merge_count"] or 0),
+            workspace=run["workspace"],
+            repo_key=run["repo_key"],
         )
     finally:
         conn.close()
@@ -125,15 +228,27 @@ class IndexWriter:
         conn.commit()
         return conn
 
-    def write(self, snapshot: IndexSnapshot) -> int:
+    def write(
+        self,
+        snapshot: IndexSnapshot,
+        *,
+        repo_key: str | None = None,
+        workspace: str | None = None,
+    ) -> int:
         conn = self._connect()
         try:
+            repo_id = _repo_id_for_write(
+                conn,
+                snapshot,
+                repo_key=repo_key,
+                workspace=workspace,
+            )
             cursor = conn.execute(
                 """
                 INSERT INTO index_run (
                     project_root, scip_source, scip_hash, language, tool_version,
-                    mode, merge_count
-                ) VALUES (?, ?, ?, ?, ?, 'snapshot', 0)
+                    mode, merge_count, repo_id
+                ) VALUES (?, ?, ?, ?, ?, 'snapshot', 0, ?)
                 """,
                 (
                     snapshot.project_root,
@@ -141,6 +256,7 @@ class IndexWriter:
                     snapshot.scip_hash,
                     snapshot.language,
                     __version__,
+                    repo_id,
                 ),
             )
             index_run_id = cursor.lastrowid
@@ -151,23 +267,48 @@ class IndexWriter:
         finally:
             conn.close()
 
-    def merge(self, snapshot: IndexSnapshot, *, paths: set[str] | None = None) -> int:
+    def merge(
+        self,
+        snapshot: IndexSnapshot,
+        *,
+        paths: set[str] | None = None,
+        repo_key: str | None = None,
+        workspace: str | None = None,
+    ) -> int:
         """Update the latest index run with path-scoped symbol/edge replacement."""
         merge_paths = resolve_merge_paths(snapshot, paths)
         filtered = filter_snapshot_by_paths(snapshot, merge_paths)
 
         conn = self._connect()
         try:
-            row = conn.execute(
-                "SELECT id, merge_count FROM index_run ORDER BY id DESC LIMIT 1"
-            ).fetchone()
+            repo_id = _repo_id_for_write(
+                conn,
+                snapshot,
+                repo_key=repo_key,
+                workspace=workspace,
+            )
+            if repo_id is None:
+                row = conn.execute(
+                    "SELECT id, merge_count FROM index_run ORDER BY id DESC LIMIT 1"
+                ).fetchone()
+            else:
+                row = conn.execute(
+                    """
+                    SELECT id, merge_count
+                    FROM index_run
+                    WHERE repo_id = ?
+                    ORDER BY id DESC
+                    LIMIT 1
+                    """,
+                    (repo_id,),
+                ).fetchone()
             if row is None:
                 cursor = conn.execute(
                     """
                     INSERT INTO index_run (
                         project_root, scip_source, scip_hash, language, tool_version,
-                        mode, merge_count
-                    ) VALUES (?, ?, ?, ?, ?, 'merged', 0)
+                        mode, merge_count, repo_id
+                    ) VALUES (?, ?, ?, ?, ?, 'merged', 0, ?)
                     """,
                     (
                         snapshot.project_root,
@@ -175,6 +316,7 @@ class IndexWriter:
                         snapshot.scip_hash,
                         snapshot.language,
                         __version__,
+                        repo_id,
                     ),
                 )
                 index_run_id = cursor.lastrowid

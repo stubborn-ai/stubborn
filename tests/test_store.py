@@ -124,21 +124,27 @@ def test_invalid_edge_kind_raises_on_write(tmp_path: Path) -> None:
         IndexWriter(db).write(snapshot)
 
 
-def test_schema_version_is_v2_after_init(tmp_path: Path) -> None:
+def test_schema_version_is_v3_after_init(tmp_path: Path) -> None:
     db = tmp_path / "symbols.db"
     init_db(db)
 
     conn = sqlite3.connect(db)
     try:
         version = conn.execute("SELECT MAX(version) FROM meta_schema_version").fetchone()[0]
-        assert version == 2
-        columns = {row[1] for row in conn.execute("PRAGMA table_info(scip_symbol)")}
-        assert "relative_path" in columns
+        assert version == 3
+        symbol_columns = {row[1] for row in conn.execute("PRAGMA table_info(scip_symbol)")}
+        run_columns = {row[1] for row in conn.execute("PRAGMA table_info(index_run)")}
+        assert "relative_path" in symbol_columns
+        assert "repo_id" in run_columns
+        tables = {
+            row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        }
+        assert {"workspace", "repo"} <= tables
     finally:
         conn.close()
 
 
-def test_v1_database_migrates_to_v2(tmp_path: Path) -> None:
+def test_v1_database_migrates_to_v3(tmp_path: Path) -> None:
     from importlib import resources
 
     db = tmp_path / "symbols.db"
@@ -162,9 +168,11 @@ def test_v1_database_migrates_to_v2(tmp_path: Path) -> None:
     conn = sqlite3.connect(db)
     try:
         version = conn.execute("SELECT MAX(version) FROM meta_schema_version").fetchone()[0]
-        assert version == 2
+        assert version == 3
         row = conn.execute("SELECT relative_path FROM scip_symbol WHERE stable_id = 'a'").fetchone()
         assert row[0] == "A.java"
+        columns = {row[1] for row in conn.execute("PRAGMA table_info(index_run)")}
+        assert "repo_id" in columns
     finally:
         conn.close()
 
@@ -237,6 +245,85 @@ def test_sequential_path_merges_preserve_cross_file_edges(tmp_path: Path) -> Non
     assert second.edge_count == 2
     assert second.merge_count == 2
     assert _edge_kinds(db, "process", "Order") == {"signature-ref", "type"}
+
+
+def test_workspace_context_crosses_repo_source_symbols(tmp_path: Path) -> None:
+    from stubborn.config import ContextBudget
+    from stubborn.graph.prune import prune_context
+    from stubborn.store.reader import list_symbols
+
+    db = tmp_path / "symbols.db"
+    service = "semanticdb maven com/example/lib/Service#"
+    helper = "semanticdb maven com/example/lib/Helper#"
+    controller = "semanticdb maven com/example/app/Controller#"
+    handle = "semanticdb maven com/example/app/Controller#handle()."
+
+    repo_a = IndexSnapshot(
+        scip_source="repo-a.json",
+        project_root="/workspace/repo-a",
+        language="java",
+        symbols=[
+            SymbolRecord(
+                stable_id=controller,
+                display_name="Controller",
+                kind="class",
+                signature="public class Controller",
+                relative_path="src/Controller.java",
+            ),
+            SymbolRecord(
+                stable_id=handle,
+                display_name="handle",
+                kind="method",
+                signature="public void handle(Service service)",
+                relative_path="src/Controller.java",
+            ),
+            SymbolRecord(
+                stable_id=service,
+                display_name="Service",
+                kind="class",
+                signature="public class Service",
+            ),
+        ],
+        edges=[EdgeRecord(handle, service, "reference")],
+    )
+    repo_b = IndexSnapshot(
+        scip_source="repo-b.json",
+        project_root="/workspace/repo-b",
+        language="java",
+        symbols=[
+            SymbolRecord(
+                stable_id=service,
+                display_name="Service",
+                kind="class",
+                signature="public class Service",
+                relative_path="src/Service.java",
+            ),
+            SymbolRecord(
+                stable_id=helper,
+                display_name="Helper",
+                kind="class",
+                signature="public class Helper",
+                relative_path="src/Helper.java",
+            ),
+        ],
+        edges=[EdgeRecord(service, helper, "type")],
+    )
+
+    writer = IndexWriter(db)
+    writer.write(repo_a, workspace="acme", repo_key="repo-a")
+    writer.write(repo_b, workspace="acme", repo_key="repo-b")
+
+    graph = prune_context(
+        db,
+        handle,
+        workspace="acme",
+        budget=ContextBudget(call_closure_depth=2, max_symbols=20),
+    )
+    names = {symbol.display_name for symbol in graph.symbols}
+    assert {"handle", "Service", "Helper"} <= names
+
+    listed = list_symbols(db, workspace="acme", query="Service", limit=10)
+    assert [symbol.stable_id for symbol in listed].count(service) == 1
 
 
 def _edge_kinds(db: Path, from_display: str, to_display: str) -> set[str]:

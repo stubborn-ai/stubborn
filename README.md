@@ -181,9 +181,11 @@ Tools: `get_context`, `list_symbols`, `metrics`. See [stubborn-mcp docs](https:/
 | Command | Description |
 |---------|-------------|
 | `init-db` | Create empty SQLite symbol graph |
-| `index` | Ingest SCIP (`.scip`, `.scip.ndjson`, or `.json` fixture) |
+| `workspace` | Initialize/register multi-repo workspace metadata |
+| `index` | Ingest SCIP (`.scip`, `.scip.ndjson`, or `.json` fixture); use `--workspace`/`--repo` for multi-repo views |
 | `info` | Index run summary |
-| `context` | Prune graph → emit LLM context (`--format java-stub` \| `stubborn-dsl`; `--prune-mode smart` \| `strict` \| `fast`) |
+| `context` | Prune graph → emit LLM context (`--workspace` can query latest runs across repos) |
+| `list-symbols` | Browse symbols in a legacy, repo, or workspace view |
 | `metrics` | Compression KPI: stub vs full Java sources |
 | `diff` | Symbol set reconcile (missing/extra) |
 
@@ -201,7 +203,7 @@ Design rationale is recorded as [Architecture Decision Records (docs/adr/)](docs
   LLM / Agent / CI
 ```
 
-SQLite schema: [`src/stubborn/store/schema/v1.sql`](src/stubborn/store/schema/v1.sql)
+SQLite schema: [`src/stubborn/store/schema/v3.sql`](src/stubborn/store/schema/v3.sql)
 
 ## Roadmap
 

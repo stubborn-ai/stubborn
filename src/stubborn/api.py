@@ -53,6 +53,8 @@ def get_context(
     member_signatures: str = "target",
     javadoc: str | None = None,
     prune_mode: str = "smart",
+    workspace: str | None = None,
+    repo_key: str | None = None,
 ) -> ContextResult:
     """Prune symbol graph and weave LLM context for a target symbol."""
     path = resolve_db_path(db_path)
@@ -63,7 +65,13 @@ def get_context(
         prune_mode=prune_mode,
     )
     weave_options = WeaveOptions(member_signatures=member_signatures, javadoc=javadoc)
-    graph = prune_context(path, target, budget=budget)
+    graph = prune_context(
+        path,
+        target,
+        budget=budget,
+        workspace=workspace,
+        repo_key=repo_key,
+    )
     result = weave_context(
         graph,
         format=format,
@@ -87,6 +95,8 @@ def list_index_symbols(
     kind: str | None = None,
     limit: int = 50,
     index_run_id: int | None = None,
+    workspace: str | None = None,
+    repo_key: str | None = None,
 ) -> list[dict[str, Any]]:
     """Return symbol records as JSON-serializable dicts."""
     path = resolve_db_path(db_path)
@@ -96,6 +106,8 @@ def list_index_symbols(
         kind=kind,
         limit=limit,
         index_run_id=index_run_id,
+        workspace=workspace,
+        repo_key=repo_key,
     )
     return [asdict(record) for record in records]
 
@@ -116,6 +128,8 @@ def get_index_info(
         "symbol_count": info.symbol_count,
         "edge_count": info.edge_count,
         "db_path": str(path),
+        "workspace": info.workspace,
+        "repo_key": info.repo_key,
     }
 
 
@@ -131,6 +145,8 @@ def get_metrics(
     member_signatures: str = "target",
     javadoc: str | None = None,
     prune_mode: str = "smart",
+    workspace: str | None = None,
+    repo_key: str | None = None,
 ) -> dict[str, Any]:
     """Return compression KPI as a JSON-serializable dict."""
     path = resolve_db_path(db_path)
@@ -148,6 +164,8 @@ def get_metrics(
         budget=budget,
         format=format,
         options=weave_options,
+        workspace=workspace,
+        repo_key=repo_key,
     )
     return {
         "target_stable_id": report.target_stable_id,

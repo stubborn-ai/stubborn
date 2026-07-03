@@ -19,6 +19,7 @@ This project is built for **use and for reading**: ADRs are part of the public d
 | [ADR-007](ADR-007-java-first-beta-scope.md) | Accepted | Java-first beta scope |
 | [ADR-008](ADR-008-weak-coupling-ecosystem.md) | Accepted | Weak coupling to optional ecosystem consumers |
 | [ADR-009](ADR-009-incremental-index-merge.md) | Accepted | Incremental index merge vs full snapshot |
+| [ADR-010](ADR-010-workspace-multi-repo-graph.md) | Accepted | Workspace graph for multi-repo source projects |
 
 ## Status legend
 
