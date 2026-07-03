@@ -216,7 +216,8 @@ SQLite schema: [`src/stubborn/store/schema/v1.sql`](src/stubborn/store/schema/v1
 | **0.7** | [Stubborn-DSL](docs/STUBBORN-DSL.md) weaver (`--format stubborn-dsl`) |
 | **0.8** | Java-first beta track — [BETA.md](docs/BETA.md), demo-spring cases |
 | **0.9** | Method signatures, [STUBBORN-DSL-GUIDE](docs/STUBBORN-DSL-GUIDE.md) |
-| **0.9.0b3** (now) | **Standalone cleanup** — rename debt removed, ruff CI, CLI smoke tests |
+| **0.9.0b4** (now) | **MCP split** — `stubborn-mcp` on PyPI; prune-mode, ADR-009 design |
+| **0.9.0b3** | Standalone cleanup — rename debt removed, ruff CI, CLI smoke tests |
 | **0.9.0b2** | **Java-first Beta** — classifier + weave granularity switches |
 | **1.0** | Multi-language E2E, stable API |
 

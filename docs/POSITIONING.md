@@ -65,6 +65,7 @@ Stubborn wins when **determinism + token KPI + privacy contract** matter more th
 | Path | Prerequisites | Best for |
 |------|---------------|----------|
 | **Fixture** (30s) | `pip install stubborn-stub` | Try the compiler; no Java |
+| **Agents (MCP)** | `pip install stubborn-stub stubborn-mcp` | Cursor with `symbols.db` — see [stubborn-mcp](https://github.com/stubborn-ai/stubborn-mcp) |
 | **Docker E2E** | Docker Desktop | Reproduce CI; demo-spring artifacts |
 | **Real Java project** | JDK, Maven/Gradle, **scip-java**, Python | Primary production use |
 
@@ -109,7 +110,8 @@ See [ADR-003](adr/ADR-003-type-neighbor-pruning.md) for honesty tiers (SCIP edge
 
 ```
 stubborn-ai
-└── stubborn           → LLM context compiler (SCIP-indexed repos)  ← this repo
+├── stubborn           → LLM context compiler (SCIP-indexed repos)
+└── stubborn-mcp       → MCP server for agents (PyPI)
 
 anchor-migration (optional consumer)
 ├── db-metadata        → data layer SSOT
