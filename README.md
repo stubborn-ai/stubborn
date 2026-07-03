@@ -8,7 +8,7 @@ Stubborn compiles a **SCIP symbol index** into **type-safe, privacy-preserving s
 
 **Primary fit:** Java / Spring repos (especially legacy modernization) where teams already run or can run **scip-java**. **Also:** Cursor/MCP users with a `symbols.db` who want deterministic context — not a zero-config repo map.
 
-Independent project under [stubborn-ai](https://github.com/stubborn-ai). Full positioning: [docs/POSITIONING.md](docs/POSITIONING.md).
+Independent project under [stubborn-ai](https://github.com/stubborn-ai) ([program map](https://github.com/stubborn-ai/stubborn-hub/blob/main/docs/START-HERE.md)). Full positioning: [docs/POSITIONING.md](docs/POSITIONING.md).
 
 This repo is a **personal showcase of architecture-led, AI-assisted engineering**: the developer defines system design, boundary protocols, and acceptance criteria; AI implements most of the code; the shipped artifact is **deterministic Python** — reproducible, test-gated, and verifiable (same SCIP → same context).
 
@@ -76,7 +76,7 @@ See [docker/README.md](docker/README.md).
 **PyPI:** `stubborn-stub` · **CLI:** `stubborn` (alias: `stub`)
 
 ```bash
-pip install stubborn-stub[mcp]
+pip install stubborn-stub
 ```
 
 From source (development):
@@ -166,13 +166,15 @@ stubborn diff ./metadata/before.db ./metadata/after.db
 
 ### 5. MCP server (Cursor / agents)
 
+Use the separate **[stubborn-mcp](https://github.com/stubborn-ai/stubborn-mcp)** package:
+
 ```bash
-pip install stubborn-stub[mcp]
+pip install stubborn-mcp
 export STUBBORN_DB=./metadata/symbols.db
-stubborn mcp
+stubborn-mcp
 ```
 
-Tools: `get_context`, `list_symbols`, `metrics`. See [docs/MCP.md](docs/MCP.md) for Cursor configuration.
+Tools: `get_context`, `list_symbols`, `metrics`. See [stubborn-mcp docs](https://github.com/stubborn-ai/stubborn-mcp/blob/main/docs/MCP.md).
 
 ## CLI
 
@@ -183,7 +185,6 @@ Tools: `get_context`, `list_symbols`, `metrics`. See [docs/MCP.md](docs/MCP.md) 
 | `info` | Index run summary |
 | `context` | Prune graph → emit LLM context (`--format java-stub` \| `stubborn-dsl`; `--prune-mode smart` \| `strict` \| `fast`) |
 | `metrics` | Compression KPI: stub vs full Java sources |
-| `mcp` | Run MCP server (stdio) for agents |
 | `diff` | Symbol set reconcile (missing/extra) |
 
 ## Architecture
@@ -256,11 +257,11 @@ ruff check src tests
 ruff format --check src tests
 ```
 
-MCP server:
+MCP server ([stubborn-mcp](https://github.com/stubborn-ai/stubborn-mcp)):
 
 ```bash
-pip install -e ".[mcp]"
-stubborn mcp
+pip install -e "../stubborn-mcp"
+stubborn-mcp
 ```
 
 ## License

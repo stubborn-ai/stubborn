@@ -8,13 +8,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- Architecture Decision Records (`docs/adr/`) — ADR-001 through ADR-008.
+- Architecture Decision Records (`docs/adr/`) — ADR-001 through ADR-009.
+- [ADR-009](docs/adr/ADR-009-incremental-index-merge.md) — incremental `--merge` vs full snapshot indexing.
 - [DEVELOPMENT-MODEL.md](docs/DEVELOPMENT-MODEL.md) — architecture-led, AI-assisted engineering declaration.
 - **`--prune-mode`** (`smart` | `strict` | `fast`) on `context`, `metrics`, API, and MCP — user control over neighbor expansion.
 - Ingest signature enrichment edges tagged as `signature-ref` (skipped in `strict` / `fast`).
 
 ### Changed
 
+- **MCP moved to [stubborn-mcp](https://github.com/stubborn-ai/stubborn-mcp)** — removed `stubborn.mcp_server`, `[mcp]` extra, `stubborn mcp` CLI; use `pip install stubborn-mcp`.
 - Renamed store read model `SymbolRecord` → `SymbolSummary` (distinct from ingest `SymbolRecord`).
 - `list_symbols` / MCP `list_symbols` now include `documentation` in results.
 - [POSITIONING.md](docs/POSITIONING.md) — primary/secondary audience, honest competitor comparison, SCIP prerequisite, language scope.

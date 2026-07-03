@@ -25,7 +25,7 @@ stubborn context metadata/code-context.db \
 
 Feed the output to the LLM instead of raw sources. For `stubborn-dsl`, paste [STUBBORN-DSL-LLM.txt](STUBBORN-DSL-LLM.txt) into the system prompt (or rely on the embedded `# Guide` header).
 
-Or use the MCP server (`stubborn mcp`) so agents call `get_context` with `format: "java-stub"` or `"stubborn-dsl"` — see [MCP.md](MCP.md).
+Or use the MCP server ([stubborn-mcp](https://github.com/stubborn-ai/stubborn-mcp)) so agents call `get_context` with `format: "java-stub"` or `"stubborn-dsl"`.
 
 Tune weave output: `--member-signatures off|target|neighbors|all` and `--javadoc off|summary|full` on `context` / `metrics` (and MCP `get_context`).
 

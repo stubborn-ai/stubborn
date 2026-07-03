@@ -17,7 +17,6 @@ keywords = [
     "stub",
     "dependency-graph",
     "symbol-graph",
-    "mcp",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -38,13 +37,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-mcp = ["mcp>=1.6,<2"]
-dev = ["pytest>=8.0,<9.0", "mcp>=1.6,<2", "ruff>=0.9,<1"]
+dev = ["pytest>=8.0,<9.0", "ruff>=0.9,<1"]
 
 [project.scripts]
 stubborn = "stubborn.cli:app"
 stub = "stubborn.cli:app"
-stubborn-mcp = "stubborn.mcp_server.server:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/stubborn"]

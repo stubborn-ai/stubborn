@@ -1,4 +1,4 @@
-"""Tests for API layer and MCP tool wiring."""
+"""Tests for stubborn.api (CLI / SDK integration surface)."""
 
 from __future__ import annotations
 
@@ -76,24 +76,3 @@ def test_get_metrics_api(indexed_db: Path) -> None:
     assert report["source_files"] >= 10
     assert report["compression_ratio"] > 0.5
     assert "stub_text" in report
-
-
-def test_mcp_tools_callable(indexed_db: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    pytest.importorskip("mcp")
-    monkeypatch.setenv("STUBBORN_DB", str(indexed_db))
-
-    from stubborn.mcp_server.server import get_context as mcp_get_context
-    from stubborn.mcp_server.server import list_symbols as mcp_list_symbols
-    from stubborn.mcp_server.server import metrics as mcp_metrics
-
-    ctx = mcp_get_context(TARGET)
-    assert ctx["text"]
-    assert ctx["symbol_count"] >= 1
-
-    listing = mcp_list_symbols(query="Order")
-    assert listing["returned"] >= 1
-    assert listing["symbols"]
-
-    kpi = mcp_metrics(TARGET, str(DEMO_JAVA), include_stub_text=False)
-    assert "stub_text" not in kpi
-    assert kpi["token_savings_percent"] > 0

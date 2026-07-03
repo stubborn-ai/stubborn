@@ -14,7 +14,7 @@ if (-not (Test-Path $DbPath)) {
 $env:STUBBORN_DB = $DbPath
 
 python -c @"
-from stubborn.mcp_server.server import get_context, list_symbols, metrics
+from stubborn_mcp.server import get_context, list_symbols, metrics
 
 listing = list_symbols(query='OrderService', limit=3)
 print('list_symbols:', listing['returned'], 'hit(s)')

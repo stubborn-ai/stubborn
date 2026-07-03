@@ -27,7 +27,7 @@ See [POSITIONING.md](POSITIONING.md) for the full primary/secondary split.
 ### Core pipeline
 
 - [x] SCIP binary + NDJSON + JSON fixture ingest
-- [x] SQLite symbol graph + CLI + MCP
+- [x] SQLite symbol graph + CLI; MCP via **stubborn-mcp** package
 - [x] Type-neighbor pruning + token budget + `--prune-mode`
 - [x] `java-stub` + `stubborn-dsl` weavers (user choice)
 - [x] Target-type method signatures (v0.9); neighbor/all + Javadoc via weave switches

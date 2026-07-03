@@ -1,8 +1,7 @@
 {
   "mcpServers": {
     "stubborn": {
-      "command": "python",
-      "args": ["-m", "stubborn.mcp_server"],
+      "command": "stubborn-mcp",
       "env": {
         "STUBBORN_DB": "${workspaceFolder}/examples/demo-spring/metadata/symbols.db"
       }

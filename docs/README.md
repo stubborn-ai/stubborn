@@ -1,6 +1,6 @@
 # Documentation index
 
-**PyPI package:** `stubborn-stub` · **version:** `0.9.0b3` (Beta) · **CLI:** `stubborn`
+**Program map:** [stubborn-hub](https://github.com/stubborn-ai/stubborn-hub) · **PyPI package:** `stubborn-stub` · **version:** `0.9.0b3` (Beta) · **CLI:** `stubborn`
 
 | Doc | Audience | Contents |
 |-----|----------|----------|
@@ -10,7 +10,7 @@
 | [POSITIONING.md](POSITIONING.md) | Architects, adopters | Primary/secondary audience; honest comparison; SCIP prerequisite |
 | [INTEGRATION.md](INTEGRATION.md) | Optional adopters | How anchor-migration consumes Stubborn |
 | [SCIP-INGEST.md](SCIP-INGEST.md) | Index authors | Supported SCIP formats and ingest behavior |
-| [MCP.md](MCP.md) | Agent / Cursor users | MCP tools, config, workflows |
+| [MCP.md](MCP.md) | Agent / Cursor users | Pointer to **stubborn-mcp** package |
 | [STUBBORN-DSL-GUIDE.md](STUBBORN-DSL-GUIDE.md) | Prompt authors | When to use java-stub vs stubborn-dsl |
 | [STUBBORN-DSL.md](STUBBORN-DSL.md) | LLM context authors | Stubborn-DSL v1 grammar and CLI usage |
 | [STUBBORN-DSL-LLM.txt](STUBBORN-DSL-LLM.txt) | Prompt engineers | Short system-prompt snippet for `format=stubborn-dsl` |
