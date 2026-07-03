@@ -122,3 +122,95 @@ def test_invalid_edge_kind_raises_on_write(tmp_path: Path) -> None:
 
     with pytest.raises(sqlite3.IntegrityError):
         IndexWriter(db).write(snapshot)
+
+
+def test_schema_version_is_v2_after_init(tmp_path: Path) -> None:
+    db = tmp_path / "symbols.db"
+    init_db(db)
+
+    conn = sqlite3.connect(db)
+    try:
+        version = conn.execute("SELECT MAX(version) FROM meta_schema_version").fetchone()[0]
+        assert version == 2
+        columns = {
+            row[1] for row in conn.execute("PRAGMA table_info(scip_symbol)")
+        }
+        assert "relative_path" in columns
+    finally:
+        conn.close()
+
+
+def test_v1_database_migrates_to_v2(tmp_path: Path) -> None:
+    from importlib import resources
+
+    db = tmp_path / "symbols.db"
+    v1_ref = resources.files("stubborn.store") / "schema" / "v1.sql"
+    with resources.as_file(v1_ref) as v1_path:
+        conn = sqlite3.connect(db)
+        try:
+            conn.executescript(v1_path.read_text(encoding="utf-8"))
+            conn.commit()
+        finally:
+            conn.close()
+
+    IndexWriter(db).write(
+        IndexSnapshot(
+            scip_source="fixture.json",
+            symbols=[SymbolRecord(stable_id="a", kind="class", relative_path="A.java")],
+            edges=[],
+        )
+    )
+
+    conn = sqlite3.connect(db)
+    try:
+        version = conn.execute("SELECT MAX(version) FROM meta_schema_version").fetchone()[0]
+        assert version == 2
+        row = conn.execute(
+            "SELECT relative_path FROM scip_symbol WHERE stable_id = 'a'"
+        ).fetchone()
+        assert row[0] == "A.java"
+    finally:
+        conn.close()
+
+
+def test_merge_replaces_path_and_keeps_others(tmp_path: Path) -> None:
+    from stubborn.ingest.scip import load_scip_index
+    from stubborn.store.reader import list_symbols
+
+    fixtures = Path(__file__).resolve().parents[1] / "examples" / "fixtures"
+    base = load_scip_index(fixtures / "two_documents.json")
+    updated = load_scip_index(fixtures / "two_documents_merged.json")
+
+    db = tmp_path / "symbols.db"
+    writer = IndexWriter(db)
+    run_id = writer.write(base)
+    assert run_id == 1
+
+    writer.merge(updated, paths={"com/example/OrderService.java"})
+    info = read_info(db)
+    assert info.index_run_id == 1
+    assert info.mode == "merged"
+    assert info.merge_count == 1
+    assert info.symbol_count == 4
+
+    names = {s.display_name for s in list_symbols(db, limit=50)}
+    assert "PaymentService" in names
+    assert "Order" in names
+    assert "OrderService" in names
+
+
+def test_merge_without_paths_uses_snapshot_documents(tmp_path: Path) -> None:
+    from stubborn.ingest.scip import load_scip_index
+
+    fixtures = Path(__file__).resolve().parents[1] / "examples" / "fixtures"
+    base = load_scip_index(fixtures / "two_documents.json")
+    updated = load_scip_index(fixtures / "two_documents_merged.json")
+
+    db = tmp_path / "symbols.db"
+    writer = IndexWriter(db)
+    writer.write(base)
+    writer.merge(updated)
+
+    info = read_info(db)
+    assert info.symbol_count == 4
+    assert info.merge_count == 1

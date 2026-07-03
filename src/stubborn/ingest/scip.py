@@ -62,24 +62,50 @@ def load_scip_index(
 def _load_json_fixture(path: Path, *, project_root: str | None) -> IndexSnapshot:
     """Load a minimal JSON fixture used by tests and examples."""
     payload = json.loads(path.read_text(encoding="utf-8"))
-    symbols = [
-        SymbolRecord(
-            stable_id=item["stable_id"],
-            display_name=item.get("display_name"),
-            kind=item.get("kind"),
-            signature=item.get("signature"),
-            documentation=item.get("documentation"),
-        )
-        for item in payload.get("symbols", [])
-    ]
-    edges = [
-        EdgeRecord(
-            from_stable_id=item["from"],
-            to_stable_id=item["to"],
-            edge_kind=item.get("edge_kind", "reference"),
-        )
-        for item in payload.get("edges", [])
-    ]
+    if "documents" in payload:
+        symbols: list[SymbolRecord] = []
+        edges: list[EdgeRecord] = []
+        for document in payload["documents"]:
+            rel_path = document.get("relative_path")
+            for item in document.get("symbols", []):
+                symbols.append(
+                    SymbolRecord(
+                        stable_id=item["stable_id"],
+                        display_name=item.get("display_name"),
+                        kind=item.get("kind"),
+                        signature=item.get("signature"),
+                        documentation=item.get("documentation"),
+                        relative_path=item.get("relative_path", rel_path),
+                    )
+                )
+            for item in document.get("edges", []):
+                edges.append(
+                    EdgeRecord(
+                        from_stable_id=item["from"],
+                        to_stable_id=item["to"],
+                        edge_kind=item.get("edge_kind", "reference"),
+                    )
+                )
+    else:
+        symbols = [
+            SymbolRecord(
+                stable_id=item["stable_id"],
+                display_name=item.get("display_name"),
+                kind=item.get("kind"),
+                signature=item.get("signature"),
+                documentation=item.get("documentation"),
+                relative_path=item.get("relative_path"),
+            )
+            for item in payload.get("symbols", [])
+        ]
+        edges = [
+            EdgeRecord(
+                from_stable_id=item["from"],
+                to_stable_id=item["to"],
+                edge_kind=item.get("edge_kind", "reference"),
+            )
+            for item in payload.get("edges", [])
+        ]
     edges = enrich_snapshot_edges(symbols, edges)
     return IndexSnapshot(
         scip_source=str(path),

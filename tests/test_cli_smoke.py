@@ -63,3 +63,35 @@ def test_cli_index_json_fixture(tmp_path: Path) -> None:
     )
     assert result.exit_code == 0, result.stdout + result.stderr
     assert db.is_file()
+
+
+def test_cli_index_merge(tmp_path: Path) -> None:
+    runner = CliRunner()
+    db = tmp_path / "symbols.db"
+    fixtures = REPO_ROOT / "examples" / "fixtures"
+
+    base = runner.invoke(
+        app,
+        ["index", "--scip", str(fixtures / "two_documents.json"), "--out", str(db)],
+    )
+    assert base.exit_code == 0, base.stdout + base.stderr
+
+    merged = runner.invoke(
+        app,
+        [
+            "index",
+            "--scip",
+            str(fixtures / "two_documents_merged.json"),
+            "--out",
+            str(db),
+            "--merge",
+            "--paths",
+            "com/example/OrderService.java",
+        ],
+    )
+    assert merged.exit_code == 0, merged.stdout + merged.stderr
+    assert "mode=merged" in merged.stdout
+
+    info = runner.invoke(app, ["info", str(db)])
+    assert info.exit_code == 0
+    assert "Mode:           merged" in info.stdout

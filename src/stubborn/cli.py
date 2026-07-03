@@ -44,14 +44,37 @@ def index_cmd(
         "--project-root",
         help="Optional project root path recorded in index_run",
     ),
+    merge: bool = typer.Option(
+        False,
+        "--merge",
+        help="Merge into the latest index run (path-scoped replace) instead of a new snapshot",
+    ),
+    paths: Optional[str] = typer.Option(
+        None,
+        "--paths",
+        help="Comma-separated relative_path values to merge (default: all paths in SCIP)",
+    ),
 ) -> None:
     """Ingest a SCIP index into a local symbol graph SQLite database."""
     snapshot = load_scip_index(scip, project_root=project_root)
     writer = IndexWriter(out)
-    index_run_id = writer.write(snapshot)
+    path_set: set[str] | None = None
+    if paths:
+        path_set = {part.strip() for part in paths.split(",") if part.strip()}
+
+    if merge:
+        index_run_id = writer.merge(snapshot, paths=path_set)
+        mode = "merged"
+    else:
+        if path_set is not None:
+            raise typer.BadParameter("--paths requires --merge")
+        index_run_id = writer.write(snapshot)
+        mode = "snapshot"
+
     typer.echo(
         f"Indexed {len(snapshot.symbols)} symbol(s), "
-        f"{len(snapshot.edges)} edge(s) -> {out} (index_run_id={index_run_id})"
+        f"{len(snapshot.edges)} edge(s) -> {out} "
+        f"(index_run_id={index_run_id}, mode={mode})"
     )
 
 
@@ -72,6 +95,9 @@ def info_cmd(
     typer.echo(f"Indexed at:     {info.indexed_at}")
     typer.echo(f"Symbols:        {info.symbol_count}")
     typer.echo(f"Edges:          {info.edge_count}")
+    typer.echo(f"Mode:           {info.mode}")
+    if info.merge_count:
+        typer.echo(f"Merge count:    {info.merge_count}")
 
 
 @app.command("context")

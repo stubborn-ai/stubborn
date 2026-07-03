@@ -41,8 +41,9 @@ def parsed_index_to_snapshot(
     edges: list[EdgeRecord] = []
 
     for document in parsed.documents:
+        rel_path = document.relative_path or None
         for symbol_info in document.symbols:
-            _upsert_symbol(symbols, symbol_info)
+            _upsert_symbol(symbols, symbol_info, relative_path=rel_path)
             edges.extend(_edges_from_relationships(symbol_info))
 
         edges.extend(_edges_from_occurrences(document))
@@ -132,7 +133,12 @@ def _documentation_text(symbol_info: scip_pb2.SymbolInformation) -> str | None:
     return "\n".join(prose)
 
 
-def _upsert_symbol(store: dict[str, SymbolRecord], symbol_info: scip_pb2.SymbolInformation) -> None:
+def _upsert_symbol(
+    store: dict[str, SymbolRecord],
+    symbol_info: scip_pb2.SymbolInformation,
+    *,
+    relative_path: str | None = None,
+) -> None:
     if not symbol_info.symbol:
         return
     store[symbol_info.symbol] = SymbolRecord(
@@ -141,6 +147,7 @@ def _upsert_symbol(store: dict[str, SymbolRecord], symbol_info: scip_pb2.SymbolI
         kind=_kind_name(symbol_info.kind),
         signature=_signature_text(symbol_info),
         documentation=_documentation_text(symbol_info),
+        relative_path=relative_path,
     )
 
 

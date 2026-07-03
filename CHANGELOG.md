@@ -6,12 +6,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **ADR-009 incremental merge** — schema v2 (`relative_path`, `index_run.mode`, `merge_count`), `IndexWriter.merge()`, CLI `stubborn index --merge` and `--paths`.
+- JSON fixture `documents[]` format with per-document `relative_path`.
+- [`stubborn-watch`](https://github.com/stubborn-ai/stubborn-watch) — debounced file watch → scip-java → merge (new repo).
+
+### Changed
+
+- New databases initialize schema **v2**; v1 databases auto-migrate on open.
+
 ## [0.9.0b4] - 2026-07-03
 
 ### Added
 
 - Architecture Decision Records (`docs/adr/`) — ADR-001 through ADR-009.
-- [ADR-009](docs/adr/ADR-009-incremental-index-merge.md) — incremental `--merge` vs full snapshot indexing (design; not yet implemented).
+- [ADR-009](docs/adr/ADR-009-incremental-index-merge.md) — incremental `--merge` vs full snapshot indexing.
 - [DEVELOPMENT-MODEL.md](docs/DEVELOPMENT-MODEL.md) — architecture-led, AI-assisted engineering declaration.
 - **`--prune-mode`** (`smart` | `strict` | `fast`) on `context`, `metrics`, and API — user control over neighbor expansion.
 - Ingest signature enrichment edges tagged as `signature-ref` (skipped in `strict` / `fast`).

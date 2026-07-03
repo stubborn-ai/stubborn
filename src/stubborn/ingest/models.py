@@ -12,6 +12,7 @@ class SymbolRecord:
     kind: str | None = None
     signature: str | None = None
     documentation: str | None = None
+    relative_path: str | None = None
 
 
 @dataclass(frozen=True)
