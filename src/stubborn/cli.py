@@ -13,7 +13,7 @@ from stubborn.ingest.scip import load_scip_index
 from stubborn.metrics import compute_compression
 from stubborn.reconcile.diff import format_report, reconcile
 from stubborn.reconcile.entities import SymbolEntity
-from stubborn.store.reader import list_symbols
+from stubborn.store.reader import list_symbols, workspace_run_summaries
 from stubborn.store.writer import IndexWriter, init_db, read_info, register_repo
 from stubborn.weave.dispatch import weave_context
 from stubborn.weave.options import WeaveOptions
@@ -136,8 +136,28 @@ def info_cmd(
         "--run-id",
         help="Specific index_run id (default: latest)",
     ),
+    workspace: Optional[str] = typer.Option(
+        None,
+        "--workspace",
+        help="Show latest-run summary for every repo in a workspace",
+    ),
 ) -> None:
     """Show summary for an index run."""
+    if workspace is not None:
+        if run_id is not None:
+            raise typer.BadParameter("--workspace cannot be combined with --run-id")
+        summaries = workspace_run_summaries(db_path, workspace=workspace)
+        typer.echo(f"Workspace:      {workspace}")
+        typer.echo(f"Repos:          {len(summaries)}")
+        typer.echo(f"Symbols:        {sum(item.symbol_count for item in summaries)}")
+        typer.echo(f"Edges:          {sum(item.edge_count for item in summaries)}")
+        for item in summaries:
+            typer.echo(
+                f"- {item.repo_key}: run={item.index_run_id}, symbols={item.symbol_count}, "
+                f"edges={item.edge_count}, mode={item.mode}, merges={item.merge_count}"
+            )
+        return
+
     info = read_info(db_path, index_run_id=run_id)
     typer.echo(f"Index run:      {info.index_run_id}")
     typer.echo(f"SCIP source:    {info.scip_source}")

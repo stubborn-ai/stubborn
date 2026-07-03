@@ -191,12 +191,12 @@ def prune_context(
             """,
             run_ids,
         ):
-            adjacency.setdefault(row["from_symbol_id"], []).append(
-                (row["to_symbol_id"], row["edge_kind"])
-            )
-            adjacency.setdefault(row["to_symbol_id"], []).append(
-                (row["from_symbol_id"], row["edge_kind"])
-            )
+            from_row = symbols_by_id[row["from_symbol_id"]]
+            to_row = symbols_by_id[row["to_symbol_id"]]
+            from_id = stable_to_id[from_row["stable_id"]]
+            to_id = stable_to_id[to_row["stable_id"]]
+            adjacency.setdefault(from_id, []).append((to_id, row["edge_kind"]))
+            adjacency.setdefault(to_id, []).append((from_id, row["edge_kind"]))
 
         start_id = stable_to_id[target_stable_id]
         type_name_index = _build_type_name_index(symbols_by_id)
@@ -218,11 +218,12 @@ def prune_context(
             current_depth = seen[current_id]
             current_row = symbols_by_id[current_id]
 
-            for ref_id in _signature_type_ref_ids(current_row, type_name_index):
-                ref_row = symbols_by_id[ref_id]
-                canonical_ref_id = stable_to_id[ref_row["stable_id"]]
-                if not use_heuristics:
-                    continue
+            if use_heuristics:
+                signature_refs = _signature_type_ref_ids(current_row, type_name_index)
+            else:
+                signature_refs = []
+            for ref_id in signature_refs:
+                canonical_ref_id = stable_to_id[symbols_by_id[ref_id]["stable_id"]]
                 if current_depth > 0:
                     continue
                 if canonical_ref_id in seen:
@@ -241,15 +242,13 @@ def prune_context(
                 )
 
             for neighbor_id, edge_kind in adjacency.get(current_id, []):
-                neighbor_row = symbols_by_id[neighbor_id]
-                canonical_neighbor_id = stable_to_id[neighbor_row["stable_id"]]
-                if canonical_neighbor_id in seen:
+                if neighbor_id in seen:
                     continue
 
                 if not use_heuristics and edge_kind in _INFERRED_EDGE_KINDS:
                     continue
 
-                neighbor = symbols_by_id[canonical_neighbor_id]
+                neighbor = symbols_by_id[neighbor_id]
                 if _should_exclude(neighbor["stable_id"], budget.exclude_patterns):
                     continue
 
@@ -260,7 +259,7 @@ def prune_context(
                     continue
 
                 _enqueue_symbol(
-                    canonical_neighbor_id,
+                    neighbor_id,
                     current_depth + 1,
                     seen=seen,
                     queue=queue,

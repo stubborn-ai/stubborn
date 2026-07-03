@@ -122,6 +122,11 @@ def test_cli_workspace_scope(tmp_path: Path) -> None:
     assert "Workspace:      acme" in info.stdout
     assert "Repo:           orders" in info.stdout
 
+    workspace_info = runner.invoke(app, ["info", str(db), "--workspace", "acme"])
+    assert workspace_info.exit_code == 0, workspace_info.stdout + workspace_info.stderr
+    assert "Repos:          1" in workspace_info.stdout
+    assert "- orders:" in workspace_info.stdout
+
     listed = runner.invoke(
         app,
         ["list-symbols", str(db), "--workspace", "acme", "--query", "OrderService"],

@@ -19,6 +19,18 @@ class SymbolSummary:
     documentation: str | None
 
 
+@dataclass(frozen=True)
+class RepoRunSummary:
+    workspace: str
+    repo_key: str
+    index_run_id: int
+    indexed_at: str
+    mode: str
+    merge_count: int
+    symbol_count: int
+    edge_count: int
+
+
 def resolve_db_path(db_path: str | Path | None) -> Path:
     """Resolve DB path from argument or STUBBORN_DB environment variable."""
     if db_path is not None:
@@ -214,5 +226,43 @@ def resolve_stable_id(
                 ):
                     return stable_id
         return rows[0][0]
+    finally:
+        conn.close()
+
+
+def workspace_run_summaries(db_path: str | Path, *, workspace: str) -> list[RepoRunSummary]:
+    """Return latest run summaries for every repo in a workspace."""
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    try:
+        run_ids = latest_index_run_ids(conn, workspace=workspace)
+        placeholders = _placeholders(list(run_ids))
+        rows = conn.execute(
+            f"""
+            SELECT w.name AS workspace, r.repo_key, ir.id AS index_run_id,
+                   ir.indexed_at, ir.mode, ir.merge_count,
+                   (SELECT COUNT(*) FROM scip_symbol s WHERE s.index_run_id = ir.id) AS symbol_count,
+                   (SELECT COUNT(*) FROM scip_edge e WHERE e.index_run_id = ir.id) AS edge_count
+            FROM index_run ir
+            JOIN repo r ON r.id = ir.repo_id
+            JOIN workspace w ON w.id = r.workspace_id
+            WHERE ir.id IN ({placeholders})
+            ORDER BY r.priority, r.repo_key
+            """,
+            run_ids,
+        ).fetchall()
+        return [
+            RepoRunSummary(
+                workspace=row["workspace"],
+                repo_key=row["repo_key"],
+                index_run_id=int(row["index_run_id"]),
+                indexed_at=row["indexed_at"],
+                mode=row["mode"],
+                merge_count=int(row["merge_count"] or 0),
+                symbol_count=int(row["symbol_count"]),
+                edge_count=int(row["edge_count"]),
+            )
+            for row in rows
+        ]
     finally:
         conn.close()

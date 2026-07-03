@@ -322,6 +322,15 @@ def test_workspace_context_crosses_repo_source_symbols(tmp_path: Path) -> None:
     names = {symbol.display_name for symbol in graph.symbols}
     assert {"handle", "Service", "Helper"} <= names
 
+    reverse_graph = prune_context(
+        db,
+        service,
+        workspace="acme",
+        budget=ContextBudget(call_closure_depth=2, max_symbols=20),
+    )
+    reverse_names = {symbol.display_name for symbol in reverse_graph.symbols}
+    assert {"handle", "Service", "Helper"} <= reverse_names
+
     listed = list_symbols(db, workspace="acme", query="Service", limit=10)
     assert [symbol.stable_id for symbol in listed].count(service) == 1
 
