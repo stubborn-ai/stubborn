@@ -1,16 +1,19 @@
 # Examples
 
-End-to-end scenarios for Stubborn. All validated examples are **Java / Spring** — matching [beta scope](../docs/BETA.md).
+Core fixtures and legacy in-repo examples for Stubborn.
 
-**Primary audience:** teams running SCIP in CI or migration runbooks. **Secondary:** try Docker E2E or fixtures without a local JDK.
+The canonical runnable demo and validation projects are moving to
+[`stubborn-demo`](https://github.com/stubborn-ai/stubborn-demo), so the core repo
+can stay focused on headless ingest, store, prune, weave, API, and CLI behavior.
+Minimal fixtures remain here for unit and contract tests.
 
 | Example | Status | Description |
 |---------|--------|-------------|
-| [demo-spring](demo-spring/) | **Active** | In-repo Spring Boot 3 demo — primary E2E path |
+| [demo-spring](demo-spring/) | Legacy / mirrored | Spring Boot 3 demo; canonical copy moves to `stubborn-demo` |
 | [fixtures](fixtures/) | Active | Minimal JSON / binary SCIP for unit tests |
-| [spring-petclinic](spring-petclinic/) | **Active** | Scale-up E2E vs official PetClinic (~375 symbols, ~90% savings) |
-| [dukesbank](dukesbank/) | **Active** | Duke's Bank Step 7 — external clone + E2E |
-| [migration-bridge](migration-bridge/) | Active | Optional anchor-migration consumer sketch |
+| [spring-petclinic](spring-petclinic/) | Legacy / mirrored | Scale-up E2E vs official PetClinic (~375 symbols, ~90% savings) |
+| [dukesbank](dukesbank/) | Legacy / mirrored | Duke's Bank Step 7 — external clone + E2E |
+| [migration-bridge](migration-bridge/) | Legacy / mirrored | Optional anchor-migration consumer sketch |
 
 ## Output formats
 
@@ -21,22 +24,13 @@ Both examples support:
 
 ## Recommended first run
 
-**Docker (no local Java toolchain):**
+Use [`stubborn-demo`](https://github.com/stubborn-ai/stubborn-demo) for product
+demos and validation:
 
 ```bash
-# from repo root
-docker compose build
-docker compose run --rm e2e              # demo-spring
-docker compose run --rm petclinic-e2e    # spring-petclinic scale-up
-docker compose run --rm dukesbank-e2e    # Duke's Bank (sibling dukesbank clone)
-```
-
-**Host:**
-
-```bash
-cd examples/demo-spring
+git clone https://github.com/stubborn-ai/stubborn-demo
+cd stubborn-demo/demo-spring
 ./scripts/run-e2e.ps1   # Windows PowerShell
-# or follow README.md for manual steps
 ```
 
 ## Documentation
