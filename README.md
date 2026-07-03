@@ -2,7 +2,7 @@
 
 **Deterministic code context from symbol graphs — for SCIP-indexed codebases.**
 
-> **Status: Beta (Java-first)** — release **`0.9.0b3`** · [BETA.md](docs/BETA.md) · [POSITIONING.md](docs/POSITIONING.md) · [CHANGELOG](CHANGELOG.md)
+> **Status: Beta (Java-first)** — release **`0.9.0b4`** · [BETA.md](docs/BETA.md) · [POSITIONING.md](docs/POSITIONING.md) · [CHANGELOG](CHANGELOG.md)
 
 Stubborn compiles a **SCIP symbol index** into **type-safe, privacy-preserving stub text** for LLMs and agents. Same index + target + options → same context: reproducible, token-bounded, and stripped of method bodies.
 

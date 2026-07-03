@@ -1,6 +1,6 @@
 # Documentation index
 
-**Program map:** [stubborn-hub](https://github.com/stubborn-ai/stubborn-hub) · **PyPI package:** `stubborn-stub` · **version:** `0.9.0b3` (Beta) · **CLI:** `stubborn`
+**Program map:** [stubborn-hub](https://github.com/stubborn-ai/stubborn-hub) · **PyPI package:** `stubborn-stub` · **version:** `0.9.0b4` (Beta) · **CLI:** `stubborn`
 
 | Doc | Audience | Contents |
 |-----|----------|----------|
