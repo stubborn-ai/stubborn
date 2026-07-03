@@ -158,7 +158,9 @@ class IndexWriter:
 
         conn = self._connect()
         try:
-            row = conn.execute("SELECT id, merge_count FROM index_run ORDER BY id DESC LIMIT 1").fetchone()
+            row = conn.execute(
+                "SELECT id, merge_count FROM index_run ORDER BY id DESC LIMIT 1"
+            ).fetchone()
             if row is None:
                 cursor = conn.execute(
                     """

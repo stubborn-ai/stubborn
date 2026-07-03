@@ -132,9 +132,7 @@ def test_schema_version_is_v2_after_init(tmp_path: Path) -> None:
     try:
         version = conn.execute("SELECT MAX(version) FROM meta_schema_version").fetchone()[0]
         assert version == 2
-        columns = {
-            row[1] for row in conn.execute("PRAGMA table_info(scip_symbol)")
-        }
+        columns = {row[1] for row in conn.execute("PRAGMA table_info(scip_symbol)")}
         assert "relative_path" in columns
     finally:
         conn.close()
@@ -165,9 +163,7 @@ def test_v1_database_migrates_to_v2(tmp_path: Path) -> None:
     try:
         version = conn.execute("SELECT MAX(version) FROM meta_schema_version").fetchone()[0]
         assert version == 2
-        row = conn.execute(
-            "SELECT relative_path FROM scip_symbol WHERE stable_id = 'a'"
-        ).fetchone()
+        row = conn.execute("SELECT relative_path FROM scip_symbol WHERE stable_id = 'a'").fetchone()
         assert row[0] == "A.java"
     finally:
         conn.close()

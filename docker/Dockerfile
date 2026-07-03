@@ -5,9 +5,6 @@
 # Build (from repo root):
 #   docker compose build
 #
-# Run demo-spring E2E:
-#   docker compose run --rm e2e
-#
 # Interactive shell:
 #   docker compose run --rm shell
 
@@ -47,20 +44,7 @@ COPY proto ./proto
 
 RUN pip3 install --no-cache-dir --break-system-packages -e ".[dev]"
 
-COPY docker/run-e2e.sh /usr/local/bin/run-demo-e2e
-RUN sed -i 's/\r$//' /usr/local/bin/run-demo-e2e && chmod +x /usr/local/bin/run-demo-e2e
-
-COPY docker/run-petclinic-e2e.sh /usr/local/bin/run-petclinic-e2e
-RUN sed -i 's/\r$//' /usr/local/bin/run-petclinic-e2e && chmod +x /usr/local/bin/run-petclinic-e2e
-
-COPY docker/run-dukesbank-e2e.sh /usr/local/bin/run-dukesbank-e2e
-RUN sed -i 's/\r$//' /usr/local/bin/run-dukesbank-e2e && chmod +x /usr/local/bin/run-dukesbank-e2e
-
-COPY examples/spring-petclinic/upstream.pin /opt/stubborn/examples/spring-petclinic/upstream.pin
-COPY scripts/resolve_symbol.py scripts/verify_petclinic_context.py \
-    scripts/verify_demo_context.py scripts/verify_controller_context.py \
-    scripts/verify_pay_flow_context.py scripts/verify_dukesbank_context.py \
-    /opt/stubborn/scripts/
+COPY scripts/resolve_symbol.py /opt/stubborn/scripts/
 
 # Default CLI; compose services override entrypoint/command as needed
 ENTRYPOINT ["stubborn"]

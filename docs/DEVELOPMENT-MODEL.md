@@ -12,7 +12,7 @@ Responsible for:
 
 - **Architecture** — pipeline shape (ingest → store → prune → weave), repo layout, public API surface
 - **Boundary protocols** — SQLite schema, SCIP ingest contracts, CLI/MCP semantics, output format grammars ([ADR index](adr/README.md))
-- **Acceptance criteria** — compression KPIs, neighbor guard scripts, Docker E2E cases (`examples/demo-spring/cases/`)
+- **Acceptance criteria** — core fixture tests here; compression KPIs, neighbor guards, and Docker E2E cases in [`stubborn-demo`](https://github.com/stubborn-ai/stubborn-demo)
 - **Final judgment** — merge when deterministic gates pass (pytest, ruff, CI E2E, verify scripts)
 - **Decision records** — material changes captured as ADRs before or alongside bulk implementation
 
@@ -37,8 +37,8 @@ Core pipeline targets **reproducible execution**:
 |-------|----------|-------|
 | Ingest | `symbols.db` from SCIP | Unit tests + fixture indexes |
 | Context | `java-stub` / `stubborn-dsl` text | Same DB + target + budget → same output |
-| KPI | `metrics` compression ratio | demo-spring / petclinic baselines in [BETA.md](BETA.md) |
-| CI guard | Neighbor type sets | `scripts/verify_*.py` after Docker E2E |
+| KPI | `metrics` compression ratio | fixture tests here; demo baselines in [BETA.md](BETA.md) and `stubborn-demo` |
+| CI guard | Neighbor type sets | `stubborn-demo` E2E guards |
 | Reconcile | Symbol diff | `stubborn diff` exit codes |
 
 Given the same SCIP index, target `stable_id`, and budget options, `context` output is **stable** (no embeddings, no model calls inside Stubborn).

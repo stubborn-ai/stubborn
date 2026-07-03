@@ -1,31 +1,19 @@
 # Examples
 
-Core fixtures and legacy in-repo examples for Stubborn.
+Core fixtures for Stubborn unit and contract tests.
 
-The canonical runnable demo and validation projects are moving to
-[`stubborn-demo`](https://github.com/stubborn-ai/stubborn-demo), so the core repo
-can stay focused on headless ingest, store, prune, weave, API, and CLI behavior.
-Minimal fixtures remain here for unit and contract tests.
+Runnable demos and black-box validation projects live in
+[`stubborn-demo`](https://github.com/stubborn-ai/stubborn-demo). This keeps the
+core repo focused on headless ingest, store, prune, weave, API, and CLI
+behavior, without mirrored demo copies that can drift.
 
-| Example | Status | Description |
-|---------|--------|-------------|
-| [demo-spring](demo-spring/) | Legacy / mirrored | Spring Boot 3 demo; canonical copy moves to `stubborn-demo` |
-| [fixtures](fixtures/) | Active | Minimal JSON / binary SCIP for unit tests |
-| [spring-petclinic](spring-petclinic/) | Legacy / mirrored | Scale-up E2E vs official PetClinic (~375 symbols, ~90% savings) |
-| [dukesbank](dukesbank/) | Legacy / mirrored | Duke's Bank Step 7 — external clone + E2E |
-| [migration-bridge](migration-bridge/) | Legacy / mirrored | Optional anchor-migration consumer sketch |
+| Path | Status | Description |
+|------|--------|-------------|
+| [fixtures](fixtures/) | Active | Minimal JSON / binary SCIP fixtures for tests and quick starts |
 
-## Output formats
+## Recommended Demo Path
 
-Both examples support:
-
-- `java-stub` (default) — Java-like declarations for codegen
-- `stubborn-dsl` — compact type/edge graph ([docs/STUBBORN-DSL.md](../docs/STUBBORN-DSL.md))
-
-## Recommended first run
-
-Use [`stubborn-demo`](https://github.com/stubborn-ai/stubborn-demo) for product
-demos and validation:
+Use `stubborn-demo` for product demos and validation:
 
 ```bash
 git clone https://github.com/stubborn-ai/stubborn-demo
@@ -36,4 +24,4 @@ cd stubborn-demo/demo-spring
 ## Documentation
 
 - [docs/README.md](../docs/README.md) — full doc index
-- [docker/README.md](../docker/README.md) — toolchain image
+- [stubborn-demo](https://github.com/stubborn-ai/stubborn-demo) — runnable demos and validation

@@ -284,4 +284,3 @@ def diff_cmd(
     typer.echo(format_report(report))
     if not report.ok:
         raise typer.Exit(code=1)
-

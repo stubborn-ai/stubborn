@@ -3,7 +3,7 @@
     "stubborn": {
       "command": "stubborn-mcp",
       "env": {
-        "STUBBORN_DB": "${workspaceFolder}/examples/demo-spring/metadata/symbols.db"
+        "STUBBORN_DB": "${workspaceFolder}/metadata/symbols.db"
       }
     }
   }

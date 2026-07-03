@@ -2,11 +2,8 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import pytest
 
-from stubborn.api import get_context
 from stubborn.graph.prune import PrunedGraph, PrunedSymbol
 from stubborn.weave.java_stub import weave_java_stub
 from stubborn.weave.members import (
@@ -16,13 +13,6 @@ from stubborn.weave.members import (
 )
 from stubborn.weave.options import DEFAULT_WEAVE_OPTIONS, WeaveOptions
 from stubborn.weave.stubborn_dsl import weave_stubborn_dsl
-
-DEMO_ROOT = Path(__file__).resolve().parents[1] / "examples" / "demo-spring"
-DEMO_DB = DEMO_ROOT / "metadata" / "symbols.db"
-DEMO_TARGET = (
-    "semanticdb maven maven/com.example/orders-demo 0.1.0-SNAPSHOT "
-    "com/example/orders/service/OrderService#"
-)
 
 TARGET_TYPE = "semanticdb maven com/example/OrderService#"
 NEIGHBOR_TYPE = "semanticdb maven com/example/OrderRepository#"
@@ -177,19 +167,3 @@ def test_stubborn_dsl_javadoc_summary_when_explicit() -> None:
     )
     assert 'doc "Handles orders."' in result.text
     assert "members:" not in result.text
-
-
-@pytest.mark.skipif(not DEMO_DB.exists(), reason="demo-spring symbols.db not built")
-def test_demo_neighbors_mode_increases_tokens() -> None:
-    target_only = get_context(DEMO_TARGET, db_path=DEMO_DB, member_signatures="target")
-    neighbors = get_context(DEMO_TARGET, db_path=DEMO_DB, member_signatures="neighbors")
-    all_types = get_context(DEMO_TARGET, db_path=DEMO_DB, member_signatures="all")
-    assert neighbors.estimated_tokens >= target_only.estimated_tokens
-    assert all_types.estimated_tokens >= neighbors.estimated_tokens
-
-
-@pytest.mark.skipif(not DEMO_DB.exists(), reason="demo-spring symbols.db not built")
-def test_demo_javadoc_off_reduces_tokens() -> None:
-    with_summary = get_context(DEMO_TARGET, db_path=DEMO_DB, javadoc="summary")
-    without = get_context(DEMO_TARGET, db_path=DEMO_DB, javadoc="off")
-    assert without.estimated_tokens <= with_summary.estimated_tokens

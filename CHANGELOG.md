@@ -15,6 +15,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - New databases initialize schema **v2**; v1 databases auto-migrate on open.
+- Core `examples/` now contains only fixtures; runnable demo and validation projects live in [`stubborn-demo`](https://github.com/stubborn-ai/stubborn-demo).
+
+### Removed
+
+- Mirrored demo assets (`demo-spring`, `spring-petclinic`, Duke's Bank, migration bridge) and their core-repo E2E scripts/workflows.
 
 ### Fixed
 

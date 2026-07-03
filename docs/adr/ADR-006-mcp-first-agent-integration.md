@@ -53,7 +53,7 @@ Entry point: `stubborn-mcp` console script (or `python -m stubborn_mcp`).
 - Agents get typed tools instead of parsing CLI stdout
 - Same budgets and weave options as CLI/API — no “MCP-only” behavior drift
 - Core package stays free of MCP SDK dependency
-- Demo path: `examples/demo-spring/scripts/mcp-smoke.ps1` (uses `stubborn_mcp`)
+- Demo path: [`stubborn-demo/demo-spring/scripts/mcp-smoke.ps1`](https://github.com/stubborn-ai/stubborn-demo/blob/main/demo-spring/scripts/mcp-smoke.ps1)
 - Positions Stubborn as infrastructure for codegen agents, not a standalone REPL tool
 
 ### Negative / trade-offs

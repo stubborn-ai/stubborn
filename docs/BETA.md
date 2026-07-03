@@ -9,7 +9,7 @@ Pre-beta (`0.9.0a1`) completed the checklist; this tag flips the PyPI classifier
 | Audience | Beta fit |
 |----------|----------|
 | **Primary** — Java/Spring teams with SCIP in CI or runbooks | **Strong** — E2E, KPIs, `diff`, verify guards |
-| **Secondary** — Cursor/MCP individuals | **Good** if you accept SCIP/index setup; start with fixture or Docker |
+| **Secondary** — Cursor/MCP individuals | **Good** if you accept SCIP/index setup; start with fixture or `stubborn-demo` |
 | **Any language via SCIP** | **Experimental ingest only** — no weave/E2E claim |
 
 See [POSITIONING.md](POSITIONING.md) for the full primary/secondary split.
@@ -34,10 +34,10 @@ See [POSITIONING.md](POSITIONING.md) for the full primary/secondary split.
 
 ### E2E validation
 
-- [x] demo-spring Docker E2E (OrderService, OrderController, payOrder)
-- [x] spring-petclinic scale-up E2E
-- [x] Duke's Bank `AccountControllerBean` case (Step 7 runbook)
-- [x] CI symbols.db artifact — neighbor tests without skip
+- [x] demo-spring Docker E2E (OrderService, OrderController, payOrder) — maintained in [`stubborn-demo`](https://github.com/stubborn-ai/stubborn-demo)
+- [x] spring-petclinic scale-up E2E — maintained in `stubborn-demo`
+- [x] Duke's Bank `AccountControllerBean` case (Step 7 runbook) — maintained in `stubborn-demo`
+- [x] Core fixture CI in this repo; black-box neighbor guards in `stubborn-demo`
 
 ### Agent / docs
 

@@ -60,7 +60,7 @@ Cross-program contract (external): [migration-hub ADR-010](https://github.com/an
 |----------|---------|
 | `stubborn diff` | Symbol reconcile between two indexes |
 | [pr-symbol-diff.yml](../.github/workflows/pr-symbol-diff.yml) | PR guard for symbol regressions |
-| [petclinic-e2e.yml](../.github/workflows/petclinic-e2e.yml) | Weekly / manual scale-up E2E |
+| [`stubborn-demo`](https://github.com/stubborn-ai/stubborn-demo) | Runnable demo and scale-up E2E workflows |
 
 Example:
 

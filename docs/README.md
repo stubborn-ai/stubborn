@@ -30,10 +30,9 @@ Both formats share the same prune step and privacy contract (declarations only, 
 
 | Path | Description |
 |------|-------------|
-| [examples/demo-spring](../examples/demo-spring/) | Primary in-repo E2E (~14 files, ~81% savings) |
-| [examples/spring-petclinic](../examples/spring-petclinic/) | Scale-up E2E vs upstream PetClinic (~375 symbols, ~90% savings) |
-| [examples/migration-bridge](../examples/migration-bridge/) | Optional anchor-migration consumer pattern |
-| [docker/README.md](../docker/README.md) | Reproducible Docker toolchain |
+| [examples/fixtures](../examples/fixtures/) | Minimal SCIP fixtures for unit tests and quick starts |
+| [stubborn-demo](https://github.com/stubborn-ai/stubborn-demo) | Runnable demos and black-box validation projects |
+| [docker/README.md](../docker/README.md) | Reproducible core CLI/toolchain image |
 
 ## External
 

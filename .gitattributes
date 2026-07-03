@@ -1,5 +1,2 @@
 * text=auto
 *.sh text eol=lf
-docker/run-e2e.sh text eol=lf
-docker/run-petclinic-e2e.sh text eol=lf
-examples/spring-petclinic/upstream.pin text eol=lf

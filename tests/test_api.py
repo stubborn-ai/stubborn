@@ -12,10 +12,43 @@ from stubborn.store.reader import list_symbols, resolve_db_path
 from stubborn.store.writer import IndexWriter
 
 FIXTURE = Path(__file__).resolve().parents[1] / "examples" / "fixtures" / "minimal.json"
-DEMO_JAVA = (
-    Path(__file__).resolve().parents[1] / "examples" / "demo-spring" / "src" / "main" / "java"
-)
 TARGET = "semanticdb maven com/example/OrderService#process()."
+
+
+def _write_source_fixture(tmp_path: Path) -> Path:
+    source_root = tmp_path / "src" / "main" / "java" / "com" / "example"
+    source_root.mkdir(parents=True)
+    rules = "\n".join(
+        f"                // business rule {i}: validate order state before returning context."
+        for i in range(40)
+    )
+    (source_root / "OrderService.java").write_text(
+        """
+        package com.example;
+
+        public class OrderService {
+            public Order process(OrderRepository repository) {
+                Order order = repository.findById("demo");
+RULES
+                repository.save(order);
+                return order;
+            }
+        }
+        """.replace("RULES", rules),
+        encoding="utf-8",
+    )
+    (source_root / "OrderRepository.java").write_text(
+        """
+        package com.example;
+
+        public interface OrderRepository {
+            Order findById(String id);
+            void save(Order order);
+        }
+        """,
+        encoding="utf-8",
+    )
+    return tmp_path / "src" / "main" / "java"
 
 
 @pytest.fixture()
@@ -71,8 +104,8 @@ def test_list_index_symbols_api(indexed_db: Path) -> None:
     assert "documentation" in symbols[0]
 
 
-def test_get_metrics_api(indexed_db: Path) -> None:
-    report = get_metrics(TARGET, DEMO_JAVA, db_path=indexed_db)
-    assert report["source_files"] >= 10
+def test_get_metrics_api(indexed_db: Path, tmp_path: Path) -> None:
+    report = get_metrics(TARGET, _write_source_fixture(tmp_path), db_path=indexed_db)
+    assert report["source_files"] == 2
     assert report["compression_ratio"] > 0.5
     assert "stub_text" in report

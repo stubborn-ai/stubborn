@@ -8,31 +8,6 @@ services:
         SCIP_JAVA_VERSION: "0.12.3"
     image: stubborn:e2e
 
-  e2e:
-    image: stubborn:e2e
-    entrypoint: ["/bin/bash", "/usr/local/bin/run-demo-e2e"]
-    working_dir: /demo
-    volumes:
-      - ./examples/demo-spring:/demo
-
-  petclinic-e2e:
-    image: stubborn:e2e
-    entrypoint: ["/bin/bash", "/usr/local/bin/run-petclinic-e2e"]
-    volumes:
-      - .:/opt/stubborn
-    environment:
-      PETCLINIC_ROOT: /petclinic
-
-  dukesbank-e2e:
-    image: stubborn:e2e
-    entrypoint: ["/bin/bash", "/usr/local/bin/run-dukesbank-e2e"]
-    volumes:
-      - .:/opt/stubborn
-      - ../../dukesbank/src/j2eetutorial14/examples/bank:/bank:ro
-    environment:
-      BANK_ROOT: /bank
-      EXAMPLE_ROOT: /opt/stubborn/examples/dukesbank
-
   shell:
     image: stubborn:e2e
     entrypoint: ["/bin/bash"]
@@ -41,7 +16,6 @@ services:
     working_dir: /opt/stubborn
     volumes:
       - .:/opt/stubborn
-      - ./examples/demo-spring:/demo
 
   cli:
     image: stubborn:e2e
@@ -49,4 +23,3 @@ services:
     working_dir: /workspace
     volumes:
       - .:/opt/stubborn
-      - ./examples/demo-spring:/demo

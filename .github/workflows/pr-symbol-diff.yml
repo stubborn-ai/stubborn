@@ -3,33 +3,11 @@ name: PR symbol diff
 on:
   pull_request:
     paths:
-      - "examples/demo-spring/**"
+      - "examples/fixtures/**"
       - "src/**"
-      - "scripts/verify_demo_context.py"
       - ".github/workflows/pr-symbol-diff.yml"
 
 jobs:
-  demo-spring-context-guard:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build toolchain image
-        run: docker compose build stubborn
-
-      - name: Run demo-spring E2E
-        run: docker compose run --rm e2e
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install package
-        run: pip install -e ".[dev]"
-
-      - name: Verify OrderService context neighbors
-        run: python scripts/verify_demo_context.py
-
   fixture-symbol-diff:
     runs-on: ubuntu-latest
     steps:

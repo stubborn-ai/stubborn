@@ -25,7 +25,7 @@ It is **not** a zero-configuration repo map. You (or your CI) run a SCIP indexer
 
 **Success looks like:** MCP tools return pruned stubs before codegen — not “open repo and go” like [Aider repo-map](https://aider.chat/docs/repomap.html).
 
-Stubborn serves both, but **features and CI investment skew Primary** (reconcile, verify scripts, migration cases). Secondary users should start with the [30-second fixture path](../README.md#try-in-30-seconds-no-java-required) or Docker E2E.
+Stubborn serves both, but **features and CI investment skew Primary** (reconcile, validation cases, demo runbooks). Secondary users should start with the [30-second fixture path](../README.md#try-in-30-seconds-no-java-required) or [`stubborn-demo`](https://github.com/stubborn-ai/stubborn-demo).
 
 ## What it is
 
@@ -66,7 +66,7 @@ Stubborn wins when **determinism + token KPI + privacy contract** matter more th
 |------|---------------|----------|
 | **Fixture** (30s) | `pip install stubborn-stub` | Try the compiler; no Java |
 | **Agents (MCP)** | `pip install stubborn-stub stubborn-mcp` | Cursor with `symbols.db` — see [stubborn-mcp](https://github.com/stubborn-ai/stubborn-mcp) |
-| **Docker E2E** | Docker Desktop | Reproduce CI; demo-spring artifacts |
+| **Docker E2E** | Docker Desktop + `stubborn-demo` | Reproduce demo-spring and scale-up validation |
 | **Real Java project** | JDK, Maven/Gradle, **scip-java**, Python | Primary production use |
 
 Real workflow:

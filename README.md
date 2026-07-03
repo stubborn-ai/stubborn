@@ -36,7 +36,7 @@ Stubborn addresses these when you already have (or can build) a **SCIP index**. 
 
 **Primary (Java / Spring + SCIP workflow):**
 
-- **Legacy / modernization** — scoped context for large estates ([examples/migration-bridge](examples/migration-bridge/), [dukesbank](examples/dukesbank/))
+- **Legacy / modernization** — scoped context for large estates; runnable validation lives in [`stubborn-demo`](https://github.com/stubborn-ai/stubborn-demo)
 - **PR semantic audit** — `diff` two SCIP indexes; CI symbol guards
 - **Program runbooks** — reproducible stub artifacts with compression KPIs
 
@@ -64,12 +64,12 @@ Start with [30-second fixture](#try-in-30-seconds-no-java-required) or [Docker E
 
 ```bash
 docker compose build
-docker compose run --rm e2e    # demo-spring E2E
-docker compose run --rm petclinic-e2e  # spring-petclinic scale-up
 docker compose run --rm cli --help
+docker compose run --rm shell -lc \
+  "stubborn index --scip examples/fixtures/minimal.scip --out /tmp/symbols.db && stubborn info /tmp/symbols.db"
 ```
 
-See [docker/README.md](docker/README.md).
+See [docker/README.md](docker/README.md). Runnable Java demos and E2E validation live in [`stubborn-demo`](https://github.com/stubborn-ai/stubborn-demo).
 
 ## Installation
 
@@ -102,7 +102,7 @@ stubborn context /tmp/symbols.db \
 
 ## Quick start
 
-**Full E2E with a modern Spring Boot demo:** see [examples/demo-spring](examples/demo-spring/).
+**Full E2E with a modern Spring Boot demo:** see [`stubborn-demo/demo-spring`](https://github.com/stubborn-ai/stubborn-demo/tree/main/demo-spring).
 
 ### 1. Index symbols
 
@@ -212,7 +212,7 @@ SQLite schema: [`src/stubborn/store/schema/v1.sql`](src/stubborn/store/schema/v1
 | **0.3** | Token budget enforcement, `metrics` KPI, weaver quality, Docker CI |
 | **0.4** | MCP server (`get_context`, `list_symbols`, `metrics`) |
 | **0.5** | Type-neighbor pruning, PR symbol-diff Action, context guard |
-| **0.6** | [spring-petclinic](examples/spring-petclinic/) scale-up E2E (~90% savings) |
+| **0.6** | spring-petclinic scale-up E2E (~90% savings; now maintained in [`stubborn-demo`](https://github.com/stubborn-ai/stubborn-demo)) |
 | **0.7** | [Stubborn-DSL](docs/STUBBORN-DSL.md) weaver (`--format stubborn-dsl`) |
 | **0.8** | Java-first beta track — [BETA.md](docs/BETA.md), demo-spring cases |
 | **0.9** | Method signatures, [STUBBORN-DSL-GUIDE](docs/STUBBORN-DSL-GUIDE.md) |

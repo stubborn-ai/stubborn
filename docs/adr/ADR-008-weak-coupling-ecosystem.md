@@ -38,7 +38,7 @@ Stubborn’s README leads with standalone value; ecosystem links sit under “Op
 ### Negative / trade-offs
 
 - Duplicated *documentation* of integration patterns (hub ADR + INTEGRATION.md)
-- Migration users must wire Stubborn into runbooks themselves (examples/dukesbank, migration-bridge sketch)
+- Migration users must wire Stubborn into runbooks themselves (Duke's Bank and migration-bridge sketches live in `stubborn-demo`)
 
 ## Alternatives considered
 
@@ -52,4 +52,4 @@ Stubborn’s README leads with standalone value; ecosystem links sit under “Op
 
 - [INTEGRATION.md](../INTEGRATION.md)
 - [POSITIONING.md](../POSITIONING.md)
-- [examples/migration-bridge/README.md](../../examples/migration-bridge/README.md)
+- [`stubborn-demo/migration-bridge`](https://github.com/stubborn-ai/stubborn-demo/tree/main/migration-bridge)

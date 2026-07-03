@@ -13,9 +13,41 @@ from stubborn.tokens import estimate_tokens
 from stubborn.weave.java_stub import weave_java_stub
 
 FIXTURE = Path(__file__).resolve().parents[1] / "examples" / "fixtures" / "minimal.json"
-DEMO_JAVA = (
-    Path(__file__).resolve().parents[1] / "examples" / "demo-spring" / "src" / "main" / "java"
-)
+
+
+def _write_source_fixture(tmp_path: Path) -> Path:
+    source_root = tmp_path / "src" / "main" / "java" / "com" / "example"
+    source_root.mkdir(parents=True)
+    (source_root / "OrderService.java").write_text(
+        """
+        package com.example;
+
+        public class OrderService {
+            public Order process(OrderRepository repository, String id) {
+                Order order = repository.findById(id);
+                return order;
+            }
+
+            public Order cancel(OrderRepository repository, String id) {
+                Order order = repository.findById(id);
+                return order;
+            }
+        }
+        """,
+        encoding="utf-8",
+    )
+    (source_root / "OrderRepository.java").write_text(
+        """
+        package com.example;
+
+        public interface OrderRepository {
+            Order findById(String id);
+            void save(Order order);
+        }
+        """,
+        encoding="utf-8",
+    )
+    return tmp_path / "src" / "main" / "java"
 
 
 def test_estimate_tokens() -> None:
@@ -68,9 +100,9 @@ def test_metrics_on_fixture(tmp_path: Path) -> None:
     report = compute_compression(
         db,
         "semanticdb maven com/example/OrderService#",
-        DEMO_JAVA,
+        _write_source_fixture(tmp_path),
         budget=ContextBudget(max_tokens=12_000),
     )
-    assert report.source.file_count >= 10
+    assert report.source.file_count == 2
     assert report.stub.estimated_tokens > 0
     assert report.compression_ratio > 0.5

@@ -1,6 +1,7 @@
 # Docker environment
 
-Reproducible toolchain for Stubborn without installing JDK, Maven, or scip-java locally.
+Reproducible core CLI/toolchain image for Stubborn without installing JDK,
+Maven, or scip-java locally.
 
 ## Image contents
 
@@ -19,32 +20,22 @@ From the **repository root**:
 # Build image
 docker compose build
 
-# Run demo-spring E2E (writes artifacts to examples/demo-spring/metadata/)
-docker compose run --rm e2e
-
-# Run spring-petclinic scale-up E2E (~5 min first run; clones upstream)
-docker compose run --rm petclinic-e2e
-
-# Duke's Bank Step 7 (requires sibling dukesbank clone at ../../dukesbank)
-docker compose run --rm dukesbank-e2e
-
-# Inspect outputs on the host
-ls examples/demo-spring/metadata/
-cat examples/demo-spring/metadata/order-service.stub.java
-
-# Stubborn-DSL (after indexing):
-docker compose run --rm cli context /demo/metadata/symbols.db \
-  --target "<stable_id>" --format stubborn-dsl
+# Run the CLI against the bundled fixture
+docker compose run --rm shell -lc \
+  "stubborn index --scip examples/fixtures/minimal.scip --out /tmp/symbols.db && \
+   stubborn context /tmp/symbols.db \
+     --target 'semanticdb maven com/example/OrderService#' \
+     --format stubborn-dsl"
 ```
 
-See [docs/STUBBORN-DSL.md](../docs/STUBBORN-DSL.md).
+See [docs/STUBBORN-DSL.md](../docs/STUBBORN-DSL.md). Runnable Java demos and
+E2E validation live in
+[`stubborn-demo`](https://github.com/stubborn-ai/stubborn-demo).
 
 ## Services
 
 | Service | Purpose |
 |---------|---------|
-| `e2e` | Runs `docker/run-e2e.sh` on mounted `examples/demo-spring` |
-| `petclinic-e2e` | Clones pinned spring-petclinic, full scale-up pipeline |
 | `shell` | Interactive bash with full toolchain |
 | `cli` | Run arbitrary `stubborn` commands |
 
@@ -53,15 +44,14 @@ See [docs/STUBBORN-DSL.md](../docs/STUBBORN-DSL.md).
 ```bash
 docker compose run --rm shell
 # inside container:
-cd /demo && mvn -q -DskipTests package
-scip-java index
-stubborn index --scip index.scip --out metadata/symbols.db
+stubborn --help
+scip-java --help
 ```
 
 ### One-off CLI
 
 ```bash
-docker compose run --rm cli info /demo/metadata/symbols.db
+docker compose run --rm cli --help
 ```
 
 Mount your own project by editing `docker-compose.yml` or:
@@ -69,7 +59,7 @@ Mount your own project by editing `docker-compose.yml` or:
 ```bash
 docker compose run --rm \
   -v /path/to/your/java/project:/demo \
-  e2e
+  shell
 ```
 
 ## Build arguments
@@ -81,11 +71,9 @@ docker compose build --build-arg SCIP_JAVA_VERSION=0.12.3
 ## Windows notes
 
 - Use Docker Desktop with Linux containers.
-- Generated files appear under `examples\demo-spring\metadata\` via bind mount.
-- PowerShell users can still use `examples/demo-spring/scripts/run-e2e.ps1` on the host.
+- Demo scripts for PowerShell live in `stubborn-demo`.
 
 ## Related
 
-- [examples/demo-spring/README.md](../examples/demo-spring/README.md) — demo app and cases
-- [examples/spring-petclinic/README.md](../examples/spring-petclinic/README.md) — scale-up E2E
+- [stubborn-demo](https://github.com/stubborn-ai/stubborn-demo) — demo apps and E2E cases
 - [docs/SCIP-INGEST.md](../docs/SCIP-INGEST.md) — SCIP ingest details

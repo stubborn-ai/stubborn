@@ -65,7 +65,7 @@ Algorithm highlights ([`src/stubborn/graph/prune.py`](../../src/stubborn/graph/p
 - Reproducible: same DB + target + budget → same pruned graph
 - KPI-friendly: `metrics` compares stub vs full source tree
 - Tunable for agents via API/MCP parameters
-- CI guard scripts assert expected **type neighbors** in demo-spring cases
+- `stubborn-demo` guard scripts assert expected **type neighbors** in demo-spring cases
 
 ### Negative / trade-offs
 
@@ -87,5 +87,5 @@ Algorithm highlights ([`src/stubborn/graph/prune.py`](../../src/stubborn/graph/p
 
 - [src/stubborn/graph/prune.py](../../src/stubborn/graph/prune.py)
 - [src/stubborn/config.py](../../src/stubborn/config.py)
-- [examples/demo-spring/cases/](../../examples/demo-spring/cases/) — expected neighbor catalogs
+- [`stubborn-demo/demo-spring/cases`](https://github.com/stubborn-ai/stubborn-demo/tree/main/demo-spring/cases) — expected neighbor catalogs
 - [BETA.md](../BETA.md) — KPI baselines
