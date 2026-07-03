@@ -18,7 +18,7 @@ def resolve_merge_paths(snapshot: IndexSnapshot, paths: set[str] | None) -> set[
 
 
 def filter_snapshot_by_paths(snapshot: IndexSnapshot, paths: set[str]) -> IndexSnapshot:
-    """Keep symbols (and internal edges) for the given document paths."""
+    """Keep touched symbols and edges incident on those symbols."""
     if not paths:
         return IndexSnapshot(
             scip_source=snapshot.scip_source,
@@ -30,11 +30,11 @@ def filter_snapshot_by_paths(snapshot: IndexSnapshot, paths: set[str]) -> IndexS
         )
 
     symbols: list[SymbolRecord] = [s for s in snapshot.symbols if s.relative_path in paths]
-    stable_ids = {s.stable_id for s in symbols}
+    touched_stable_ids = {s.stable_id for s in symbols}
     edges: list[EdgeRecord] = [
         edge
         for edge in snapshot.edges
-        if edge.from_stable_id in stable_ids and edge.to_stable_id in stable_ids
+        if edge.from_stable_id in touched_stable_ids or edge.to_stable_id in touched_stable_ids
     ]
     return IndexSnapshot(
         scip_source=snapshot.scip_source,

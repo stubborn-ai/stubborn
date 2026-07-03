@@ -260,6 +260,24 @@ class IndexWriter:
             )
             symbol_ids[symbol.stable_id] = row.lastrowid
 
+        edge_stable_ids = {
+            stable_id
+            for edge in snapshot.edges
+            for stable_id in (edge.from_stable_id, edge.to_stable_id)
+            if stable_id not in symbol_ids
+        }
+        if edge_stable_ids:
+            placeholders = ",".join("?" * len(edge_stable_ids))
+            rows = conn.execute(
+                f"""
+                SELECT stable_id, id
+                FROM scip_symbol
+                WHERE index_run_id = ? AND stable_id IN ({placeholders})
+                """,
+                (index_run_id, *sorted(edge_stable_ids)),
+            ).fetchall()
+            symbol_ids.update({stable_id: int(symbol_id) for stable_id, symbol_id in rows})
+
         for edge in snapshot.edges:
             from_id = symbol_ids.get(edge.from_stable_id)
             to_id = symbol_ids.get(edge.to_stable_id)

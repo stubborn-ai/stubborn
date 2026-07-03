@@ -192,11 +192,14 @@ def test_merge_replaces_path_and_keeps_others(tmp_path: Path) -> None:
     assert info.mode == "merged"
     assert info.merge_count == 1
     assert info.symbol_count == 4
+    assert info.edge_count == 2
 
     names = {s.display_name for s in list_symbols(db, limit=50)}
     assert "PaymentService" in names
     assert "Order" in names
     assert "OrderService" in names
+
+    assert _edge_kinds(db, "process", "Order") == {"signature-ref", "type"}
 
 
 def test_merge_without_paths_uses_snapshot_documents(tmp_path: Path) -> None:
@@ -213,4 +216,47 @@ def test_merge_without_paths_uses_snapshot_documents(tmp_path: Path) -> None:
 
     info = read_info(db)
     assert info.symbol_count == 4
+    assert info.edge_count == 2
     assert info.merge_count == 1
+
+
+def test_sequential_path_merges_preserve_cross_file_edges(tmp_path: Path) -> None:
+    from stubborn.ingest.scip import load_scip_index
+
+    fixtures = Path(__file__).resolve().parents[1] / "examples" / "fixtures"
+    base = load_scip_index(fixtures / "two_documents.json")
+    updated = load_scip_index(fixtures / "two_documents_merged.json")
+
+    db = tmp_path / "symbols.db"
+    writer = IndexWriter(db)
+    writer.write(base)
+
+    writer.merge(updated, paths={"com/example/OrderService.java"})
+    first = read_info(db)
+    assert first.edge_count == 2
+    assert _edge_kinds(db, "process", "Order") == {"signature-ref", "type"}
+
+    writer.merge(updated, paths={"com/example/Order.java"})
+    second = read_info(db)
+    assert second.edge_count == 2
+    assert second.merge_count == 2
+    assert _edge_kinds(db, "process", "Order") == {"signature-ref", "type"}
+
+
+def _edge_kinds(db: Path, from_display: str, to_display: str) -> set[str]:
+    conn = sqlite3.connect(db)
+    try:
+        rows = conn.execute(
+            """
+            SELECT e.edge_kind
+            FROM scip_edge e
+            JOIN scip_symbol src ON src.id = e.from_symbol_id
+            JOIN scip_symbol dst ON dst.id = e.to_symbol_id
+            WHERE src.display_name = ?
+              AND dst.display_name = ?
+            """,
+            (from_display, to_display),
+        ).fetchall()
+        return {row[0] for row in rows}
+    finally:
+        conn.close()

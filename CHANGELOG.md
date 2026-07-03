@@ -16,6 +16,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - New databases initialize schema **v2**; v1 databases auto-migrate on open.
 
+### Fixed
+
+- Incremental `--merge` now preserves cross-file edges whose other endpoint is an unchanged symbol already present in the active `index_run`.
+
 ## [0.9.0b4] - 2026-07-03
 
 ### Added

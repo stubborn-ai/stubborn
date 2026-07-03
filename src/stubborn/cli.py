@@ -64,18 +64,22 @@ def index_cmd(
 
     if merge:
         index_run_id = writer.merge(snapshot, paths=path_set)
-        mode = "merged"
+        info = read_info(out, index_run_id=index_run_id)
+        typer.echo(
+            f"Merged {len(snapshot.symbols)} input symbol(s), "
+            f"{len(snapshot.edges)} input edge(s) -> {out} "
+            f"(index_run_id={index_run_id}, stored_symbols={info.symbol_count}, "
+            f"stored_edges={info.edge_count}, mode={info.mode}, merge_count={info.merge_count})"
+        )
     else:
         if path_set is not None:
             raise typer.BadParameter("--paths requires --merge")
         index_run_id = writer.write(snapshot)
-        mode = "snapshot"
-
-    typer.echo(
-        f"Indexed {len(snapshot.symbols)} symbol(s), "
-        f"{len(snapshot.edges)} edge(s) -> {out} "
-        f"(index_run_id={index_run_id}, mode={mode})"
-    )
+        typer.echo(
+            f"Indexed {len(snapshot.symbols)} symbol(s), "
+            f"{len(snapshot.edges)} edge(s) -> {out} "
+            f"(index_run_id={index_run_id}, mode=snapshot)"
+        )
 
 
 @app.command("info")

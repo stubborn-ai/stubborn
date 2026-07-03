@@ -24,7 +24,13 @@
           "signature": "public class PaymentService"
         }
       ],
-      "edges": []
+      "edges": [
+        {
+          "from": "semanticdb maven com/example/OrderService#process().",
+          "to": "semanticdb maven com/example/Order#",
+          "edge_kind": "type"
+        }
+      ]
     },
     {
       "relative_path": "com/example/Order.java",
