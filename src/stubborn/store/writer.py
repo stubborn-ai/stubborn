@@ -1,4 +1,4 @@
-"""Write SCIP-derived symbol graphs to SQLite."""
+"""Write code and contract graphs to SQLite."""
 
 from __future__ import annotations
 
@@ -29,10 +29,10 @@ def _schema_version(conn: sqlite3.Connection) -> int | None:
 
 
 def ensure_schema(conn: sqlite3.Connection) -> None:
-    """Create or upgrade schema to v3."""
+    """Create or upgrade schema to v4."""
     version = _schema_version(conn)
     if version is None:
-        with open(_schema_path("v3.sql"), encoding="utf-8") as f:
+        with open(_schema_path("v4.sql"), encoding="utf-8") as f:
             conn.executescript(f.read())
         return
     if version < 2:
@@ -41,6 +41,10 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
         version = 2
     if version < 3:
         with open(_schema_path("migrate_v2_to_v3.sql"), encoding="utf-8") as f:
+            conn.executescript(f.read())
+        version = 3
+    if version < 4:
+        with open(_schema_path("migrate_v3_to_v4.sql"), encoding="utf-8") as f:
             conn.executescript(f.read())
 
 
@@ -95,6 +99,45 @@ class IndexInfo:
     merge_count: int = 0
     workspace: str | None = None
     repo_key: str | None = None
+    run_kind: str = "code"
+
+
+@dataclass(frozen=True)
+class ContractSchemaConstraintRecord:
+    location: str
+    field_path: str
+    type_name: str | None = None
+    required: bool | None = None
+
+
+@dataclass(frozen=True)
+class ContractBindingRecord:
+    code_stable_id: str
+    role: str
+    evidence: str
+    source: str | None = None
+
+
+@dataclass(frozen=True)
+class ContractEndpointRecord:
+    stable_id: str
+    protocol: str
+    address: str
+    service: str | None = None
+    version: str | None = None
+    method_or_verb: str | None = None
+    display_name: str | None = None
+    schema_constraints: tuple[ContractSchemaConstraintRecord, ...] = ()
+    bindings: tuple[ContractBindingRecord, ...] = ()
+
+
+@dataclass(frozen=True)
+class ContractSnapshot:
+    scip_source: str
+    endpoints: tuple[ContractEndpointRecord, ...]
+    project_root: str | None = None
+    scip_hash: str | None = None
+    language: str | None = None
 
 
 def _ensure_workspace(
@@ -178,7 +221,7 @@ def read_info(db_path: str | Path, index_run_id: int | None = None) -> IndexInfo
         run = conn.execute(
             """
             SELECT ir.id, ir.scip_source, ir.language, ir.indexed_at, ir.mode, ir.merge_count,
-                   w.name AS workspace, r.repo_key
+                   ir.run_kind, w.name AS workspace, r.repo_key
             FROM index_run ir
             LEFT JOIN repo r ON r.id = ir.repo_id
             LEFT JOIN workspace w ON w.id = r.workspace_id
@@ -209,6 +252,7 @@ def read_info(db_path: str | Path, index_run_id: int | None = None) -> IndexInfo
             merge_count=int(run["merge_count"] or 0),
             workspace=run["workspace"],
             repo_key=run["repo_key"],
+            run_kind=run["run_kind"] or "code",
         )
     finally:
         conn.close()
@@ -267,6 +311,50 @@ class IndexWriter:
         finally:
             conn.close()
 
+    def write_contract(
+        self,
+        snapshot: ContractSnapshot,
+        *,
+        repo_key: str | None = None,
+        workspace: str | None = None,
+    ) -> int:
+        """Persist contract endpoint/binding facts as a contract index run."""
+        conn = self._connect()
+        try:
+            repo_id = None
+            if repo_key is not None:
+                repo_id = _ensure_repo(
+                    conn,
+                    workspace=workspace or "default",
+                    repo_key=repo_key,
+                    root=snapshot.project_root,
+                    language=snapshot.language,
+                )
+
+            cursor = conn.execute(
+                """
+                INSERT INTO index_run (
+                    project_root, scip_source, scip_hash, language, tool_version,
+                    mode, merge_count, repo_id, run_kind
+                ) VALUES (?, ?, ?, ?, ?, 'snapshot', 0, ?, 'contract')
+                """,
+                (
+                    snapshot.project_root,
+                    snapshot.scip_source,
+                    snapshot.scip_hash,
+                    snapshot.language,
+                    __version__,
+                    repo_id,
+                ),
+            )
+            index_run_id = cursor.lastrowid
+            assert index_run_id is not None
+            self._insert_contract_facts(conn, index_run_id, snapshot)
+            conn.commit()
+            return index_run_id
+        finally:
+            conn.close()
+
     def merge(
         self,
         snapshot: IndexSnapshot,
@@ -289,14 +377,20 @@ class IndexWriter:
             )
             if repo_id is None:
                 row = conn.execute(
-                    "SELECT id, merge_count FROM index_run ORDER BY id DESC LIMIT 1"
+                    """
+                    SELECT id, merge_count
+                    FROM index_run
+                    WHERE run_kind = 'code'
+                    ORDER BY id DESC
+                    LIMIT 1
+                    """
                 ).fetchone()
             else:
                 row = conn.execute(
                     """
                     SELECT id, merge_count
                     FROM index_run
-                    WHERE repo_id = ?
+                    WHERE repo_id = ? AND run_kind = 'code'
                     ORDER BY id DESC
                     LIMIT 1
                     """,
@@ -437,3 +531,76 @@ class IndexWriter:
                 """,
                 (index_run_id, from_id, to_id, edge.edge_kind),
             )
+
+    def _insert_contract_facts(
+        self,
+        conn: sqlite3.Connection,
+        index_run_id: int,
+        snapshot: ContractSnapshot,
+    ) -> None:
+        for endpoint in snapshot.endpoints:
+            _validate_contract_endpoint(endpoint)
+            cursor = conn.execute(
+                """
+                INSERT INTO contract_endpoint (
+                    index_run_id, stable_id, protocol, service, version,
+                    method_or_verb, address, display_name
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    index_run_id,
+                    endpoint.stable_id,
+                    endpoint.protocol,
+                    endpoint.service,
+                    endpoint.version,
+                    endpoint.method_or_verb,
+                    endpoint.address,
+                    endpoint.display_name,
+                ),
+            )
+            endpoint_id = cursor.lastrowid
+            assert endpoint_id is not None
+
+            for constraint in endpoint.schema_constraints:
+                conn.execute(
+                    """
+                    INSERT INTO contract_schema_constraint (
+                        endpoint_id, location, field_path, type_name, required
+                    ) VALUES (?, ?, ?, ?, ?)
+                    """,
+                    (
+                        endpoint_id,
+                        constraint.location,
+                        constraint.field_path,
+                        constraint.type_name,
+                        _bool_to_int(constraint.required),
+                    ),
+                )
+
+            for binding in endpoint.bindings:
+                conn.execute(
+                    """
+                    INSERT INTO contract_binding (
+                        endpoint_id, code_stable_id, role, evidence, source
+                    ) VALUES (?, ?, ?, ?, ?)
+                    ON CONFLICT(endpoint_id, code_stable_id, role) DO NOTHING
+                    """,
+                    (
+                        endpoint_id,
+                        binding.code_stable_id,
+                        binding.role,
+                        binding.evidence,
+                        binding.source,
+                    ),
+                )
+
+
+def _validate_contract_endpoint(endpoint: ContractEndpointRecord) -> None:
+    if endpoint.protocol.lower() == "http" and not endpoint.stable_id.startswith("openapi "):
+        raise ValueError("HTTP contract endpoint stable_id must start with 'openapi '")
+
+
+def _bool_to_int(value: bool | None) -> int | None:
+    if value is None:
+        return None
+    return 1 if value else 0

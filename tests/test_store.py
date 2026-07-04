@@ -6,7 +6,15 @@ import sqlite3
 from pathlib import Path
 
 from stubborn.ingest.models import EdgeRecord, IndexSnapshot, SymbolRecord
-from stubborn.store.writer import IndexWriter, init_db, read_info
+from stubborn.store.writer import (
+    ContractBindingRecord,
+    ContractEndpointRecord,
+    ContractSchemaConstraintRecord,
+    ContractSnapshot,
+    IndexWriter,
+    init_db,
+    read_info,
+)
 
 
 def test_init_db_creates_schema(tmp_path: Path) -> None:
@@ -21,6 +29,9 @@ def test_init_db_creates_schema(tmp_path: Path) -> None:
         assert "index_run" in tables
         assert "scip_symbol" in tables
         assert "scip_edge" in tables
+        assert "contract_endpoint" in tables
+        assert "contract_schema_constraint" in tables
+        assert "contract_binding" in tables
     finally:
         conn.close()
 
@@ -124,27 +135,34 @@ def test_invalid_edge_kind_raises_on_write(tmp_path: Path) -> None:
         IndexWriter(db).write(snapshot)
 
 
-def test_schema_version_is_v3_after_init(tmp_path: Path) -> None:
+def test_schema_version_is_v4_after_init(tmp_path: Path) -> None:
     db = tmp_path / "symbols.db"
     init_db(db)
 
     conn = sqlite3.connect(db)
     try:
         version = conn.execute("SELECT MAX(version) FROM meta_schema_version").fetchone()[0]
-        assert version == 3
+        assert version == 4
         symbol_columns = {row[1] for row in conn.execute("PRAGMA table_info(scip_symbol)")}
         run_columns = {row[1] for row in conn.execute("PRAGMA table_info(index_run)")}
         assert "relative_path" in symbol_columns
         assert "repo_id" in run_columns
+        assert "run_kind" in run_columns
         tables = {
             row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
         }
-        assert {"workspace", "repo"} <= tables
+        assert {
+            "workspace",
+            "repo",
+            "contract_endpoint",
+            "contract_schema_constraint",
+            "contract_binding",
+        } <= tables
     finally:
         conn.close()
 
 
-def test_v1_database_migrates_to_v3(tmp_path: Path) -> None:
+def test_v1_database_migrates_to_v4(tmp_path: Path) -> None:
     from importlib import resources
 
     db = tmp_path / "symbols.db"
@@ -168,13 +186,197 @@ def test_v1_database_migrates_to_v3(tmp_path: Path) -> None:
     conn = sqlite3.connect(db)
     try:
         version = conn.execute("SELECT MAX(version) FROM meta_schema_version").fetchone()[0]
-        assert version == 3
+        assert version == 4
         row = conn.execute("SELECT relative_path FROM scip_symbol WHERE stable_id = 'a'").fetchone()
         assert row[0] == "A.java"
         columns = {row[1] for row in conn.execute("PRAGMA table_info(index_run)")}
         assert "repo_id" in columns
+        assert "run_kind" in columns
+        run_kind = conn.execute("SELECT run_kind FROM index_run").fetchone()[0]
+        assert run_kind == "code"
     finally:
         conn.close()
+
+
+def test_v3_database_migrates_to_v4_contract_schema(tmp_path: Path) -> None:
+    from importlib import resources
+
+    db = tmp_path / "symbols.db"
+    v3_ref = resources.files("stubborn.store") / "schema" / "v3.sql"
+    with resources.as_file(v3_ref) as v3_path:
+        conn = sqlite3.connect(db)
+        try:
+            conn.executescript(v3_path.read_text(encoding="utf-8"))
+            conn.commit()
+        finally:
+            conn.close()
+
+    init_db(db)
+
+    conn = sqlite3.connect(db)
+    try:
+        version = conn.execute("SELECT MAX(version) FROM meta_schema_version").fetchone()[0]
+        assert version == 4
+        run_columns = {row[1] for row in conn.execute("PRAGMA table_info(index_run)")}
+        tables = {
+            row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        }
+        assert "run_kind" in run_columns
+        assert {
+            "contract_endpoint",
+            "contract_schema_constraint",
+            "contract_binding",
+        } <= tables
+    finally:
+        conn.close()
+
+
+def test_write_and_read_contract_bindings(tmp_path: Path) -> None:
+    from stubborn.store.reader import list_contract_bindings
+
+    db = tmp_path / "symbols.db"
+    provider = "semanticdb maven com/example/customers/OwnerResource#getOwner()."
+    consumer = "semanticdb maven com/example/visits/CustomersClient#getOwner()."
+    snapshot = ContractSnapshot(
+        scip_source="contracts/openapi.json",
+        language="openapi",
+        endpoints=(
+            ContractEndpointRecord(
+                stable_id="openapi customers-service:v1 GET /owners/{ownerId}",
+                protocol="http",
+                service="customers-service",
+                version="v1",
+                method_or_verb="GET",
+                address="/owners/{ownerId}",
+                display_name="GET /owners/{ownerId}",
+                schema_constraints=(
+                    ContractSchemaConstraintRecord(
+                        location="path",
+                        field_path="ownerId",
+                        type_name="integer",
+                        required=True,
+                    ),
+                ),
+                bindings=(
+                    ContractBindingRecord(
+                        code_stable_id=provider,
+                        role="provider",
+                        evidence="strong",
+                        source="openapi-generated-server",
+                    ),
+                    ContractBindingRecord(
+                        code_stable_id=consumer,
+                        role="consumer",
+                        evidence="declared",
+                        source="manual:contracts/http.yml",
+                    ),
+                ),
+            ),
+        ),
+    )
+
+    writer = IndexWriter(db)
+    run_id = writer.write_contract(snapshot, workspace="petclinic", repo_key="petclinic-contracts")
+    info = read_info(db, index_run_id=run_id)
+    bindings = list_contract_bindings(db, workspace="petclinic")
+
+    assert info.run_kind == "contract"
+    assert info.symbol_count == 0
+    assert info.edge_count == 0
+    assert len(bindings) == 2
+    assert {binding.role for binding in bindings} == {"provider", "consumer"}
+    assert {binding.evidence for binding in bindings} == {"strong", "declared"}
+    assert bindings[0].endpoint_stable_id == "openapi customers-service:v1 GET /owners/{ownerId}"
+
+    conn = sqlite3.connect(db)
+    try:
+        required = conn.execute(
+            "SELECT required FROM contract_schema_constraint WHERE field_path = 'ownerId'"
+        ).fetchone()[0]
+        assert required == 1
+    finally:
+        conn.close()
+
+
+def test_invalid_contract_evidence_raises_on_write(tmp_path: Path) -> None:
+    import pytest
+
+    db = tmp_path / "symbols.db"
+    snapshot = ContractSnapshot(
+        scip_source="contracts/openapi.json",
+        endpoints=(
+            ContractEndpointRecord(
+                stable_id="openapi customers-service:v1 GET /owners/{ownerId}",
+                protocol="http",
+                address="/owners/{ownerId}",
+                bindings=(
+                    ContractBindingRecord(
+                        code_stable_id="semanticdb maven com/example/OwnerResource#getOwner().",
+                        role="provider",
+                        evidence="not-a-real-evidence",
+                    ),
+                ),
+            ),
+        ),
+    )
+
+    with pytest.raises(sqlite3.IntegrityError):
+        IndexWriter(db).write_contract(snapshot)
+
+
+def test_contract_tables_do_not_change_code_only_context(tmp_path: Path) -> None:
+    from stubborn.config import ContextBudget
+    from stubborn.graph.prune import prune_context
+
+    db = tmp_path / "symbols.db"
+    service = "semanticdb maven com/example/Service#"
+    helper = "semanticdb maven com/example/Helper#"
+    endpoint = "semanticdb maven com/example/RemoteController#get()."
+
+    writer = IndexWriter(db)
+    writer.write(
+        IndexSnapshot(
+            scip_source="code.json",
+            symbols=[
+                SymbolRecord(stable_id=service, display_name="Service", kind="class"),
+                SymbolRecord(stable_id=helper, display_name="Helper", kind="class"),
+            ],
+            edges=[EdgeRecord(service, helper, "reference")],
+        ),
+        workspace="acme",
+        repo_key="code",
+    )
+    writer.write_contract(
+        ContractSnapshot(
+            scip_source="contracts/openapi.json",
+            endpoints=(
+                ContractEndpointRecord(
+                    stable_id="openapi remote:v1 GET /remote",
+                    protocol="http",
+                    address="/remote",
+                    bindings=(
+                        ContractBindingRecord(
+                            code_stable_id=endpoint,
+                            role="provider",
+                            evidence="declared",
+                            source="manual:contracts/http.yml",
+                        ),
+                    ),
+                ),
+            ),
+        ),
+        workspace="acme",
+        repo_key="code",
+    )
+
+    graph = prune_context(
+        db,
+        service,
+        workspace="acme",
+        budget=ContextBudget(call_closure_depth=1, max_symbols=10),
+    )
+
+    assert {symbol.stable_id for symbol in graph.symbols} == {service, helper}
 
 
 def test_merge_replaces_path_and_keeps_others(tmp_path: Path) -> None:

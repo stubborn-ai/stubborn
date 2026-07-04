@@ -31,6 +31,21 @@ class RepoRunSummary:
     edge_count: int
 
 
+@dataclass(frozen=True)
+class ContractBindingSummary:
+    endpoint_stable_id: str
+    endpoint_display_name: str | None
+    protocol: str
+    service: str | None
+    version: str | None
+    method_or_verb: str | None
+    address: str
+    code_stable_id: str
+    role: str
+    evidence: str
+    source: str | None
+
+
 def resolve_db_path(db_path: str | Path | None) -> Path:
     """Resolve DB path from argument or STUBBORN_DB environment variable."""
     if db_path is not None:
@@ -47,10 +62,21 @@ def resolve_db_path(db_path: str | Path | None) -> Path:
     return path
 
 
-def _latest_index_run_id(conn: sqlite3.Connection, index_run_id: int | None) -> int:
+def _latest_index_run_id(
+    conn: sqlite3.Connection,
+    index_run_id: int | None,
+    *,
+    run_kind: str | None = "code",
+) -> int:
     if index_run_id is not None:
         return index_run_id
-    row = conn.execute("SELECT id FROM index_run ORDER BY id DESC LIMIT 1").fetchone()
+    sql = "SELECT id FROM index_run"
+    params: list[object] = []
+    if run_kind is not None:
+        sql += " WHERE run_kind = ?"
+        params.append(run_kind)
+    sql += " ORDER BY id DESC LIMIT 1"
+    row = conn.execute(sql, params).fetchone()
     if row is None:
         raise ValueError("No index runs found in database")
     return int(row[0])
@@ -66,6 +92,7 @@ def latest_index_run_ids(
     index_run_id: int | None = None,
     workspace: str | None = None,
     repo_key: str | None = None,
+    run_kind: str | None = "code",
 ) -> list[int]:
     """Resolve the active run set for legacy, repo, or workspace scoped queries."""
     if index_run_id is not None:
@@ -83,6 +110,9 @@ def latest_index_run_ids(
         if workspace is not None:
             sql += " AND w.name = ?"
             params.append(workspace)
+        if run_kind is not None:
+            sql += " AND ir.run_kind = ?"
+            params.append(run_kind)
         sql += " ORDER BY ir.id DESC LIMIT 1"
         row = conn.execute(sql, params).fetchone()
         if row is None:
@@ -97,16 +127,17 @@ def latest_index_run_ids(
             JOIN repo r ON r.id = ir.repo_id
             JOIN workspace w ON w.id = r.workspace_id
             WHERE w.name = ?
+              AND (? IS NULL OR ir.run_kind = ?)
             GROUP BY r.id
             ORDER BY r.priority, r.repo_key
             """,
-            (workspace,),
+            (workspace, run_kind, run_kind),
         ).fetchall()
         if not rows:
             raise ValueError(f"No index runs found for workspace {workspace!r}")
         return [int(row[0]) for row in rows]
 
-    return [_latest_index_run_id(conn, None)]
+    return [_latest_index_run_id(conn, None, run_kind=run_kind)]
 
 
 def list_symbols(
@@ -263,6 +294,74 @@ def workspace_run_summaries(db_path: str | Path, *, workspace: str) -> list[Repo
                 edge_count=int(row["edge_count"]),
             )
             for row in rows
+        ]
+    finally:
+        conn.close()
+
+
+def list_contract_bindings(
+    db_path: str | Path,
+    *,
+    code_stable_id: str | None = None,
+    evidence: str | None = None,
+    index_run_id: int | None = None,
+    workspace: str | None = None,
+    repo_key: str | None = None,
+) -> list[ContractBindingSummary]:
+    """List contract bindings from the latest legacy run or scoped workspace view."""
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    try:
+        run_ids = latest_index_run_ids(
+            conn,
+            index_run_id=index_run_id,
+            workspace=workspace,
+            repo_key=repo_key,
+            run_kind="contract",
+        )
+        placeholders = _placeholders(list(run_ids))
+        sql = f"""
+            SELECT ce.stable_id AS endpoint_stable_id,
+                   ce.display_name AS endpoint_display_name,
+                   ce.protocol,
+                   ce.service,
+                   ce.version,
+                   ce.method_or_verb,
+                   ce.address,
+                   cb.code_stable_id,
+                   cb.role,
+                   cb.evidence,
+                   cb.source
+            FROM contract_binding cb
+            JOIN contract_endpoint ce ON ce.id = cb.endpoint_id
+            WHERE ce.index_run_id IN ({placeholders})
+        """
+        params: list[object] = list(run_ids)
+
+        if code_stable_id is not None:
+            sql += " AND cb.code_stable_id = ?"
+            params.append(code_stable_id)
+        if evidence is not None:
+            sql += " AND cb.evidence = ?"
+            params.append(evidence)
+
+        sql += " ORDER BY ce.stable_id, cb.role, cb.code_stable_id"
+
+        return [
+            ContractBindingSummary(
+                endpoint_stable_id=row["endpoint_stable_id"],
+                endpoint_display_name=row["endpoint_display_name"],
+                protocol=row["protocol"],
+                service=row["service"],
+                version=row["version"],
+                method_or_verb=row["method_or_verb"],
+                address=row["address"],
+                code_stable_id=row["code_stable_id"],
+                role=row["role"],
+                evidence=row["evidence"],
+                source=row["source"],
+            )
+            for row in conn.execute(sql, params)
         ]
     finally:
         conn.close()
