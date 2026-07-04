@@ -36,7 +36,7 @@ prover.
 
 | Source | Status | Evidence floor |
 |--------|--------|----------------|
-| OpenAPI 3.x | Planned adapter | `strong` for operations and schemas |
+| OpenAPI 3.x | Supported by `stubborn index-openapi` for endpoint/schema facts | `strong` for operations and schemas |
 | Explicit binding manifest | Supported by `stubborn index-contract` | `declared` |
 | Generated client/server code | Planned | `strong` when operation identity is traceable |
 | Spring annotation / URL string extraction | Possible demo/lab adapter only | `inferred`; not a REST v1 authority source |
@@ -138,14 +138,18 @@ Schema v4 makes contract evidence first-class:
 - Render contract sections in `stubborn-dsl` so generated context does not hide
   the evidence tier.
 
-The current productized ingest entrypoint is the explicit manifest path:
+The current productized ingest entrypoints are:
 
 ```bash
 stubborn index-contract --manifest contracts/http.json --out symbols.db
+stubborn index-openapi --openapi openapi.yml --service customers-service --out symbols.db
 ```
 
-The OpenAPI 3.x adapter remains a planned adapter that should produce the same
-contract IR from authoritative OpenAPI YAML/JSON.
+`index-openapi` produces endpoint and schema facts from authoritative OpenAPI
+YAML/JSON. It deliberately does not bind operations to code symbols by scanning
+annotations, URL strings, or hand-written clients. Cross-service traversal still
+requires `contract_binding` rows from an explicit manifest, generated client
+traceability, or another evidence-producing adapter.
 
 ## Weave Direction
 

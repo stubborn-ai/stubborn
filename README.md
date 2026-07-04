@@ -146,6 +146,12 @@ Schema v4 can store explicit REST contract evidence separately from SCIP facts:
 stubborn index-contract \
   --manifest contracts/http.json \
   --out ./metadata/symbols.db
+
+stubborn index-openapi \
+  --openapi openapi.yml \
+  --service customers-service \
+  --version v1 \
+  --out ./metadata/symbols.db
 ```
 
 The first manifest format is intentionally explicit: endpoints declare
@@ -154,6 +160,9 @@ Bindings may reference existing code symbols by `code_stable_id`, or by
 `repo` + `display_name` inside a workspace. Contract evidence is rendered in
 `--format stubborn-dsl` under a separate `contracts:` block; Java stubs remain
 Java-shaped.
+
+`index-openapi` is endpoint/schema ingest only. It does not infer provider or
+consumer code bindings from annotations, URLs, or client interfaces.
 
 **Choose output format:**
 
@@ -201,6 +210,7 @@ Tools: `get_context`, `list_symbols`, `metrics`. See [stubborn-mcp docs](https:/
 | `workspace` | Initialize/register multi-repo workspace metadata |
 | `index` | Ingest SCIP (`.scip`, `.scip.ndjson`, or `.json` fixture); use `--workspace`/`--repo` for multi-repo views |
 | `index-contract` | Ingest an explicit contract manifest into schema v4 contract evidence tables |
+| `index-openapi` | Ingest OpenAPI 3.x endpoints/schemas without inferring code bindings |
 | `info` | Index run summary |
 | `context` | Prune graph → emit LLM context (`--workspace` can query latest runs across repos) |
 | `list-symbols` | Browse symbols in a legacy, repo, or workspace view |

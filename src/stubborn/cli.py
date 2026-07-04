@@ -7,7 +7,7 @@ from typing import Optional
 
 import typer
 
-from stubborn.api import index_contract_manifest
+from stubborn.api import index_contract_manifest, index_openapi_contract
 from stubborn.config import ContextBudget, apply_prune_mode, normalize_prune_mode
 from stubborn.graph.prune import prune_context
 from stubborn.ingest.scip import load_scip_index
@@ -173,6 +173,61 @@ def index_contract_cmd(
 
     typer.echo(
         f"Indexed {result.endpoint_count} contract endpoint(s), "
+        f"{result.binding_count} binding(s) -> {out} "
+        f"(index_run_id={result.index_run_id}, run_kind=contract)"
+    )
+
+
+@app.command("index-openapi")
+def index_openapi_cmd(
+    openapi: Path = typer.Option(
+        ...,
+        "--openapi",
+        help="OpenAPI 3.x YAML/JSON document",
+    ),
+    out: Path = typer.Option(..., "--out", "-o", help="Output SQLite file path"),
+    service: str = typer.Option(
+        ...,
+        "--service",
+        help="Service name used in endpoint stable IDs",
+    ),
+    version: Optional[str] = typer.Option(
+        None,
+        "--version",
+        help="Contract version; defaults to info.version or v1",
+    ),
+    workspace: Optional[str] = typer.Option(
+        None,
+        "--workspace",
+        help="Workspace name for contract source tracking",
+    ),
+    repo: Optional[str] = typer.Option(
+        None,
+        "--repo",
+        help="Contract source repo key; defaults to <service>-openapi",
+    ),
+    project_root: Optional[str] = typer.Option(
+        None,
+        "--project-root",
+        help="Optional OpenAPI source root recorded in index_run",
+    ),
+) -> None:
+    """Ingest OpenAPI 3.x endpoints/schemas without inferring code bindings."""
+    try:
+        result = index_openapi_contract(
+            openapi,
+            db_path=out,
+            service=service,
+            version=version,
+            workspace=workspace,
+            repo_key=repo,
+            project_root=project_root,
+        )
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+
+    typer.echo(
+        f"Indexed {result.endpoint_count} OpenAPI endpoint(s), "
         f"{result.binding_count} binding(s) -> {out} "
         f"(index_run_id={result.index_run_id}, run_kind=contract)"
     )

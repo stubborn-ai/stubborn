@@ -9,6 +9,7 @@ from typing import Any
 from stubborn.config import ContextBudget, apply_prune_mode
 from stubborn.graph.prune import prune_context
 from stubborn.ingest.contracts import contract_snapshot_from_manifest
+from stubborn.ingest.openapi import openapi_snapshot_from_file
 from stubborn.metrics import compute_compression
 from stubborn.store.reader import list_symbols, resolve_db_path
 from stubborn.store.writer import IndexInfo, IndexWriter, read_info
@@ -144,6 +145,40 @@ def index_contract_manifest(
         repo_key=resolved_repo_key,
         endpoint_count=len(snapshot.endpoints),
         binding_count=sum(len(endpoint.bindings) for endpoint in snapshot.endpoints),
+    )
+
+
+def index_openapi_contract(
+    openapi_path: str | Path,
+    *,
+    db_path: str | Path,
+    service: str,
+    version: str | None = None,
+    workspace: str | None = None,
+    repo_key: str | None = None,
+    project_root: str | None = None,
+) -> ContractIndexResult:
+    """Index OpenAPI 3.x endpoints/schemas as contract facts without code bindings."""
+    snapshot = openapi_snapshot_from_file(
+        openapi_path,
+        service=service,
+        version=version,
+        project_root=project_root,
+    )
+    resolved_repo_key = repo_key or f"{service}-openapi"
+    index_run_id = IndexWriter(db_path).write_contract(
+        snapshot,
+        workspace=workspace,
+        repo_key=resolved_repo_key,
+    )
+    return ContractIndexResult(
+        index_run_id=index_run_id,
+        db_path=str(Path(db_path)),
+        manifest_path=str(Path(openapi_path)),
+        workspace=workspace,
+        repo_key=resolved_repo_key,
+        endpoint_count=len(snapshot.endpoints),
+        binding_count=0,
     )
 
 
