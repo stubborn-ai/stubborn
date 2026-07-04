@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import re
+from itertools import groupby
 
-from stubborn.graph.prune import PrunedGraph, PrunedSymbol
+from stubborn.graph.prune import ContractPrunedEdge, PrunedGraph, PrunedSymbol
 from stubborn.tokens import estimate_tokens
 from stubborn.weave._shared import (
     is_annotation_only,
@@ -127,6 +128,25 @@ def weave_stubborn_dsl(
         for from_id, to_id, edge_kind in sorted(pruned_edges):
             abbrev = _EDGE_ABBREV.get(edge_kind, edge_kind)
             lines.append(f"  {abbrev} {short_target_name(from_id)} -> {short_target_name(to_id)}")
+        lines.append("")
+
+    graph_stable_ids = {symbol.stable_id for symbol in graph.symbols}
+    contract_edges = [
+        edge
+        for edge in graph.contract_edges
+        if edge.from_stable_id in graph_stable_ids and edge.to_stable_id in graph_stable_ids
+    ]
+    if contract_edges:
+        lines.append("contracts:")
+        for endpoint_id, edges in groupby(
+            sorted(contract_edges, key=_contract_sort_key),
+            key=lambda edge: edge.endpoint_stable_id,
+        ):
+            first = next(edges)
+            lines.append(f"  {first.protocol} {endpoint_id}")
+            lines.append(_format_contract_edge(first))
+            for edge in edges:
+                lines.append(_format_contract_edge(edge))
 
     text = "\n".join(lines).rstrip() + "\n"
     return WeaveResult(
@@ -201,3 +221,20 @@ def _format_member_line(symbol: PrunedSymbol) -> str | None:
 
     label = short_target_name(symbol.stable_id)
     return f"member m {label} {signature}"
+
+
+def _contract_sort_key(edge: ContractPrunedEdge) -> tuple[str, str, str, str]:
+    return (
+        edge.endpoint_stable_id,
+        edge.from_role,
+        edge.from_stable_id,
+        edge.to_stable_id,
+    )
+
+
+def _format_contract_edge(edge: ContractPrunedEdge) -> str:
+    return (
+        f"    {edge.from_role} {short_target_name(edge.from_stable_id)}"
+        f" -> {edge.to_role} {short_target_name(edge.to_stable_id)}"
+        f" evidence={edge.evidence}"
+    )

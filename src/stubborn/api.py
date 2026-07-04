@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -23,6 +23,8 @@ class ContextResult:
     symbol_count: int
     estimated_tokens: int
     dropped_for_budget: bool
+    contract_edges: list[dict[str, Any]] = field(default_factory=list)
+    contract_evidence_summary: dict[str, int] = field(default_factory=dict)
 
 
 def _budget(
@@ -85,7 +87,16 @@ def get_context(
         symbol_count=result.symbol_count,
         estimated_tokens=result.estimated_tokens,
         dropped_for_budget=result.dropped_for_budget,
+        contract_edges=[asdict(edge) for edge in graph.contract_edges],
+        contract_evidence_summary=_contract_evidence_summary(graph),
     )
+
+
+def _contract_evidence_summary(graph: Any) -> dict[str, int]:
+    summary: dict[str, int] = {}
+    for edge in graph.contract_edges:
+        summary[edge.evidence] = summary.get(edge.evidence, 0) + 1
+    return summary
 
 
 def list_index_symbols(
