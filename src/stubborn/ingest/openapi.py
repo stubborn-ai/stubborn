@@ -6,8 +6,6 @@ import json
 from pathlib import Path
 from typing import Any
 
-import yaml
-
 from stubborn.store.writer import (
     ContractEndpointRecord,
     ContractSchemaConstraintRecord,
@@ -24,7 +22,7 @@ def load_openapi_document(path: str | Path) -> dict[str, Any]:
     if source.suffix.lower() == ".json":
         document = json.loads(text)
     else:
-        document = yaml.safe_load(text)
+        document = _load_yaml(text)
     if not isinstance(document, dict):
         raise ValueError("OpenAPI document must be a mapping")
     return document
@@ -157,3 +155,14 @@ def _schema_type_name(schema: Any) -> str | None:
             return f"array[{item_type}]" if item_type else "array"
         return schema_type
     return None
+
+
+def _load_yaml(text: str) -> Any:
+    try:
+        import yaml
+    except ImportError as exc:
+        raise ValueError(
+            "PyYAML is required for OpenAPI YAML input. "
+            "Install with: pip install 'stubborn-stub[openapi]'"
+        ) from exc
+    return yaml.safe_load(text)

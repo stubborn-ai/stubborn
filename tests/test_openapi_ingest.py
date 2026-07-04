@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
+import sys
 from pathlib import Path
 
 from typer.testing import CliRunner
@@ -73,6 +74,45 @@ components:
     return path
 
 
+def _write_openapi_json(tmp_path: Path) -> Path:
+    path = tmp_path / "openapi.json"
+    path.write_text(
+        """
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Customers API",
+    "version": "v1"
+  },
+  "paths": {
+    "/owners/{ownerId}": {
+      "get": {
+        "operationId": "getOwner",
+        "parameters": [
+          {
+            "name": "ownerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Owner found"
+          }
+        }
+      }
+    }
+  }
+}
+""".lstrip(),
+        encoding="utf-8",
+    )
+    return path
+
+
 def _write_code_symbol(db: Path) -> None:
     IndexWriter(db).write(
         IndexSnapshot(
@@ -110,6 +150,29 @@ def test_openapi_loader_emits_endpoints_and_constraints(tmp_path: Path) -> None:
     assert ("path", "ownerId", "integer", True) in constraints
     assert ("query", "includePets", "boolean", False) in constraints
     assert ("responseBody", "200.application/json", "Owner", None) in constraints
+
+
+def test_openapi_json_loader_does_not_require_yaml(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    class BlockYamlImport:
+        def find_spec(self, fullname: str, path=None, target=None):
+            if fullname == "yaml":
+                raise ImportError("blocked yaml import")
+            return None
+
+    monkeypatch.delitem(sys.modules, "yaml", raising=False)
+    monkeypatch.setattr(sys, "meta_path", [BlockYamlImport(), *sys.meta_path])
+
+    snapshot = openapi_snapshot_from_file(
+        _write_openapi_json(tmp_path),
+        service=SERVICE,
+        version="v1",
+    )
+
+    assert len(snapshot.endpoints) == 1
+    assert snapshot.endpoints[0].stable_id == ENDPOINT
 
 
 def test_api_indexes_openapi_without_code_bindings(tmp_path: Path) -> None:

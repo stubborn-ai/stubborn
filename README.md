@@ -162,7 +162,8 @@ Bindings may reference existing code symbols by `code_stable_id`, or by
 Java-shaped.
 
 `index-openapi` is endpoint/schema ingest only. It does not infer provider or
-consumer code bindings from annotations, URLs, or client interfaces.
+consumer code bindings from annotations, URLs, or client interfaces. JSON input
+uses only the core package; YAML input requires `pip install stubborn-stub[openapi]`.
 
 **Choose output format:**
 
