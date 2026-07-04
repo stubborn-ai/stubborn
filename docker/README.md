@@ -72,8 +72,9 @@ docker compose build --build-arg SCIP_JAVA_VERSION=0.12.3
 ## Windows notes
 
 - Use Docker Desktop with Linux containers.
-- For shell-heavy workflows on Windows, WSL2 is usually smoother than native PowerShell.
-- Demo scripts for PowerShell live in `stubborn-demo` as a fallback host path.
+- For shell-heavy workflows on Windows, WSL2 is the preferred local bash path.
+- PowerShell is the fallback tier only; any `*.ps1` entrypoints should stay thin and align with the same Docker/bash targets.
+- Historical PS1 demo scripts can be recovered from git history if you need the legacy launcher shape.
 
 ## Related
 

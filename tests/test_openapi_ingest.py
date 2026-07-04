@@ -291,6 +291,20 @@ def test_code_only_workspace_still_lists_code_symbols(tmp_path: Path) -> None:
     assert endpoints == []
 
 
+def test_legacy_code_only_workspace_info_falls_back(tmp_path: Path) -> None:
+    db = tmp_path / "symbols.db"
+    _write_code_symbol(db)
+
+    info = get_workspace_info(db_path=db, workspace="default")
+
+    assert info["repo_count"] == 1
+    assert info["code_repo_count"] == 1
+    assert info["contract_source_count"] == 0
+    assert info["contract_endpoint_count"] == 0
+    assert info["contract_binding_count"] == 0
+    assert info["symbol_count"] == 1
+
+
 def test_cli_info_and_list_contracts_for_openapi_only_workspace(tmp_path: Path) -> None:
     db = tmp_path / "symbols.db"
     openapi = _write_openapi(tmp_path)

@@ -4,6 +4,6 @@ Vendored from [sourcegraph/scip](https://github.com/sourcegraph/scip/blob/main/s
 
 Regenerate Python bindings:
 
-```powershell
-../scripts/regenerate_scip_proto.ps1
+```bash
+../scripts/regenerate_scip_proto.sh
 ```

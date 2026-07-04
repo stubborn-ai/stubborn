@@ -11,7 +11,7 @@ behavior, without mirrored demo copies that can drift.
 
 - **Docker-first** for reproducible demo and validation runs
 - **WSL2** on Windows when you want a bash-compatible shell locally
-- **PowerShell** only for host-side fallback scripts when you need them
+- **PowerShell** only as a fallback tier for Windows host users
 
 | Path | Status | Description |
 |------|--------|-------------|
@@ -29,8 +29,8 @@ docker compose run --rm e2e
 ```
 
 If you are on Windows and prefer a bash-compatible shell, use WSL2 and the same Docker
-commands. If you need a host fallback, the demo repositories still keep PS1
-wrappers.
+commands. If you need a Windows host fallback, use the historical PS1 scripts from git
+history or thin wrappers that forward to the same targets.
 
 ## Documentation
 

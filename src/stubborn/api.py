@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sqlite3
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
@@ -15,6 +16,7 @@ from stubborn.store.reader import (
     list_contract_endpoints,
     list_symbols,
     resolve_db_path,
+    RepoRunSummary,
     workspace_run_summaries,
 )
 from stubborn.store.writer import IndexInfo, IndexWriter, read_info
@@ -62,6 +64,30 @@ def _budget(
             prune_mode=prune_mode,
         )
     )
+
+
+def _legacy_workspace_run_summaries(
+    *,
+    workspace: str,
+    info: IndexInfo,
+) -> list[RepoRunSummary]:
+    """Synthesize a one-repo summary for legacy code-only databases."""
+    repo_key = info.repo_key or "legacy"
+    return [
+        RepoRunSummary(
+            workspace=workspace,
+            repo_key=repo_key,
+            index_run_id=info.index_run_id,
+            indexed_at=info.indexed_at,
+            mode=info.mode,
+            merge_count=info.merge_count,
+            run_kind=info.run_kind,
+            symbol_count=info.symbol_count,
+            edge_count=info.edge_count,
+            contract_endpoint_count=0,
+            contract_binding_count=0,
+        )
+    ]
 
 
 def get_context(
@@ -240,7 +266,13 @@ def get_workspace_info(
 ) -> dict[str, Any]:
     """Return source-neutral workspace run summary."""
     path = resolve_db_path(db_path)
-    summaries = workspace_run_summaries(path, workspace=workspace)
+    try:
+        summaries = workspace_run_summaries(path, workspace=workspace)
+    except (sqlite3.OperationalError, ValueError) as exc:
+        # Code-only databases from the legacy layout do not have workspace metadata.
+        if "repo" not in str(exc) and "workspace" not in str(exc):
+            raise
+        summaries = _legacy_workspace_run_summaries(workspace=workspace, info=read_info(path))
     code_repos = [item for item in summaries if item.run_kind == "code"]
     contract_sources = [item for item in summaries if item.run_kind == "contract"]
     return {

@@ -45,14 +45,14 @@ Stubborn addresses these when you already have (or can build) a **SCIP index**. 
 - **Cursor / MCP** — `get_context` before codegen on a pre-built `symbols.db`
 - **Large-repo onboarding** — dependency skeleton for one target symbol
 
-Start with [30-second fixture](#try-in-30-seconds-no-java-required) or [Docker E2E](#docker-quick-start); Docker is the primary reproducible path. On Windows, use **WSL2** for shell-heavy work and keep PowerShell host scripts as a fallback (see [Requirements](#requirements)).
+Start with [30-second fixture](#try-in-30-seconds-no-java-required) or [Docker E2E](#docker-quick-start); Docker is the primary reproducible path. On Windows, use **WSL2** for shell-heavy work and keep PowerShell host scripts as a fallback, not a second primary path (see [Requirements](#requirements)).
 
 ## Requirements
 
 Recommended local shell:
 
 - **Linux shell**: any bash-compatible shell, including Ubuntu and macOS
-- **Windows**: **WSL2** for Docker and bash-heavy workflows; PowerShell only for host-side demo fallbacks
+- **Windows**: **WSL2** for Docker and bash-heavy workflows; PowerShell only as a fallback tier
 
 - Python 3.11+ (or use [Docker](docker/README.md))
 - A **SCIP index** for your project — Stubborn does not index source directly
@@ -64,6 +64,14 @@ Recommended local shell:
 | Reproduce project E2E | Docker Desktop — [docker/README.md](docker/README.md) |
 
 **Beta scope:** weave quality and KPIs are **Java-validated**. Other SCIP languages may ingest; output quality is not guaranteed until language-specific E2E ships ([BETA.md](docs/BETA.md)).
+
+## Execution tiers
+
+| Tier | Use when | Typical entrypoints |
+|------|----------|---------------------|
+| Docker | You want the same environment on Windows, Linux, and macOS | `docker compose build`, `docker compose run --rm shell`, `docker compose run --rm cli` |
+| WSL/bash | You want the fastest local loop on a Unix-like shell | `pytest`, `ruff`, host scripts under `stubborn-demo/**/scripts/*.sh` |
+| PowerShell fallback | You are on Windows host and need a thin fallback path | Historical `*.ps1` scripts from git history, or thin wrappers that call the same targets |
 
 ### Docker quick start
 

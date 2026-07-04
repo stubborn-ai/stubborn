@@ -43,8 +43,8 @@ Schema: [`proto/scip.proto`](../proto/scip.proto) (from [sourcegraph/scip](https
 
 Regenerate Python bindings:
 
-```powershell
-./scripts/regenerate_scip_proto.ps1
+```bash
+./scripts/regenerate_scip_proto.sh
 ```
 
 Output: `src/stubborn/ingest/scip_proto/scip_pb2.py`
