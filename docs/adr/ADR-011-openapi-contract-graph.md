@@ -170,7 +170,25 @@ and evidence models.
   not pretend hand-written interfaces are canonical contract input.
 - The v3 schema can host a prototype via compatible snapshots, but first-class
   evidence metadata may require a schema migration.
+- Until that schema migration exists, v3-compatible contract bridge demos encode
+  bindings as ordinary `reference` edges. That proves traversal shape but does
+  not preserve evidence tier through `context` output.
 - The story is REST-first, not "all microservice communication."
+
+### Follow-up technical debt
+
+The first implementation follow-up should be a schema/output ADR for evidence
+metadata, likely schema v4:
+
+- persist `ContractEndpoint`, `SchemaConstraint`, and `ContractBinding`
+  provenance/evidence
+- distinguish contract bindings from SCIP `reference` edges at query time
+- expose evidence tiers through `stubborn.api` and MCP
+- render contract sections in `stubborn-dsl` or a sidecar output
+
+Without this, the evidence-tier model remains documentation-only and users could
+mistake a declared or inferred cross-service binding for a compiler-proven code
+reference.
 
 ## Alternatives considered
 

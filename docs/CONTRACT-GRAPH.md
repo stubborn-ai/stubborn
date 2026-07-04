@@ -127,6 +127,25 @@ Strict contract mode should exclude `inferred` bindings by default. Users can op
 into inferred bindings for exploratory runs, but those edges must not be
 presented as deterministic proof of service communication.
 
+## Current Prototype Gap
+
+Schema v3 can host seed validations by encoding contract endpoints and bindings
+as ordinary snapshot symbols and `reference` edges. That is enough to prove graph
+composition, but it is not enough to satisfy the evidence contract above.
+
+In v3-compatible prototypes, a declared contract binding can look identical to a
+compiler-proven SCIP reference once it reaches `stubborn context`. Consumers
+cannot yet query or render whether a cross-service neighbor came from `strong`,
+`declared`, or `inferred` evidence.
+
+The first schema follow-up after ADR-011 should make evidence first-class:
+
+- Persist endpoint/binding provenance and evidence tier.
+- Keep contract edges distinguishable from SCIP code-reference edges.
+- Expose evidence through API/MCP responses.
+- Render contract sections in `stubborn-dsl` or a sidecar output so generated
+  context does not hide the evidence tier.
+
 ## Weave Direction
 
 Future `stubborn-dsl` output can add a contract section without breaking the
