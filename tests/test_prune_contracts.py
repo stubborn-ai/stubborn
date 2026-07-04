@@ -16,6 +16,7 @@ from stubborn.store.writer import (
 
 PROVIDER = "semanticdb maven com/example/customers/OwnerResource#getOwner()."
 CONSUMER = "semanticdb maven com/example/visits/CustomersClient#getOwner()."
+CONSUMER_B = "semanticdb maven com/example/reporting/ReportingClient#getOwner()."
 ENDPOINT = "openapi customers-service:v1 GET /owners/{ownerId}"
 
 
@@ -58,12 +59,57 @@ def _write_code_repos(db: Path) -> IndexWriter:
     return writer
 
 
+def _write_reporting_consumer(writer: IndexWriter) -> None:
+    writer.write(
+        IndexSnapshot(
+            scip_source="reporting.json",
+            language="java",
+            symbols=[
+                SymbolRecord(
+                    stable_id=CONSUMER_B,
+                    display_name="getOwner",
+                    kind="method",
+                    signature="OwnerReport getOwner(Integer ownerId)",
+                    relative_path="src/ReportingClient.java",
+                ),
+            ],
+        ),
+        workspace="petclinic",
+        repo_key="reporting-service",
+    )
+
+
 def _write_contract(
     writer: IndexWriter,
     *,
     provider_evidence: str = "strong",
     consumer_evidence: str = "declared",
+    include_reporting_consumer: bool = False,
 ) -> None:
+    bindings = [
+        ContractBindingRecord(
+            code_stable_id=PROVIDER,
+            role="provider",
+            evidence=provider_evidence,
+            source="openapi-generated-server",
+        ),
+        ContractBindingRecord(
+            code_stable_id=CONSUMER,
+            role="consumer",
+            evidence=consumer_evidence,
+            source="manual:contracts/http.yml",
+        ),
+    ]
+    if include_reporting_consumer:
+        bindings.append(
+            ContractBindingRecord(
+                code_stable_id=CONSUMER_B,
+                role="consumer",
+                evidence=consumer_evidence,
+                source="manual:contracts/http.yml",
+            )
+        )
+
     writer.write_contract(
         ContractSnapshot(
             scip_source="contracts/openapi.json",
@@ -77,20 +123,7 @@ def _write_contract(
                     method_or_verb="GET",
                     address="/owners/{ownerId}",
                     display_name="GET /owners/{ownerId}",
-                    bindings=(
-                        ContractBindingRecord(
-                            code_stable_id=PROVIDER,
-                            role="provider",
-                            evidence=provider_evidence,
-                            source="openapi-generated-server",
-                        ),
-                        ContractBindingRecord(
-                            code_stable_id=CONSUMER,
-                            role="consumer",
-                            evidence=consumer_evidence,
-                            source="manual:contracts/http.yml",
-                        ),
-                    ),
+                    bindings=tuple(bindings),
                 ),
             ),
         ),
@@ -141,6 +174,45 @@ def test_contract_prune_crosses_consumer_to_provider(tmp_path: Path) -> None:
         and edge.to_stable_id == PROVIDER
         and edge.endpoint_stable_id == ENDPOINT
         for edge in graph.contract_edges
+    )
+
+
+def test_contract_prune_does_not_create_direct_consumer_to_consumer_edges(tmp_path: Path) -> None:
+    db = tmp_path / "symbols.db"
+    writer = _write_code_repos(db)
+    _write_reporting_consumer(writer)
+    _write_contract(writer, include_reporting_consumer=True)
+
+    one_hop = prune_context(
+        db,
+        CONSUMER,
+        workspace="petclinic",
+        budget=ContextBudget(call_closure_depth=1, max_symbols=10),
+    )
+    assert {symbol.stable_id for symbol in one_hop.symbols} == {CONSUMER, PROVIDER}
+    assert all(
+        {edge.from_role, edge.to_role} == {"provider", "consumer"}
+        for edge in one_hop.contract_edges
+    )
+    assert not any(
+        edge.from_stable_id == CONSUMER and edge.to_stable_id == CONSUMER_B
+        for edge in one_hop.contract_edges
+    )
+
+    two_hop = prune_context(
+        db,
+        CONSUMER,
+        workspace="petclinic",
+        budget=ContextBudget(call_closure_depth=2, max_symbols=10),
+    )
+    assert {symbol.stable_id for symbol in two_hop.symbols} == {
+        CONSUMER,
+        PROVIDER,
+        CONSUMER_B,
+    }
+    assert not any(
+        edge.from_role == "consumer" and edge.to_role == "consumer"
+        for edge in two_hop.contract_edges
     )
 
 

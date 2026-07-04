@@ -210,6 +210,8 @@ def _build_contract_adjacency(
             for to_binding in bindings:
                 if from_binding["code_stable_id"] == to_binding["code_stable_id"]:
                     continue
+                if {from_binding["role"], to_binding["role"]} != {"provider", "consumer"}:
+                    continue
                 to_id = stable_to_id[to_binding["code_stable_id"]]
                 evidence = _weaker_contract_evidence(
                     from_binding["evidence"],
