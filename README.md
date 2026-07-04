@@ -2,7 +2,7 @@
 
 **Deterministic code context from symbol graphs — for SCIP-indexed codebases.**
 
-> **Status: Beta (Java-first)** — release **`0.9.0b4`** · [BETA.md](docs/BETA.md) · [POSITIONING.md](docs/POSITIONING.md) · [CHANGELOG](CHANGELOG.md)
+> **Status: Beta (Java-first)** — release **`0.9.0b5`** · [BETA.md](docs/BETA.md) · [POSITIONING.md](docs/POSITIONING.md) · [CHANGELOG](CHANGELOG.md)
 
 Stubborn compiles a **SCIP symbol index** into **type-safe, privacy-preserving stub text** for LLMs and agents. Same index + target + options → same context: reproducible, token-bounded, and stripped of method bodies.
 
@@ -256,7 +256,7 @@ SQLite schema: [`src/stubborn/store/schema/v4.sql`](src/stubborn/store/schema/v4
 | **0.7** | [Stubborn-DSL](docs/STUBBORN-DSL.md) weaver (`--format stubborn-dsl`) |
 | **0.8** | Java-first beta track — [BETA.md](docs/BETA.md), demo-spring cases |
 | **0.9** | Method signatures, [STUBBORN-DSL-GUIDE](docs/STUBBORN-DSL-GUIDE.md) |
-| **0.9.0b4** (now) | **MCP split** — `stubborn-mcp` on PyPI; prune-mode, ADR-009 design |
+| **0.9.0b5** (now) | **Source-neutral contracts** — contract graph evidence, `index-openapi`, `index-contract`, optional SCIP runtime |
 | **0.9.0b3** | Standalone cleanup — rename debt removed, ruff CI, CLI smoke tests |
 | **0.9.0b2** | **Java-first Beta** — classifier + weave granularity switches |
 | **1.0** | Multi-language E2E, stable API |

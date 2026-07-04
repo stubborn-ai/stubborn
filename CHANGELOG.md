@@ -6,25 +6,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.9.0b5] - 2026-07-04
+
 ### Added
 
-- **ADR-009 incremental merge** — schema v2 (`relative_path`, `index_run.mode`, `merge_count`), `IndexWriter.merge()`, CLI `stubborn index --merge` and `--paths`.
-- **ADR-010 workspace graph** — schema v3 workspace/repo metadata and workspace-scoped `context` / `list-symbols` queries for source-available multi-repo projects.
-- JSON fixture `documents[]` format with per-document `relative_path`.
-- [`stubborn-watch`](https://github.com/stubborn-ai/stubborn-watch) — debounced file watch → scip-java → merge (new repo).
+- **ADR-011/012 contract graph** — explicit OpenAPI contract ingest, schema v4 contract evidence tables, and `index-contract` for manifest-based contract evidence.
+- **ADR-013 source-neutral queries** — `prune_context` and workspace summaries now treat code and contract sources as peers, with `contract_endpoint` targets, `contract_endpoints` graph facts, and `list_contracts` discovery.
+- **ADR-014 optional SCIP runtime** — `protobuf` moved behind the `scip` extra, while core/API/JSON-fixture paths remain importable without the SCIP runtime.
 
 ### Changed
 
-- New databases initialize schema **v3**; v1/v2 databases auto-migrate on open.
-- Core `examples/` now contains only fixtures; runnable demo and validation projects live in [`stubborn-demo`](https://github.com/stubborn-ai/stubborn-demo).
-
-### Removed
-
-- Mirrored demo assets (`demo-spring`, `spring-petclinic`, Duke's Bank, migration bridge) and their core-repo E2E scripts/workflows.
+- `stubborn index-openapi` supports contract-only workspaces without code bindings; `stubborn-dsl` renders endpoint/schema facts under `contracts:`.
+- `stubborn info --workspace` now reports code repos and contract sources separately.
+- Core docs and examples now describe code/contract source kinds as peers.
 
 ### Fixed
 
-- Incremental `--merge` now preserves cross-file edges whose other endpoint is an unchanged symbol already present in the active `index_run`.
+- Deduplicated SCIP enrichment logic so the pure enrichment path and protobuf ingest share one implementation.
 
 ## [0.9.0b4] - 2026-07-03
 
@@ -82,6 +80,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 See [GitHub Releases](https://github.com/stubborn-ai/stubborn/releases) for earlier tags and migration history.
 
+[0.9.0b5]: https://github.com/stubborn-ai/stubborn/compare/v0.9.0b4...v0.9.0b5
 [0.9.0b4]: https://github.com/stubborn-ai/stubborn/compare/v0.9.0b3...v0.9.0b4
 [0.9.0b3]: https://github.com/stubborn-ai/stubborn/compare/v0.9.0b2...v0.9.0b3
 [0.9.0b2]: https://github.com/stubborn-ai/stubborn/releases/tag/v0.9.0b2

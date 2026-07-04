@@ -1,6 +1,6 @@
 # Beta readiness (Java-first)
 
-**Current: Beta `0.9.0b4`** — Java/Spring E2E validated; `Development Status :: 4 - Beta`.
+**Current: Beta `0.9.0b5`** — Java/Spring E2E validated; `Development Status :: 4 - Beta`.
 
 Pre-beta (`0.9.0a1`) completed the checklist; this tag flips the PyPI classifier and version line.
 
@@ -19,7 +19,7 @@ See [POSITIONING.md](POSITIONING.md) for the full primary/secondary split.
 | Stage | Version | Classifier |
 |-------|---------|------------|
 | Pre-beta | `0.9.0a1` | Alpha |
-| **Beta (now)** | **`0.9.0b4`** | **Beta** |
+| **Beta (now)** | **`0.9.0b5`** | **Beta** |
 | Stable | `1.0.0` | Stable |
 
 ## Beta checklist (complete)
@@ -42,7 +42,7 @@ See [POSITIONING.md](POSITIONING.md) for the full primary/secondary split.
 ### Agent / docs
 
 - [x] STUBBORN-DSL grammar, LLM snippet, format guide
-- [x] PyPI `stubborn-stub` published (`0.9.0b4`)
+- [x] PyPI `stubborn-stub` published (`0.9.0b5`)
 - [x] ADRs + honest positioning ([POSITIONING.md](POSITIONING.md))
 
 ### Quality bar
@@ -59,22 +59,22 @@ See [POSITIONING.md](POSITIONING.md) for the full primary/secondary split.
 | Zero-config repo indexing (no SCIP) | Out of scope — use IDE/repo-map tools |
 | scip-clang / TypeScript **weave E2E** | v1.0+ |
 | Polyglot merged index story | v1.0+ ADR + E2E |
-| OpenAPI contract graph adapter | Planned after ADR-011; separate `stubborn-ingest-openapi` package |
+| OpenAPI contract graph adapter | Implemented in-core as `index-openapi` / `index-contract` |
 | Method signatures on non-target types by default | v1.0+ — use `--member-signatures neighbors|all` (beta) |
 | Rich Javadoc in output | v1.0+ — use `--javadoc full` (beta) |
 | Petclinic on every PR | Weekly (cost) |
 
 ## Known limitations (beta)
 
-1. **Java-first** — production claims apply to scip-java path only; other languages ingest at your own risk.
-2. **SCIP prerequisite** — every real project needs an indexer before Stubborn; not plug-and-play vs repo-map tools.
+1. **Java-first** — production weave claims apply to scip-java path only; contract graph use cases are protocol-first.
+2. **SCIP prerequisite** — every code-first project needs an indexer before Stubborn; not plug-and-play vs repo-map tools.
 3. **Neighbor honesty** — default `--prune-mode smart` uses signature heuristics; use **`strict`** for SCIP-only edges ([ADR-003](adr/ADR-003-type-neighbor-pruning.md)).
 4. **Method signatures** — default `target` only; use `--member-signatures neighbors|all` for more.
 5. **Token estimate** — chars/4 heuristic.
 6. **Javadoc** — default summary (java-stub) / off (stubborn-dsl); `--javadoc full` for `@param` tags.
 7. **Stubborn-DSL** — user choice for token/graph tasks; `java-stub` default for Java codegen ([STUBBORN-DSL-GUIDE.md](STUBBORN-DSL-GUIDE.md)).
 8. **Dual audience** — reconcile/CI features target enterprise migration workflows; MCP targets agents — see [POSITIONING.md](POSITIONING.md).
-9. **Microservice contracts** — REST/OpenAPI graph support is planned in [ADR-011](adr/ADR-011-openapi-contract-graph.md); current SCIP ingest alone does not prove HTTP calls across services, and hand-written interfaces without an OpenAPI contract are not strong graph input.
+9. **Microservice contracts** — REST/OpenAPI graph support is implemented in-core ([ADR-011](adr/ADR-011-openapi-contract-graph.md), [ADR-012](adr/ADR-012-schema-v4-contract-evidence.md), [ADR-013](adr/ADR-013-source-neutral-contract-queries.md)).
 
 ## KPI baselines
 
