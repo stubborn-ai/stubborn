@@ -107,6 +107,7 @@ def trim_for_token_budget(
                 symbols=selected,
                 edges=graph.edges,
                 contract_edges=graph.contract_edges,
+                contract_endpoints=graph.contract_endpoints,
             ),
             max_tokens=None,
             options=weave_options,

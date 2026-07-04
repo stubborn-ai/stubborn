@@ -47,12 +47,34 @@ class ContractPrunedEdge:
     to_source: str | None
 
 
+@dataclass(frozen=True)
+class PrunedContractSchemaConstraint:
+    location: str
+    field_path: str
+    type_name: str | None
+    required: bool | None
+
+
+@dataclass(frozen=True)
+class PrunedContractEndpoint:
+    stable_id: str
+    display_name: str | None
+    protocol: str
+    service: str | None
+    version: str | None
+    method_or_verb: str | None
+    address: str
+    schema_constraints: tuple[PrunedContractSchemaConstraint, ...]
+    depth: int
+
+
 @dataclass
 class PrunedGraph:
     target_stable_id: str
     symbols: list[PrunedSymbol]
     edges: list[tuple[str, str, str]]
     contract_edges: list[ContractPrunedEdge] = field(default_factory=list)
+    contract_endpoints: list[PrunedContractEndpoint] = field(default_factory=list)
 
 
 def _should_exclude(stable_id: str, patterns: tuple[str, ...]) -> bool:
@@ -148,18 +170,160 @@ def _weaker_contract_evidence(left: str, right: str) -> str:
 def _contract_run_ids(
     conn: sqlite3.Connection,
     *,
+    index_run_id: int | None = None,
     workspace: str | None,
     repo_key: str | None,
 ) -> list[int]:
     try:
         return latest_index_run_ids(
             conn,
+            index_run_id=index_run_id,
             workspace=workspace,
             repo_key=repo_key,
             run_kind="contract",
         )
     except ValueError:
         return []
+
+
+def _code_run_ids(
+    conn: sqlite3.Connection,
+    *,
+    index_run_id: int | None = None,
+    workspace: str | None,
+    repo_key: str | None,
+) -> list[int]:
+    try:
+        return latest_index_run_ids(
+            conn,
+            index_run_id=index_run_id,
+            workspace=workspace,
+            repo_key=repo_key,
+            run_kind="code",
+        )
+    except ValueError:
+        return []
+
+
+def _load_contract_endpoints(
+    conn: sqlite3.Connection,
+    *,
+    contract_run_ids: list[int],
+) -> dict[str, PrunedContractEndpoint]:
+    if not contract_run_ids:
+        return {}
+
+    placeholders = ",".join("?" * len(contract_run_ids))
+    endpoint_rows = conn.execute(
+        f"""
+        SELECT id, stable_id, display_name, protocol, service, version,
+               method_or_verb, address
+        FROM contract_endpoint
+        WHERE index_run_id IN ({placeholders})
+        ORDER BY stable_id, id DESC
+        """,
+        contract_run_ids,
+    ).fetchall()
+    if not endpoint_rows:
+        return {}
+
+    endpoint_ids = [int(row["id"]) for row in endpoint_rows]
+    constraint_placeholders = ",".join("?" * len(endpoint_ids))
+    constraint_rows = conn.execute(
+        f"""
+        SELECT endpoint_id, location, field_path, type_name, required
+        FROM contract_schema_constraint
+        WHERE endpoint_id IN ({constraint_placeholders})
+        ORDER BY endpoint_id, location, field_path
+        """,
+        endpoint_ids,
+    ).fetchall()
+    constraints_by_endpoint_id: dict[int, list[PrunedContractSchemaConstraint]] = {}
+    for row in constraint_rows:
+        constraints_by_endpoint_id.setdefault(int(row["endpoint_id"]), []).append(
+            PrunedContractSchemaConstraint(
+                location=row["location"],
+                field_path=row["field_path"],
+                type_name=row["type_name"],
+                required=None if row["required"] is None else bool(row["required"]),
+            )
+        )
+
+    endpoints: dict[str, PrunedContractEndpoint] = {}
+    for row in endpoint_rows:
+        stable_id = row["stable_id"]
+        if stable_id in endpoints:
+            continue
+        endpoint_id = int(row["id"])
+        endpoints[stable_id] = PrunedContractEndpoint(
+            stable_id=stable_id,
+            display_name=row["display_name"],
+            protocol=row["protocol"],
+            service=row["service"],
+            version=row["version"],
+            method_or_verb=row["method_or_verb"],
+            address=row["address"],
+            schema_constraints=tuple(constraints_by_endpoint_id.get(endpoint_id, ())),
+            depth=0,
+        )
+    return endpoints
+
+
+def _contract_endpoint_with_depth(
+    endpoint: PrunedContractEndpoint,
+    depth: int,
+) -> PrunedContractEndpoint:
+    return PrunedContractEndpoint(
+        stable_id=endpoint.stable_id,
+        display_name=endpoint.display_name,
+        protocol=endpoint.protocol,
+        service=endpoint.service,
+        version=endpoint.version,
+        method_or_verb=endpoint.method_or_verb,
+        address=endpoint.address,
+        schema_constraints=endpoint.schema_constraints,
+        depth=depth,
+    )
+
+
+def _bound_code_ids_for_endpoint(
+    conn: sqlite3.Connection,
+    *,
+    contract_run_ids: list[int],
+    endpoint_stable_id: str,
+    stable_to_id: dict[str, int],
+    budget: ContextBudget,
+) -> list[int]:
+    if not contract_run_ids:
+        return []
+    if not _depth_limit_for_edge("reference", 0, budget):
+        return []
+
+    allowed_evidence = _allowed_contract_evidence(budget)
+    placeholders = ",".join("?" * len(contract_run_ids))
+    rows = conn.execute(
+        f"""
+        SELECT cb.code_stable_id, cb.evidence
+        FROM contract_binding cb
+        JOIN contract_endpoint ce ON ce.id = cb.endpoint_id
+        WHERE ce.index_run_id IN ({placeholders})
+          AND ce.stable_id = ?
+        ORDER BY cb.role, cb.code_stable_id
+        """,
+        [*contract_run_ids, endpoint_stable_id],
+    ).fetchall()
+
+    code_ids: list[int] = []
+    seen: set[int] = set()
+    for row in rows:
+        if row["evidence"] not in allowed_evidence:
+            continue
+        code_id = stable_to_id.get(row["code_stable_id"])
+        if code_id is None or code_id in seen:
+            continue
+        seen.add(code_id)
+        code_ids.append(code_id)
+    return code_ids
 
 
 def _build_contract_adjacency(
@@ -287,76 +451,100 @@ def prune_context(
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     try:
-        run_ids = latest_index_run_ids(
+        run_ids = _code_run_ids(
             conn,
             index_run_id=index_run_id,
             workspace=workspace,
             repo_key=repo_key,
         )
-        run_placeholders = ",".join("?" * len(run_ids))
+        contract_run_ids = _contract_run_ids(
+            conn,
+            index_run_id=index_run_id,
+            workspace=workspace,
+            repo_key=repo_key,
+        )
+        run_placeholders = ",".join("?" * len(run_ids)) if run_ids else ""
 
         symbols_by_id: dict[int, sqlite3.Row] = {}
         stable_to_rows: dict[str, list[sqlite3.Row]] = {}
-        for row in conn.execute(
-            f"""
-            SELECT s.id, s.index_run_id, s.stable_id, s.display_name, s.kind,
-                   s.signature, s.documentation, s.relative_path,
-                   r.repo_key, r.priority AS repo_priority
-            FROM scip_symbol s
-            JOIN index_run ir ON ir.id = s.index_run_id
-            LEFT JOIN repo r ON r.id = ir.repo_id
-            WHERE s.index_run_id IN ({run_placeholders})
-            """,
-            run_ids,
-        ):
-            symbols_by_id[row["id"]] = row
-            stable_to_rows.setdefault(row["stable_id"], []).append(row)
+        if run_ids:
+            for row in conn.execute(
+                f"""
+                SELECT s.id, s.index_run_id, s.stable_id, s.display_name, s.kind,
+                       s.signature, s.documentation, s.relative_path,
+                       r.repo_key, r.priority AS repo_priority
+                FROM scip_symbol s
+                JOIN index_run ir ON ir.id = s.index_run_id
+                LEFT JOIN repo r ON r.id = ir.repo_id
+                WHERE s.index_run_id IN ({run_placeholders})
+                """,
+                run_ids,
+            ):
+                symbols_by_id[row["id"]] = row
+                stable_to_rows.setdefault(row["stable_id"], []).append(row)
 
         stable_to_id = {
             stable_id: int(_best_symbol_row(rows)["id"])
             for stable_id, rows in stable_to_rows.items()
         }
 
-        if target_stable_id not in stable_to_id:
-            raise ValueError(f"Symbol not found in index: {target_stable_id}")
-
         adjacency: dict[int, list[tuple[int, str]]] = {}
-        for row in conn.execute(
-            f"""
-            SELECT from_symbol_id, to_symbol_id, edge_kind
-            FROM scip_edge
-            WHERE index_run_id IN ({run_placeholders})
-            """,
-            run_ids,
-        ):
-            from_row = symbols_by_id[row["from_symbol_id"]]
-            to_row = symbols_by_id[row["to_symbol_id"]]
-            from_id = stable_to_id[from_row["stable_id"]]
-            to_id = stable_to_id[to_row["stable_id"]]
-            adjacency.setdefault(from_id, []).append((to_id, row["edge_kind"]))
-            adjacency.setdefault(to_id, []).append((from_id, row["edge_kind"]))
+        if run_ids:
+            for row in conn.execute(
+                f"""
+                SELECT from_symbol_id, to_symbol_id, edge_kind
+                FROM scip_edge
+                WHERE index_run_id IN ({run_placeholders})
+                """,
+                run_ids,
+            ):
+                from_row = symbols_by_id[row["from_symbol_id"]]
+                to_row = symbols_by_id[row["to_symbol_id"]]
+                from_id = stable_to_id[from_row["stable_id"]]
+                to_id = stable_to_id[to_row["stable_id"]]
+                adjacency.setdefault(from_id, []).append((to_id, row["edge_kind"]))
+                adjacency.setdefault(to_id, []).append((from_id, row["edge_kind"]))
 
         contract_adjacency, all_contract_edges = _build_contract_adjacency(
             conn,
-            contract_run_ids=_contract_run_ids(conn, workspace=workspace, repo_key=repo_key),
+            contract_run_ids=contract_run_ids,
             stable_to_id=stable_to_id,
             budget=budget,
         )
+        contract_endpoints_by_stable = _load_contract_endpoints(
+            conn,
+            contract_run_ids=contract_run_ids,
+        )
 
-        start_id = stable_to_id[target_stable_id]
+        target_is_code_symbol = target_stable_id in stable_to_id
+        target_contract_endpoint = contract_endpoints_by_stable.get(target_stable_id)
+        if not target_is_code_symbol and target_contract_endpoint is None:
+            raise ValueError(f"Target not found in index: {target_stable_id}")
+
         type_name_index = _build_type_name_index(symbols_by_id)
         seen: dict[int, int] = {}
         queue: deque[int] = deque()
 
-        _enqueue_symbol(start_id, 0, seen=seen, queue=queue, budget=budget)
-        for member_stable_id in _type_member_stable_ids(target_stable_id, stable_to_id):
-            _enqueue_symbol(
-                stable_to_id[member_stable_id],
-                0,
-                seen=seen,
-                queue=queue,
+        if target_is_code_symbol:
+            start_id = stable_to_id[target_stable_id]
+            _enqueue_symbol(start_id, 0, seen=seen, queue=queue, budget=budget)
+            for member_stable_id in _type_member_stable_ids(target_stable_id, stable_to_id):
+                _enqueue_symbol(
+                    stable_to_id[member_stable_id],
+                    0,
+                    seen=seen,
+                    queue=queue,
+                    budget=budget,
+                )
+        else:
+            for code_id in _bound_code_ids_for_endpoint(
+                conn,
+                contract_run_ids=contract_run_ids,
+                endpoint_stable_id=target_stable_id,
+                stable_to_id=stable_to_id,
                 budget=budget,
-            )
+            ):
+                _enqueue_symbol(code_id, 1, seen=seen, queue=queue, budget=budget)
 
         while queue and len(seen) < budget.max_symbols:
             current_id = queue.popleft()
@@ -447,20 +635,21 @@ def prune_context(
         stable_ids = {s.stable_id for s in pruned_symbols}
         pruned_edges: list[tuple[str, str, str]] = []
         seen_edges: set[tuple[str, str, str]] = set()
-        for row in conn.execute(
-            f"""
-            SELECT fs.stable_id, ts.stable_id, e.edge_kind
-            FROM scip_edge e
-            JOIN scip_symbol fs ON fs.id = e.from_symbol_id
-            JOIN scip_symbol ts ON ts.id = e.to_symbol_id
-            WHERE e.index_run_id IN ({run_placeholders})
-            """,
-            run_ids,
-        ):
-            edge = (row[0], row[1], row[2])
-            if row[0] in stable_ids and row[1] in stable_ids and edge not in seen_edges:
-                seen_edges.add(edge)
-                pruned_edges.append(edge)
+        if run_ids:
+            for row in conn.execute(
+                f"""
+                SELECT fs.stable_id, ts.stable_id, e.edge_kind
+                FROM scip_edge e
+                JOIN scip_symbol fs ON fs.id = e.from_symbol_id
+                JOIN scip_symbol ts ON ts.id = e.to_symbol_id
+                WHERE e.index_run_id IN ({run_placeholders})
+                """,
+                run_ids,
+            ):
+                edge = (row[0], row[1], row[2])
+                if row[0] in stable_ids and row[1] in stable_ids and edge not in seen_edges:
+                    seen_edges.add(edge)
+                    pruned_edges.append(edge)
 
         pruned_contract_edges: list[ContractPrunedEdge] = []
         seen_contract_edges: set[tuple[str, str, str, str, str]] = set()
@@ -479,11 +668,36 @@ def prune_context(
             seen_contract_edges.add(key)
             pruned_contract_edges.append(edge)
 
+        endpoint_depths: dict[str, int] = {}
+        if target_contract_endpoint is not None:
+            endpoint_depths[target_stable_id] = 0
+        for edge in pruned_contract_edges:
+            from_depth = next(
+                (symbol.depth for symbol in pruned_symbols if symbol.stable_id == edge.from_stable_id),
+                0,
+            )
+            to_depth = next(
+                (symbol.depth for symbol in pruned_symbols if symbol.stable_id == edge.to_stable_id),
+                0,
+            )
+            edge_depth = min(from_depth, to_depth) + 1
+            endpoint_depths[edge.endpoint_stable_id] = min(
+                endpoint_depths.get(edge.endpoint_stable_id, edge_depth),
+                edge_depth,
+            )
+
+        pruned_contract_endpoints = [
+            _contract_endpoint_with_depth(contract_endpoints_by_stable[stable_id], depth)
+            for stable_id, depth in sorted(endpoint_depths.items(), key=lambda item: item[1])
+            if stable_id in contract_endpoints_by_stable
+        ]
+
         return PrunedGraph(
             target_stable_id=target_stable_id,
             symbols=pruned_symbols,
             edges=pruned_edges,
             contract_edges=pruned_contract_edges,
+            contract_endpoints=pruned_contract_endpoints,
         )
     finally:
         conn.close()

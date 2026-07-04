@@ -11,7 +11,12 @@ from stubborn.graph.prune import prune_context
 from stubborn.ingest.contracts import contract_snapshot_from_manifest
 from stubborn.ingest.openapi import openapi_snapshot_from_file
 from stubborn.metrics import compute_compression
-from stubborn.store.reader import list_symbols, resolve_db_path
+from stubborn.store.reader import (
+    list_contract_endpoints,
+    list_symbols,
+    resolve_db_path,
+    workspace_run_summaries,
+)
 from stubborn.store.writer import IndexInfo, IndexWriter, read_info
 from stubborn.weave.dispatch import weave_context
 from stubborn.weave.options import WeaveOptions
@@ -26,6 +31,7 @@ class ContextResult:
     estimated_tokens: int
     dropped_for_budget: bool
     contract_edges: list[dict[str, Any]] = field(default_factory=list)
+    contract_endpoints: list[dict[str, Any]] = field(default_factory=list)
     contract_evidence_summary: dict[str, int] = field(default_factory=dict)
 
 
@@ -102,6 +108,7 @@ def get_context(
         estimated_tokens=result.estimated_tokens,
         dropped_for_budget=result.dropped_for_budget,
         contract_edges=[asdict(edge) for edge in graph.contract_edges],
+        contract_endpoints=[asdict(endpoint) for endpoint in graph.contract_endpoints],
         contract_evidence_summary=_contract_evidence_summary(graph),
     )
 
@@ -206,6 +213,51 @@ def list_index_symbols(
     return [asdict(record) for record in records]
 
 
+def list_contracts(
+    *,
+    db_path: str | Path | None = None,
+    query: str | None = None,
+    index_run_id: int | None = None,
+    workspace: str | None = None,
+    repo_key: str | None = None,
+) -> list[dict[str, Any]]:
+    """Return contract endpoint records as JSON-serializable dicts."""
+    path = resolve_db_path(db_path)
+    endpoints = list_contract_endpoints(
+        path,
+        query=query,
+        index_run_id=index_run_id,
+        workspace=workspace,
+        repo_key=repo_key,
+    )
+    return [asdict(endpoint) for endpoint in endpoints]
+
+
+def get_workspace_info(
+    *,
+    db_path: str | Path | None = None,
+    workspace: str,
+) -> dict[str, Any]:
+    """Return source-neutral workspace run summary."""
+    path = resolve_db_path(db_path)
+    summaries = workspace_run_summaries(path, workspace=workspace)
+    code_repos = [item for item in summaries if item.run_kind == "code"]
+    contract_sources = [item for item in summaries if item.run_kind == "contract"]
+    return {
+        "workspace": workspace,
+        "repo_count": len(summaries),
+        "code_repo_count": len(code_repos),
+        "contract_source_count": len(contract_sources),
+        "symbol_count": sum(item.symbol_count for item in summaries),
+        "edge_count": sum(item.edge_count for item in summaries),
+        "contract_endpoint_count": sum(
+            item.contract_endpoint_count for item in summaries
+        ),
+        "contract_binding_count": sum(item.contract_binding_count for item in summaries),
+        "runs": [asdict(item) for item in summaries],
+    }
+
+
 def get_index_info(
     *,
     db_path: str | Path | None = None,
@@ -224,6 +276,7 @@ def get_index_info(
         "db_path": str(path),
         "workspace": info.workspace,
         "repo_key": info.repo_key,
+        "run_kind": info.run_kind,
     }
 
 

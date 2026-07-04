@@ -8,10 +8,11 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from stubborn.api import get_context, index_openapi_contract
+from stubborn.api import get_context, get_workspace_info, index_openapi_contract, list_contracts
 from stubborn.cli import app
 from stubborn.ingest.models import IndexSnapshot, SymbolRecord
 from stubborn.ingest.openapi import openapi_snapshot_from_file
+from stubborn.store.reader import list_contract_endpoints
 from stubborn.store.writer import IndexWriter, read_info
 
 SERVICE = "customers-service"
@@ -209,6 +210,121 @@ def test_api_indexes_openapi_without_code_bindings(tmp_path: Path) -> None:
 
     assert endpoint_count == 2
     assert binding_count == 0
+
+
+def test_openapi_only_workspace_is_queryable_without_code_runs(tmp_path: Path) -> None:
+    db = tmp_path / "symbols.db"
+    index_openapi_contract(
+        _write_openapi(tmp_path),
+        db_path=db,
+        service=SERVICE,
+        workspace="petclinic",
+    )
+
+    context = get_context(
+        ENDPOINT,
+        db_path=db,
+        workspace="petclinic",
+        format="stubborn-dsl",
+        call_depth=1,
+    )
+    info = get_workspace_info(db_path=db, workspace="petclinic")
+    endpoints = list_contracts(db_path=db, workspace="petclinic")
+
+    assert context.symbol_count == 0
+    assert context.contract_edges == []
+    assert len(context.contract_endpoints) == 1
+    assert context.contract_endpoints[0]["stable_id"] == ENDPOINT
+    assert "contracts:" in context.text
+    assert ENDPOINT in context.text
+    assert "schema path.ownerId integer required" in context.text
+    assert "schema query.includePets boolean optional" in context.text
+    assert info["code_repo_count"] == 0
+    assert info["contract_source_count"] == 1
+    assert info["contract_endpoint_count"] == 2
+    assert any(endpoint["stable_id"] == ENDPOINT for endpoint in endpoints)
+
+
+def test_mixed_workspace_unbound_endpoint_does_not_cross_into_code(
+    tmp_path: Path,
+) -> None:
+    db = tmp_path / "symbols.db"
+    _write_code_symbol(db)
+    index_openapi_contract(
+        _write_openapi(tmp_path),
+        db_path=db,
+        service=SERVICE,
+        workspace="petclinic",
+    )
+
+    context = get_context(
+        ENDPOINT,
+        db_path=db,
+        workspace="petclinic",
+        format="stubborn-dsl",
+        call_depth=2,
+    )
+
+    assert context.symbol_count == 0
+    assert context.contract_edges == []
+    assert len(context.contract_endpoints) == 1
+    assert OWNER_RESOURCE not in context.text
+
+
+def test_code_only_workspace_still_lists_code_symbols(tmp_path: Path) -> None:
+    db = tmp_path / "symbols.db"
+    _write_code_symbol(db)
+
+    context = get_context(
+        OWNER_RESOURCE,
+        db_path=db,
+        workspace="petclinic",
+        format="stubborn-dsl",
+        call_depth=1,
+    )
+    endpoints = list_contract_endpoints(db, workspace="petclinic")
+
+    assert context.symbol_count == 1
+    assert "OwnerResource" in context.text
+    assert context.contract_edges == []
+    assert context.contract_endpoints == []
+    assert endpoints == []
+
+
+def test_cli_info_and_list_contracts_for_openapi_only_workspace(tmp_path: Path) -> None:
+    db = tmp_path / "symbols.db"
+    openapi = _write_openapi(tmp_path)
+    runner = CliRunner()
+
+    indexed = runner.invoke(
+        app,
+        [
+            "index-openapi",
+            "--openapi",
+            str(openapi),
+            "--out",
+            str(db),
+            "--service",
+            SERVICE,
+            "--workspace",
+            "petclinic",
+        ],
+    )
+    info = runner.invoke(app, ["info", str(db), "--workspace", "petclinic"])
+    listed = runner.invoke(
+        app,
+        ["list-contracts", str(db), "--workspace", "petclinic", "--show-schema"],
+    )
+
+    assert indexed.exit_code == 0, indexed.stdout + indexed.stderr
+    assert info.exit_code == 0, info.stdout + info.stderr
+    assert "Code repos:     0" in info.stdout
+    assert "Contract sources: 1" in info.stdout
+    assert "Contract endpoints: 2" in info.stdout
+    assert "- customers-service-openapi: kind=contract" in info.stdout
+    assert listed.exit_code == 0, listed.stdout + listed.stderr
+    assert ENDPOINT in listed.stdout
+    assert "path.ownerId: integer required" in listed.stdout
 
 
 def test_cli_index_openapi(tmp_path: Path) -> None:

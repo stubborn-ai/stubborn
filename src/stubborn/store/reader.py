@@ -27,8 +27,11 @@ class RepoRunSummary:
     indexed_at: str
     mode: str
     merge_count: int
+    run_kind: str
     symbol_count: int
     edge_count: int
+    contract_endpoint_count: int
+    contract_binding_count: int
 
 
 @dataclass(frozen=True)
@@ -44,6 +47,26 @@ class ContractBindingSummary:
     role: str
     evidence: str
     source: str | None
+
+
+@dataclass(frozen=True)
+class ContractSchemaConstraintSummary:
+    location: str
+    field_path: str
+    type_name: str | None
+    required: bool | None
+
+
+@dataclass(frozen=True)
+class ContractEndpointSummary:
+    stable_id: str
+    display_name: str | None
+    protocol: str
+    service: str | None
+    version: str | None
+    method_or_verb: str | None
+    address: str
+    schema_constraints: tuple[ContractSchemaConstraintSummary, ...] = ()
 
 
 def resolve_db_path(db_path: str | Path | None) -> Path:
@@ -66,7 +89,7 @@ def _latest_index_run_id(
     conn: sqlite3.Connection,
     index_run_id: int | None,
     *,
-    run_kind: str | None = "code",
+    run_kind: str | None = None,
 ) -> int:
     if index_run_id is not None:
         return index_run_id
@@ -92,7 +115,7 @@ def latest_index_run_ids(
     index_run_id: int | None = None,
     workspace: str | None = None,
     repo_key: str | None = None,
-    run_kind: str | None = "code",
+    run_kind: str | None = None,
 ) -> list[int]:
     """Resolve the active run set for legacy, repo, or workspace scoped queries."""
     if index_run_id is not None:
@@ -100,7 +123,7 @@ def latest_index_run_ids(
 
     if repo_key is not None:
         sql = """
-            SELECT ir.id
+            SELECT ir.id, ir.run_kind
             FROM index_run ir
             JOIN repo r ON r.id = ir.repo_id
             JOIN workspace w ON w.id = r.workspace_id
@@ -113,6 +136,18 @@ def latest_index_run_ids(
         if run_kind is not None:
             sql += " AND ir.run_kind = ?"
             params.append(run_kind)
+        if run_kind is None:
+            sql = f"""
+                SELECT MAX(id) AS run_id
+                FROM ({sql}) scoped_runs
+                GROUP BY run_kind
+                ORDER BY run_kind
+            """
+            rows = conn.execute(sql, params).fetchall()
+            if not rows:
+                raise ValueError(f"No index runs found for repo {repo_key!r}")
+            return [int(row[0]) for row in rows]
+
         sql += " ORDER BY ir.id DESC LIMIT 1"
         row = conn.execute(sql, params).fetchone()
         if row is None:
@@ -128,8 +163,8 @@ def latest_index_run_ids(
             JOIN workspace w ON w.id = r.workspace_id
             WHERE w.name = ?
               AND (? IS NULL OR ir.run_kind = ?)
-            GROUP BY r.id
-            ORDER BY r.priority, r.repo_key
+            GROUP BY r.id, ir.run_kind
+            ORDER BY r.priority, r.repo_key, ir.run_kind
             """,
             (workspace, run_kind, run_kind),
         ).fetchall()
@@ -162,6 +197,7 @@ def list_symbols(
             index_run_id=index_run_id,
             workspace=workspace,
             repo_key=repo_key,
+            run_kind="code",
         )
         placeholders = _placeholders(list(run_ids))
         sql = (
@@ -230,6 +266,7 @@ def resolve_stable_id(
             index_run_id=index_run_id,
             workspace=workspace,
             repo_key=repo_key,
+            run_kind="code",
         )
         placeholders = _placeholders(list(run_ids))
         rows = conn.execute(
@@ -271,9 +308,20 @@ def workspace_run_summaries(db_path: str | Path, *, workspace: str) -> list[Repo
         rows = conn.execute(
             f"""
             SELECT w.name AS workspace, r.repo_key, ir.id AS index_run_id,
-                   ir.indexed_at, ir.mode, ir.merge_count,
+                   ir.indexed_at, ir.mode, ir.merge_count, ir.run_kind,
                    (SELECT COUNT(*) FROM scip_symbol s WHERE s.index_run_id = ir.id) AS symbol_count,
-                   (SELECT COUNT(*) FROM scip_edge e WHERE e.index_run_id = ir.id) AS edge_count
+                   (SELECT COUNT(*) FROM scip_edge e WHERE e.index_run_id = ir.id) AS edge_count,
+                   (
+                     SELECT COUNT(*)
+                     FROM contract_endpoint ce
+                     WHERE ce.index_run_id = ir.id
+                   ) AS contract_endpoint_count,
+                   (
+                     SELECT COUNT(*)
+                     FROM contract_binding cb
+                     JOIN contract_endpoint ce ON ce.id = cb.endpoint_id
+                     WHERE ce.index_run_id = ir.id
+                   ) AS contract_binding_count
             FROM index_run ir
             JOIN repo r ON r.id = ir.repo_id
             JOIN workspace w ON w.id = r.workspace_id
@@ -290,8 +338,11 @@ def workspace_run_summaries(db_path: str | Path, *, workspace: str) -> list[Repo
                 indexed_at=row["indexed_at"],
                 mode=row["mode"],
                 merge_count=int(row["merge_count"] or 0),
+                run_kind=row["run_kind"],
                 symbol_count=int(row["symbol_count"]),
                 edge_count=int(row["edge_count"]),
+                contract_endpoint_count=int(row["contract_endpoint_count"]),
+                contract_binding_count=int(row["contract_binding_count"]),
             )
             for row in rows
         ]
@@ -312,13 +363,16 @@ def list_contract_bindings(
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     try:
-        run_ids = latest_index_run_ids(
-            conn,
-            index_run_id=index_run_id,
-            workspace=workspace,
-            repo_key=repo_key,
-            run_kind="contract",
-        )
+        try:
+            run_ids = latest_index_run_ids(
+                conn,
+                index_run_id=index_run_id,
+                workspace=workspace,
+                repo_key=repo_key,
+                run_kind="contract",
+            )
+        except ValueError:
+            return []
         placeholders = _placeholders(list(run_ids))
         sql = f"""
             SELECT ce.stable_id AS endpoint_stable_id,
@@ -363,5 +417,81 @@ def list_contract_bindings(
             )
             for row in conn.execute(sql, params)
         ]
+    finally:
+        conn.close()
+
+
+def list_contract_endpoints(
+    db_path: str | Path,
+    *,
+    query: str | None = None,
+    index_run_id: int | None = None,
+    workspace: str | None = None,
+    repo_key: str | None = None,
+) -> list[ContractEndpointSummary]:
+    """List contract endpoints, including endpoints with no code bindings."""
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    try:
+        try:
+            run_ids = latest_index_run_ids(
+                conn,
+                index_run_id=index_run_id,
+                workspace=workspace,
+                repo_key=repo_key,
+                run_kind="contract",
+            )
+        except ValueError:
+            return []
+        placeholders = _placeholders(list(run_ids))
+        sql = f"""
+            SELECT id, stable_id, display_name, protocol, service, version,
+                   method_or_verb, address
+            FROM contract_endpoint
+            WHERE index_run_id IN ({placeholders})
+        """
+        params: list[object] = list(run_ids)
+        if query is not None:
+            pattern = f"%{query}%"
+            sql += " AND (stable_id LIKE ? OR display_name LIKE ? OR address LIKE ?)"
+            params.extend([pattern, pattern, pattern])
+        sql += " ORDER BY stable_id"
+
+        endpoints: list[ContractEndpointSummary] = []
+        for row in conn.execute(sql, params):
+            constraint_rows = conn.execute(
+                """
+                SELECT location, field_path, type_name, required
+                FROM contract_schema_constraint
+                WHERE endpoint_id = ?
+                ORDER BY location, field_path
+                """,
+                (row["id"],),
+            ).fetchall()
+            endpoints.append(
+                ContractEndpointSummary(
+                    stable_id=row["stable_id"],
+                    display_name=row["display_name"],
+                    protocol=row["protocol"],
+                    service=row["service"],
+                    version=row["version"],
+                    method_or_verb=row["method_or_verb"],
+                    address=row["address"],
+                    schema_constraints=tuple(
+                        ContractSchemaConstraintSummary(
+                            location=constraint["location"],
+                            field_path=constraint["field_path"],
+                            type_name=constraint["type_name"],
+                            required=(
+                                None
+                                if constraint["required"] is None
+                                else bool(constraint["required"])
+                            ),
+                        )
+                        for constraint in constraint_rows
+                    ),
+                )
+            )
+        return endpoints
     finally:
         conn.close()

@@ -11,6 +11,7 @@ from stubborn.ingest.models import IndexSnapshot, SymbolRecord
 from stubborn.store.writer import (
     ContractBindingRecord,
     ContractEndpointRecord,
+    ContractSchemaConstraintRecord,
     ContractSnapshot,
     IndexWriter,
 )
@@ -71,6 +72,14 @@ def _write_contract_context(db: Path) -> None:
                     method_or_verb="GET",
                     address="/owners/{ownerId}",
                     display_name="GET /owners/{ownerId}",
+                    schema_constraints=(
+                        ContractSchemaConstraintRecord(
+                            location="path",
+                            field_path="ownerId",
+                            type_name="integer",
+                            required=True,
+                        ),
+                    ),
                     bindings=(
                         ContractBindingRecord(
                             code_stable_id=PROVIDER,
@@ -109,6 +118,7 @@ def test_stubborn_dsl_renders_contracts_block(tmp_path: Path) -> None:
     assert f"  http {ENDPOINT}" in text
     assert "provider OwnerResource.getOwner -> consumer CustomersClient.getOwner" in text
     assert "evidence=declared" in text
+    assert "schema path.ownerId integer required" in text
 
 
 def test_java_stub_does_not_render_contracts(tmp_path: Path) -> None:
@@ -148,4 +158,9 @@ def test_api_exposes_contract_evidence_structured(tmp_path: Path) -> None:
         and edge["to_role"] == "consumer"
         and edge["evidence"] == "declared"
         for edge in result.contract_edges
+    )
+    assert any(
+        endpoint["stable_id"] == ENDPOINT
+        and endpoint["schema_constraints"][0]["field_path"] == "ownerId"
+        for endpoint in result.contract_endpoints
     )

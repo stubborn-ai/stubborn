@@ -14,7 +14,7 @@ from stubborn.ingest.scip import load_scip_index
 from stubborn.metrics import compute_compression
 from stubborn.reconcile.diff import format_report, reconcile
 from stubborn.reconcile.entities import SymbolEntity
-from stubborn.store.reader import list_symbols, workspace_run_summaries
+from stubborn.store.reader import list_contract_endpoints, list_symbols, workspace_run_summaries
 from stubborn.store.writer import IndexWriter, init_db, read_info, register_repo
 from stubborn.weave.dispatch import weave_context
 from stubborn.weave.options import WeaveOptions
@@ -252,14 +252,27 @@ def info_cmd(
         if run_id is not None:
             raise typer.BadParameter("--workspace cannot be combined with --run-id")
         summaries = workspace_run_summaries(db_path, workspace=workspace)
+        code_repos = [item for item in summaries if item.run_kind == "code"]
+        contract_sources = [item for item in summaries if item.run_kind == "contract"]
         typer.echo(f"Workspace:      {workspace}")
         typer.echo(f"Repos:          {len(summaries)}")
+        typer.echo(f"Code repos:     {len(code_repos)}")
+        typer.echo(f"Contract sources: {len(contract_sources)}")
         typer.echo(f"Symbols:        {sum(item.symbol_count for item in summaries)}")
         typer.echo(f"Edges:          {sum(item.edge_count for item in summaries)}")
+        typer.echo(
+            f"Contract endpoints: {sum(item.contract_endpoint_count for item in summaries)}"
+        )
+        typer.echo(
+            f"Contract bindings:  {sum(item.contract_binding_count for item in summaries)}"
+        )
         for item in summaries:
             typer.echo(
-                f"- {item.repo_key}: run={item.index_run_id}, symbols={item.symbol_count}, "
-                f"edges={item.edge_count}, mode={item.mode}, merges={item.merge_count}"
+                f"- {item.repo_key}: kind={item.run_kind}, run={item.index_run_id}, "
+                f"symbols={item.symbol_count}, edges={item.edge_count}, "
+                f"contract_endpoints={item.contract_endpoint_count}, "
+                f"contract_bindings={item.contract_binding_count}, "
+                f"mode={item.mode}, merges={item.merge_count}"
             )
         return
 
@@ -280,10 +293,69 @@ def info_cmd(
         typer.echo(f"Merge count:    {info.merge_count}")
 
 
+@app.command("list-contracts")
+def list_contracts_cmd(
+    db_path: Path = typer.Argument(..., help="SQLite symbol graph file path"),
+    query: Optional[str] = typer.Option(
+        None,
+        "--query",
+        "-q",
+        help="Filter by endpoint stable_id, display name, or address",
+    ),
+    workspace: Optional[str] = typer.Option(
+        None,
+        "--workspace",
+        help="Workspace name; list latest contract sources in that workspace",
+    ),
+    repo: Optional[str] = typer.Option(
+        None,
+        "--repo",
+        help="Contract source repo key",
+    ),
+    run_id: Optional[int] = typer.Option(
+        None,
+        "--run-id",
+        help="Specific contract index_run id",
+    ),
+    show_schema: bool = typer.Option(
+        False,
+        "--show-schema",
+        help="Print schema constraints below each endpoint",
+    ),
+) -> None:
+    """List contract endpoint stable IDs."""
+    endpoints = list_contract_endpoints(
+        db_path,
+        query=query,
+        index_run_id=run_id,
+        workspace=workspace,
+        repo_key=repo,
+    )
+    for endpoint in endpoints:
+        verb = endpoint.method_or_verb or endpoint.protocol
+        typer.echo(f"{endpoint.stable_id}\t{verb}\t{endpoint.address}")
+        if show_schema:
+            for constraint in endpoint.schema_constraints:
+                required = (
+                    ""
+                    if constraint.required is None
+                    else " required" if constraint.required else " optional"
+                )
+                type_name = constraint.type_name or "unknown"
+                typer.echo(
+                    f"  {constraint.location}.{constraint.field_path}: {type_name}{required}"
+                )
+
+
 @app.command("context")
 def context_cmd(
     db_path: Path = typer.Argument(..., help="SQLite symbol graph file path"),
-    target: str = typer.Option(..., "--target", "-t", help="Target SCIP symbol stable_id"),
+    target: str = typer.Option(
+        ...,
+        "--target",
+        "-t",
+        help="Target code symbol or contract endpoint stable_id",
+    ),
     format: str = typer.Option(
         "java-stub",
         "--format",

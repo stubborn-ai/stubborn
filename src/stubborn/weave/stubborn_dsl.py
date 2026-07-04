@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 import re
-from itertools import groupby
 
-from stubborn.graph.prune import ContractPrunedEdge, PrunedGraph, PrunedSymbol
+from stubborn.graph.prune import (
+    ContractPrunedEdge,
+    PrunedContractSchemaConstraint,
+    PrunedGraph,
+    PrunedSymbol,
+)
 from stubborn.tokens import estimate_tokens
 from stubborn.weave._shared import (
     is_annotation_only,
@@ -136,17 +140,25 @@ def weave_stubborn_dsl(
         for edge in graph.contract_edges
         if edge.from_stable_id in graph_stable_ids and edge.to_stable_id in graph_stable_ids
     ]
-    if contract_edges:
+    contract_endpoints = {endpoint.stable_id: endpoint for endpoint in graph.contract_endpoints}
+    contract_endpoint_ids = set(contract_endpoints) | {
+        edge.endpoint_stable_id for edge in contract_edges
+    }
+    if contract_endpoint_ids:
         lines.append("contracts:")
-        for endpoint_id, edges in groupby(
-            sorted(contract_edges, key=_contract_sort_key),
-            key=lambda edge: edge.endpoint_stable_id,
-        ):
-            first = next(edges)
-            lines.append(f"  {first.protocol} {endpoint_id}")
-            lines.append(_format_contract_edge(first))
-            for edge in edges:
+        for endpoint_id in sorted(contract_endpoint_ids):
+            endpoint = contract_endpoints.get(endpoint_id)
+            edges = [
+                edge for edge in contract_edges if edge.endpoint_stable_id == endpoint_id
+            ]
+            protocol = endpoint.protocol if endpoint is not None else edges[0].protocol
+            lines.append(f"  {protocol} {endpoint_id}")
+            if endpoint is not None:
+                for constraint in endpoint.schema_constraints:
+                    lines.append(_format_contract_schema_constraint(constraint))
+            for edge in sorted(edges, key=_contract_sort_key):
                 lines.append(_format_contract_edge(edge))
+        lines.append("")
 
     text = "\n".join(lines).rstrip() + "\n"
     return WeaveResult(
@@ -230,6 +242,21 @@ def _contract_sort_key(edge: ContractPrunedEdge) -> tuple[str, str, str, str]:
         edge.from_stable_id,
         edge.to_stable_id,
     )
+
+
+def _format_contract_schema_constraint(
+    constraint: PrunedContractSchemaConstraint,
+) -> str:
+    field = (
+        constraint.location
+        if not constraint.field_path
+        else f"{constraint.location}.{constraint.field_path}"
+    )
+    type_name = constraint.type_name or "unknown"
+    required = ""
+    if constraint.required is not None:
+        required = " required" if constraint.required else " optional"
+    return f"    schema {field} {type_name}{required}"
 
 
 def _format_contract_edge(edge: ContractPrunedEdge) -> str:
