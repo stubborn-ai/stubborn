@@ -138,7 +138,8 @@ compiler-proven SCIP reference once it reaches `stubborn context`. Consumers
 cannot yet query or render whether a cross-service neighbor came from `strong`,
 `declared`, or `inferred` evidence.
 
-The first schema follow-up after ADR-011 should make evidence first-class:
+ADR-012 defines the first schema follow-up after ADR-011. It makes evidence
+first-class:
 
 - Persist endpoint/binding provenance and evidence tier.
 - Keep contract edges distinguishable from SCIP code-reference edges.
@@ -171,10 +172,11 @@ Java stubs should stay Java-shaped. Contract facts fit better in
   input. Without it, Stubborn should report "unsupported/no contract input" rather
   than silently normalize hand-written interfaces.
 - Schema v3 can host prototypes through compatible snapshots; first-class
-  evidence metadata likely needs a future schema ADR.
+  evidence metadata is defined for schema v4 in ADR-012.
 
 ## References
 
 - [ADR-001: SCIP as the machine index](adr/ADR-001-scip-as-machine-index.md)
 - [ADR-010: Workspace graph for multi-repo source projects](adr/ADR-010-workspace-multi-repo-graph.md)
 - [ADR-011: OpenAPI contract graph for distributed systems](adr/ADR-011-openapi-contract-graph.md)
+- [ADR-012: Schema v4 contract evidence model](adr/ADR-012-schema-v4-contract-evidence.md)

@@ -177,8 +177,8 @@ and evidence models.
 
 ### Follow-up technical debt
 
-The first implementation follow-up should be a schema/output ADR for evidence
-metadata, likely schema v4:
+ADR-012 defines the first implementation follow-up: schema v4 evidence metadata
+and contract-aware output.
 
 - persist `ContractEndpoint`, `SchemaConstraint`, and `ContractBinding`
   provenance/evidence
@@ -207,5 +207,6 @@ reference.
 - [ADR-010](ADR-010-workspace-multi-repo-graph.md)
 - [SCIP-INGEST.md](../SCIP-INGEST.md)
 - [CONTRACT-GRAPH.md](../CONTRACT-GRAPH.md)
+- [ADR-012](ADR-012-schema-v4-contract-evidence.md)
 - [POSITIONING.md](../POSITIONING.md)
 - [stubborn-demo PetClinic microservices](https://github.com/stubborn-ai/stubborn-demo/tree/main/spring-petclinic-microservices)

@@ -21,6 +21,7 @@ This project is built for **use and for reading**: ADRs are part of the public d
 | [ADR-009](ADR-009-incremental-index-merge.md) | Accepted | Incremental index merge vs full snapshot |
 | [ADR-010](ADR-010-workspace-multi-repo-graph.md) | Accepted | Workspace graph for multi-repo source projects |
 | [ADR-011](ADR-011-openapi-contract-graph.md) | Accepted | OpenAPI contract graph for distributed systems |
+| [ADR-012](ADR-012-schema-v4-contract-evidence.md) | Accepted | Schema v4 contract evidence model |
 
 ## Status legend
 
