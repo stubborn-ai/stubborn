@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import sqlite3
 from pathlib import Path
 
 from typer.testing import CliRunner
@@ -121,14 +122,31 @@ def test_cli_index_contract_manifest(tmp_path: Path) -> None:
     _write_code_repos(db)
     manifest = _write_manifest(tmp_path)
     runner = CliRunner()
+    project_root = "/workspace/petclinic-contracts"
 
     indexed = runner.invoke(
         app,
-        ["index-contract", "--manifest", str(manifest), "--out", str(db)],
+        [
+            "index-contract",
+            "--manifest",
+            str(manifest),
+            "--out",
+            str(db),
+            "--project-root",
+            project_root,
+        ],
     )
     assert indexed.exit_code == 0, indexed.stdout + indexed.stderr
     assert "contract endpoint(s)" in indexed.stdout
     assert "run_kind=contract" in indexed.stdout
+    conn = sqlite3.connect(db)
+    try:
+        stored_root = conn.execute(
+            "SELECT project_root FROM index_run ORDER BY id DESC LIMIT 1"
+        ).fetchone()[0]
+    finally:
+        conn.close()
+    assert stored_root == project_root
 
     context = runner.invoke(
         app,

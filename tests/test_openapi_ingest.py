@@ -345,6 +345,7 @@ def test_cli_index_openapi(tmp_path: Path) -> None:
     db = tmp_path / "symbols.db"
     openapi = _write_openapi(tmp_path)
     runner = CliRunner()
+    project_root = "/workspace/customers-service"
 
     result = runner.invoke(
         app,
@@ -358,6 +359,8 @@ def test_cli_index_openapi(tmp_path: Path) -> None:
             SERVICE,
             "--workspace",
             "petclinic",
+            "--project-root",
+            project_root,
         ],
     )
 
@@ -365,3 +368,11 @@ def test_cli_index_openapi(tmp_path: Path) -> None:
     assert "OpenAPI endpoint(s)" in result.stdout
     assert "binding(s)" in result.stdout
     assert "run_kind=contract" in result.stdout
+    conn = sqlite3.connect(db)
+    try:
+        stored_root = conn.execute(
+            "SELECT project_root FROM index_run ORDER BY id DESC LIMIT 1"
+        ).fetchone()[0]
+    finally:
+        conn.close()
+    assert stored_root == project_root
