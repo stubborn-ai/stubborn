@@ -54,8 +54,8 @@ Start with [30-second fixture](#try-in-30-seconds-no-java-required) or [Docker E
 
 | Goal | You need |
 |------|----------|
-| Try Stubborn (no Java) | Bundled fixture only — [below](#try-in-30-seconds-no-java-required) |
-| Real Java / Spring repo | **[scip-java](https://github.com/sourcegraph/scip-java)** (or CI that produces `index.scip`) + `stubborn index` |
+| Try Stubborn (no Java) | Bundled JSON fixture only — [below](#try-in-30-seconds-no-java-required) |
+| Real Java / Spring repo | **[scip-java](https://github.com/sourcegraph/scip-java)** (or CI that produces `index.scip`) + `stubborn-stub[scip]` + `stubborn index` |
 | Reproduce project E2E | Docker Desktop — [docker/README.md](docker/README.md) |
 
 **Beta scope:** weave quality and KPIs are **Java-validated**. Other SCIP languages may ingest; output quality is not guaranteed until language-specific E2E ships ([BETA.md](docs/BETA.md)).
@@ -79,6 +79,12 @@ See [docker/README.md](docker/README.md). Runnable Java demos and E2E validation
 pip install stubborn-stub
 ```
 
+Binary/NDJSON SCIP ingest needs the optional protobuf runtime:
+
+```bash
+pip install "stubborn-stub[scip]"
+```
+
 From source (development):
 
 ```bash
@@ -93,7 +99,7 @@ Uses the bundled minimal SCIP fixture — no JDK, Maven, or scip-java needed:
 
 ```bash
 pip install stubborn-stub
-stubborn index --scip examples/fixtures/minimal.scip --out /tmp/symbols.db
+stubborn index --scip examples/fixtures/minimal.json --out /tmp/symbols.db
 stubborn info /tmp/symbols.db
 stubborn context /tmp/symbols.db \
   --target "semanticdb maven com/example/OrderService#" \
@@ -107,7 +113,7 @@ stubborn context /tmp/symbols.db \
 ### 1. Index symbols
 
 ```bash
-# Binary SCIP from scip-java (recommended)
+# Binary SCIP from scip-java (recommended; requires stubborn-stub[scip])
 stubborn index --scip index.scip --out ./metadata/symbols.db
 
 # Or use the bundled fixture while bootstrapping
@@ -165,6 +171,8 @@ Java-shaped.
 consumer code bindings from annotations, URLs, or client interfaces. JSON input
 uses only the core package; YAML input requires `pip install stubborn-stub[openapi]`.
 
+Binary `.scip` and `.scip.ndjson` inputs require `pip install stubborn-stub[scip]`.
+
 **Choose output format:**
 
 | Project | Suggested `--format` |
@@ -214,6 +222,7 @@ Tools: `get_context`, `list_symbols`, `metrics`. See [stubborn-mcp docs](https:/
 | `index-openapi` | Ingest OpenAPI 3.x endpoints/schemas without inferring code bindings |
 | `info` | Index run summary |
 | `context` | Prune graph → emit LLM context (`--workspace` can query latest runs across repos) |
+| `list-contracts` | Browse contract endpoint stable IDs and schema constraints |
 | `list-symbols` | Browse symbols in a legacy, repo, or workspace view |
 | `metrics` | Compression KPI: stub vs full Java sources |
 | `diff` | Symbol set reconcile (missing/extra) |

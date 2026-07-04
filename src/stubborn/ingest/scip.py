@@ -6,12 +6,14 @@ import hashlib
 import json
 from pathlib import Path
 
-from stubborn.ingest.extract import enrich_snapshot_edges, parsed_index_to_snapshot
+from stubborn.ingest.enrich import enrich_snapshot_edges
 from stubborn.ingest.models import EdgeRecord, IndexSnapshot, SymbolRecord
-from stubborn.ingest.ndjson import parse_ndjson_index
-from stubborn.ingest.stream import parse_index_bytes
 
 SCIP_MAGIC = b"\x00scip\x00"
+_SCIP_EXTRA_MESSAGE = (
+    "SCIP binary/NDJSON ingest requires the protobuf runtime. "
+    "Install it with `pip install stubborn-stub[scip]`."
+)
 
 
 def _file_hash(path: Path) -> str:
@@ -43,6 +45,7 @@ def load_scip_index(
         return _load_json_fixture(path, project_root=project_root)
 
     if name.endswith(".scip.ndjson"):
+        parse_ndjson_index, parsed_index_to_snapshot = _load_ndjson_ingest()
         parsed = parse_ndjson_index(path.read_bytes())
         return parsed_index_to_snapshot(
             parsed,
@@ -57,6 +60,31 @@ def load_scip_index(
     raise ValueError(
         f"Unsupported SCIP input: {path}. Use .scip, .scip.ndjson, or .json (fixture)."
     )
+
+
+def _raise_scip_extra_import_error(exc: ModuleNotFoundError) -> None:
+    name = exc.name or ""
+    if name == "google" or name.startswith("google.protobuf"):
+        raise ImportError(_SCIP_EXTRA_MESSAGE) from exc
+    raise exc
+
+
+def _load_ndjson_ingest():
+    try:
+        from stubborn.ingest.extract import parsed_index_to_snapshot
+        from stubborn.ingest.ndjson import parse_ndjson_index
+    except ModuleNotFoundError as exc:
+        _raise_scip_extra_import_error(exc)
+    return parse_ndjson_index, parsed_index_to_snapshot
+
+
+def _load_binary_ingest():
+    try:
+        from stubborn.ingest.extract import parsed_index_to_snapshot
+        from stubborn.ingest.stream import parse_index_bytes
+    except ModuleNotFoundError as exc:
+        _raise_scip_extra_import_error(exc)
+    return parse_index_bytes, parsed_index_to_snapshot
 
 
 def _load_json_fixture(path: Path, *, project_root: str | None) -> IndexSnapshot:
@@ -122,6 +150,7 @@ def _load_scip_protobuf(path: Path, *, project_root: str | None) -> IndexSnapsho
     if not data:
         raise ValueError(f"Empty SCIP index file: {path}")
 
+    parse_index_bytes, parsed_index_to_snapshot = _load_binary_ingest()
     parsed = parse_index_bytes(data)
     return parsed_index_to_snapshot(
         parsed,
