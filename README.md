@@ -45,9 +45,14 @@ Stubborn addresses these when you already have (or can build) a **SCIP index**. 
 - **Cursor / MCP** — `get_context` before codegen on a pre-built `symbols.db`
 - **Large-repo onboarding** — dependency skeleton for one target symbol
 
-Start with [30-second fixture](#try-in-30-seconds-no-java-required) or [Docker E2E](#docker-quick-start); production Java path requires **scip-java** (see [Requirements](#requirements)).
+Start with [30-second fixture](#try-in-30-seconds-no-java-required) or [Docker E2E](#docker-quick-start); Docker is the primary reproducible path. On Windows, use **WSL2** for shell-heavy work and keep PowerShell host scripts as a fallback (see [Requirements](#requirements)).
 
 ## Requirements
+
+Recommended local shell:
+
+- **Linux shell**: any bash-compatible shell, including Ubuntu and macOS
+- **Windows**: **WSL2** for Docker and bash-heavy workflows; PowerShell only for host-side demo fallbacks
 
 - Python 3.11+ (or use [Docker](docker/README.md))
 - A **SCIP index** for your project — Stubborn does not index source directly

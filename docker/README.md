@@ -1,7 +1,8 @@
 # Docker environment
 
 Reproducible core CLI/toolchain image for Stubborn without installing JDK,
-Maven, or scip-java locally.
+Maven, or scip-java locally. This is the primary execution path for repeatable
+CLI and demo validation.
 
 ## Image contents
 
@@ -71,7 +72,8 @@ docker compose build --build-arg SCIP_JAVA_VERSION=0.12.3
 ## Windows notes
 
 - Use Docker Desktop with Linux containers.
-- Demo scripts for PowerShell live in `stubborn-demo`.
+- For shell-heavy workflows on Windows, WSL2 is usually smoother than native PowerShell.
+- Demo scripts for PowerShell live in `stubborn-demo` as a fallback host path.
 
 ## Related
 

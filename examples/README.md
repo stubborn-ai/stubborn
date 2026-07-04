@@ -7,6 +7,12 @@ Runnable demos and black-box validation projects live in
 core repo focused on headless ingest, store, prune, weave, API, and CLI
 behavior, without mirrored demo copies that can drift.
 
+## Recommended workflow
+
+- **Docker-first** for reproducible demo and validation runs
+- **WSL2** on Windows when you want a bash-compatible shell locally
+- **PowerShell** only for host-side fallback scripts when you need them
+
 | Path | Status | Description |
 |------|--------|-------------|
 | [fixtures](fixtures/) | Active | Minimal JSON / binary SCIP fixtures for tests and quick starts |
@@ -17,9 +23,14 @@ Use `stubborn-demo` for product demos and validation:
 
 ```bash
 git clone https://github.com/stubborn-ai/stubborn-demo
-cd stubborn-demo/demo-spring
-./scripts/run-e2e.ps1   # Windows PowerShell
+cd stubborn-demo
+docker compose build
+docker compose run --rm e2e
 ```
+
+If you are on Windows and prefer a bash-compatible shell, use WSL2 and the same Docker
+commands. If you need a host fallback, the demo repositories still keep PS1
+wrappers.
 
 ## Documentation
 
