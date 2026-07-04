@@ -59,6 +59,7 @@ See [POSITIONING.md](POSITIONING.md) for the full primary/secondary split.
 | Zero-config repo indexing (no SCIP) | Out of scope — use IDE/repo-map tools |
 | scip-clang / TypeScript **weave E2E** | v1.0+ |
 | Polyglot merged index story | v1.0+ ADR + E2E |
+| OpenAPI contract graph adapter | Planned after ADR-011; separate `stubborn-ingest-openapi` package |
 | Method signatures on non-target types by default | v1.0+ — use `--member-signatures neighbors|all` (beta) |
 | Rich Javadoc in output | v1.0+ — use `--javadoc full` (beta) |
 | Petclinic on every PR | Weekly (cost) |
@@ -73,6 +74,7 @@ See [POSITIONING.md](POSITIONING.md) for the full primary/secondary split.
 6. **Javadoc** — default summary (java-stub) / off (stubborn-dsl); `--javadoc full` for `@param` tags.
 7. **Stubborn-DSL** — user choice for token/graph tasks; `java-stub` default for Java codegen ([STUBBORN-DSL-GUIDE.md](STUBBORN-DSL-GUIDE.md)).
 8. **Dual audience** — reconcile/CI features target enterprise migration workflows; MCP targets agents — see [POSITIONING.md](POSITIONING.md).
+9. **Microservice contracts** — REST/OpenAPI graph support is planned in [ADR-011](adr/ADR-011-openapi-contract-graph.md); current SCIP ingest alone does not prove HTTP calls across services, and hand-written interfaces without an OpenAPI contract are not strong graph input.
 
 ## KPI baselines
 
@@ -89,5 +91,6 @@ Java E2E only (`--prune-mode smart`):
 ## Related
 
 - [POSITIONING.md](POSITIONING.md)
+- [ADR-011 OpenAPI contract graph](adr/ADR-011-openapi-contract-graph.md)
 - [INTEGRATION.md](INTEGRATION.md)
 - [adr/README.md](adr/README.md)

@@ -46,7 +46,8 @@ A **code context compiler**:
 | “We never guess” | **`smart`** mode uses signature heuristics; use **`strict`** for SCIP-only neighbors ([ADR-003](adr/ADR-003-type-neighbor-pruning.md)) |
 | Multi-language parser | Use scip-java, scip-clang, etc. — Stubborn consumes indexes |
 | AST rewrite / migration engine | See OpenRewrite, java-ast-ssot |
-| Replacement for SCIP | SCIP is the machine index; Stubborn is the LLM-facing compiler output |
+| Replacement for SCIP | SCIP is the code-symbol machine index; Stubborn is the LLM-facing compiler output |
+| Automatic microservice topology discovery | Planned contract graph support starts from authoritative OpenAPI facts, not runtime guesses or URL-string scraping |
 
 ## How we compare (honest axes)
 
@@ -77,6 +78,18 @@ source → scip-java index → index.scip → stubborn index → symbols.db → 
 
 There is no supported path that skips SCIP for live code.
 
+Planned distributed-system workflow ([ADR-011](adr/ADR-011-openapi-contract-graph.md)):
+
+```text
+source → SCIP → code symbols
+OpenAPI → endpoint symbols
+bindings/evidence → workspace graph → stubborn context
+```
+
+SCIP remains the canonical index for code symbols. OpenAPI is the planned
+canonical index for REST contract facts; it complements SCIP rather than
+replacing it.
+
 ## Language scope
 
 | Layer | Beta status |
@@ -105,6 +118,27 @@ Both share the same prune step. DSL is retained for **polyglot / cross-language 
 | **`fast`** | Tight token budget; smaller neighborhood |
 
 See [ADR-003](adr/ADR-003-type-neighbor-pruning.md) for honesty tiers (SCIP edges vs `signature-ref` vs prune-time regex).
+
+## Contract graph direction
+
+Microservice and REST relationships are not compile-time symbol references. The
+planned contract graph layer uses authoritative OpenAPI documents for endpoint
+identity and explicit evidence tiers for code-to-endpoint bindings
+([CONTRACT-GRAPH.md](CONTRACT-GRAPH.md), [ADR-011](adr/ADR-011-openapi-contract-graph.md)):
+
+- `strong`: generated client/server or operationId-backed binding
+- `declared`: human-authored manifest binding
+- `inferred`: heuristic URL/path/template match
+- `unknown`: endpoint exists without a proven code binding
+
+This keeps Stubborn's determinism and honesty contract intact while letting
+workspace context cross service boundaries when the relevant contract facts are
+available.
+
+For REST, the stable input is the OpenAPI YAML/JSON document. Code symbols are
+used to validate or bind providers and consumers to that contract. If a project
+has only hand-written interfaces, annotations, or URL strings, Stubborn should
+not treat them as strong REST graph input.
 
 ## Ecosystem placement
 

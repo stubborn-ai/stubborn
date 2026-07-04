@@ -10,6 +10,7 @@
 | [POSITIONING.md](POSITIONING.md) | Architects, adopters | Primary/secondary audience; honest comparison; SCIP prerequisite |
 | [INTEGRATION.md](INTEGRATION.md) | Optional adopters | How anchor-migration consumes Stubborn |
 | [SCIP-INGEST.md](SCIP-INGEST.md) | Index authors | Supported SCIP formats and ingest behavior |
+| [CONTRACT-GRAPH.md](CONTRACT-GRAPH.md) | Adapter authors | Planned distributed contract IR, evidence tiers, and REST/OpenAPI boundaries |
 | [MCP.md](MCP.md) | Agent / Cursor users | Pointer to **stubborn-mcp** package |
 | [STUBBORN-DSL-GUIDE.md](STUBBORN-DSL-GUIDE.md) | Prompt authors | When to use java-stub vs stubborn-dsl |
 | [STUBBORN-DSL.md](STUBBORN-DSL.md) | LLM context authors | Stubborn-DSL v1 grammar and CLI usage |
