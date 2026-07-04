@@ -13,10 +13,10 @@ from stubborn.ingest.contracts import contract_snapshot_from_manifest
 from stubborn.ingest.openapi import openapi_snapshot_from_file
 from stubborn.metrics import compute_compression
 from stubborn.store.reader import (
+    RepoRunSummary,
     list_contract_endpoints,
     list_symbols,
     resolve_db_path,
-    RepoRunSummary,
     workspace_run_summaries,
 )
 from stubborn.store.writer import IndexInfo, IndexWriter, read_info
