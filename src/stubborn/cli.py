@@ -7,6 +7,7 @@ from typing import Optional
 
 import typer
 
+from stubborn.api import index_contract_manifest
 from stubborn.config import ContextBudget, apply_prune_mode, normalize_prune_mode
 from stubborn.graph.prune import prune_context
 from stubborn.ingest.scip import load_scip_index
@@ -128,6 +129,55 @@ def index_cmd(
         )
 
 
+@app.command("index-contract")
+def index_contract_cmd(
+    manifest: Path = typer.Option(
+        ...,
+        "--manifest",
+        help="Explicit contract manifest (JSON-compatible YAML)",
+    ),
+    out: Path = typer.Option(..., "--out", "-o", help="Output SQLite file path"),
+    workspace: Optional[str] = typer.Option(
+        None,
+        "--workspace",
+        help="Workspace name; defaults to manifest workspace",
+    ),
+    repo: Optional[str] = typer.Option(
+        None,
+        "--repo",
+        help="Contract source repo key; defaults to manifest contract_repo/bridge_repo",
+    ),
+    project_root: Optional[str] = typer.Option(
+        None,
+        "--project-root",
+        help="Optional contract source root recorded in index_run",
+    ),
+    default_evidence: str = typer.Option(
+        "declared",
+        "--default-evidence",
+        help="Evidence for bindings that do not specify one; default: declared",
+    ),
+) -> None:
+    """Ingest an explicit contract manifest into v4 contract evidence tables."""
+    try:
+        result = index_contract_manifest(
+            manifest,
+            db_path=out,
+            workspace=workspace,
+            repo_key=repo,
+            project_root=project_root,
+            default_evidence=default_evidence,
+        )
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+
+    typer.echo(
+        f"Indexed {result.endpoint_count} contract endpoint(s), "
+        f"{result.binding_count} binding(s) -> {out} "
+        f"(index_run_id={result.index_run_id}, run_kind=contract)"
+    )
+
+
 @app.command("info")
 def info_cmd(
     db_path: Path = typer.Argument(..., help="SQLite symbol graph file path"),
@@ -166,6 +216,7 @@ def info_cmd(
     typer.echo(f"Symbols:        {info.symbol_count}")
     typer.echo(f"Edges:          {info.edge_count}")
     typer.echo(f"Mode:           {info.mode}")
+    typer.echo(f"Run kind:       {info.run_kind}")
     if info.workspace:
         typer.echo(f"Workspace:      {info.workspace}")
     if info.repo_key:

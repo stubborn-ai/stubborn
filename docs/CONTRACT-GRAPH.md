@@ -36,8 +36,8 @@ prover.
 
 | Source | Status | Evidence floor |
 |--------|--------|----------------|
-| OpenAPI 3.x | First planned adapter | `strong` for operations and schemas |
-| Explicit binding manifest | Planned | `declared` |
+| OpenAPI 3.x | Planned adapter | `strong` for operations and schemas |
+| Explicit binding manifest | Supported by `stubborn index-contract` | `declared` |
 | Generated client/server code | Planned | `strong` when operation identity is traceable |
 | Spring annotation / URL string extraction | Possible demo/lab adapter only | `inferred`; not a REST v1 authority source |
 | AsyncAPI | Future | TBD |
@@ -127,25 +127,25 @@ Strict contract mode should exclude `inferred` bindings by default. Users can op
 into inferred bindings for exploratory runs, but those edges must not be
 presented as deterministic proof of service communication.
 
-## Current Prototype Gap
+## Schema v4 Status
 
-Schema v3 can host seed validations by encoding contract endpoints and bindings
-as ordinary snapshot symbols and `reference` edges. That is enough to prove graph
-composition, but it is not enough to satisfy the evidence contract above.
-
-In v3-compatible prototypes, a declared contract binding can look identical to a
-compiler-proven SCIP reference once it reaches `stubborn context`. Consumers
-cannot yet query or render whether a cross-service neighbor came from `strong`,
-`declared`, or `inferred` evidence.
-
-ADR-012 defines the first schema follow-up after ADR-011. It makes evidence
-first-class:
+Schema v4 makes contract evidence first-class:
 
 - Persist endpoint/binding provenance and evidence tier.
 - Keep contract edges distinguishable from SCIP code-reference edges.
-- Expose evidence through API/MCP responses.
-- Render contract sections in `stubborn-dsl` or a sidecar output so generated
-  context does not hide the evidence tier.
+- Compose code and contract graphs at query time.
+- Expose evidence through structured API responses.
+- Render contract sections in `stubborn-dsl` so generated context does not hide
+  the evidence tier.
+
+The current productized ingest entrypoint is the explicit manifest path:
+
+```bash
+stubborn index-contract --manifest contracts/http.json --out symbols.db
+```
+
+The OpenAPI 3.x adapter remains a planned adapter that should produce the same
+contract IR from authoritative OpenAPI YAML/JSON.
 
 ## Weave Direction
 
@@ -171,8 +171,8 @@ Java stubs should stay Java-shaped. Contract facts fit better in
 - REST v1 requires an OpenAPI YAML/JSON document or equivalent stable protocol
   input. Without it, Stubborn should report "unsupported/no contract input" rather
   than silently normalize hand-written interfaces.
-- Schema v3 can host prototypes through compatible snapshots; first-class
-  evidence metadata is defined for schema v4 in ADR-012.
+- Schema v4 stores first-class contract evidence; adapters should write
+  contract tables instead of encoding service contracts as SCIP reference edges.
 
 ## References
 

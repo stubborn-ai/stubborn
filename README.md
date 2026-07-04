@@ -138,6 +138,23 @@ stubborn context ./metadata/symbols.db \
 
 See [docs/STUBBORN-DSL.md](docs/STUBBORN-DSL.md) for the compact cross-language format.
 
+### Optional: index explicit service contracts
+
+Schema v4 can store explicit REST contract evidence separately from SCIP facts:
+
+```bash
+stubborn index-contract \
+  --manifest contracts/http.json \
+  --out ./metadata/symbols.db
+```
+
+The first manifest format is intentionally explicit: endpoints declare
+`service`, `version`, `method`, `path`, and `providers`/`consumers` bindings.
+Bindings may reference existing code symbols by `code_stable_id`, or by
+`repo` + `display_name` inside a workspace. Contract evidence is rendered in
+`--format stubborn-dsl` under a separate `contracts:` block; Java stubs remain
+Java-shaped.
+
 **Choose output format:**
 
 | Project | Suggested `--format` |
@@ -183,6 +200,7 @@ Tools: `get_context`, `list_symbols`, `metrics`. See [stubborn-mcp docs](https:/
 | `init-db` | Create empty SQLite symbol graph |
 | `workspace` | Initialize/register multi-repo workspace metadata |
 | `index` | Ingest SCIP (`.scip`, `.scip.ndjson`, or `.json` fixture); use `--workspace`/`--repo` for multi-repo views |
+| `index-contract` | Ingest an explicit contract manifest into schema v4 contract evidence tables |
 | `info` | Index run summary |
 | `context` | Prune graph → emit LLM context (`--workspace` can query latest runs across repos) |
 | `list-symbols` | Browse symbols in a legacy, repo, or workspace view |
@@ -203,7 +221,7 @@ Design rationale is recorded as [Architecture Decision Records (docs/adr/)](docs
   LLM / Agent / CI
 ```
 
-SQLite schema: [`src/stubborn/store/schema/v3.sql`](src/stubborn/store/schema/v3.sql)
+SQLite schema: [`src/stubborn/store/schema/v4.sql`](src/stubborn/store/schema/v4.sql)
 
 ## Roadmap
 

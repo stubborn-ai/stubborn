@@ -8,9 +8,10 @@ from typing import Any
 
 from stubborn.config import ContextBudget, apply_prune_mode
 from stubborn.graph.prune import prune_context
+from stubborn.ingest.contracts import contract_snapshot_from_manifest
 from stubborn.metrics import compute_compression
 from stubborn.store.reader import list_symbols, resolve_db_path
-from stubborn.store.writer import IndexInfo, read_info
+from stubborn.store.writer import IndexInfo, IndexWriter, read_info
 from stubborn.weave.dispatch import weave_context
 from stubborn.weave.options import WeaveOptions
 
@@ -25,6 +26,18 @@ class ContextResult:
     dropped_for_budget: bool
     contract_edges: list[dict[str, Any]] = field(default_factory=list)
     contract_evidence_summary: dict[str, int] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class ContractIndexResult:
+    index_run_id: int
+    db_path: str
+    manifest_path: str
+    workspace: str | None
+    repo_key: str | None
+    endpoint_count: int
+    binding_count: int
+    run_kind: str = "contract"
 
 
 def _budget(
@@ -97,6 +110,41 @@ def _contract_evidence_summary(graph: Any) -> dict[str, int]:
     for edge in graph.contract_edges:
         summary[edge.evidence] = summary.get(edge.evidence, 0) + 1
     return summary
+
+
+def index_contract_manifest(
+    manifest_path: str | Path,
+    *,
+    db_path: str | Path,
+    workspace: str | None = None,
+    repo_key: str | None = None,
+    project_root: str | None = None,
+    default_evidence: str = "declared",
+) -> ContractIndexResult:
+    """Index an explicit contract manifest into v4 contract evidence tables."""
+    snapshot, manifest_workspace, manifest_repo_key = contract_snapshot_from_manifest(
+        manifest_path,
+        db_path=db_path,
+        workspace=workspace,
+        project_root=project_root,
+        default_evidence=default_evidence,
+    )
+    resolved_workspace = workspace or manifest_workspace
+    resolved_repo_key = repo_key or manifest_repo_key
+    index_run_id = IndexWriter(db_path).write_contract(
+        snapshot,
+        workspace=resolved_workspace,
+        repo_key=resolved_repo_key,
+    )
+    return ContractIndexResult(
+        index_run_id=index_run_id,
+        db_path=str(Path(db_path)),
+        manifest_path=str(Path(manifest_path)),
+        workspace=resolved_workspace,
+        repo_key=resolved_repo_key,
+        endpoint_count=len(snapshot.endpoints),
+        binding_count=sum(len(endpoint.bindings) for endpoint in snapshot.endpoints),
+    )
 
 
 def list_index_symbols(
