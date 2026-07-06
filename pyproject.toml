@@ -36,7 +36,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["protobuf>=5.0,<6.0", "pytest>=8.0,<9.0", "ruff>=0.9,<1"]
+dev = [
+    "protobuf>=5.29,<6.0",
+    "PyYAML>=6.0,<7.0",
+    "pytest>=8.0,<9.0",
+    "ruff>=0.9,<1",
+]
 openapi = ["PyYAML>=6.0,<7.0"]
 scip = ["protobuf>=5.0,<6.0"]
 

@@ -20,7 +20,9 @@ jobs:
           python-version: "3.12"
 
       - name: Install package
-        run: pip install -e ".[dev]"
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
 
       - name: Index minimal fixture (baseline)
         run: stubborn index --scip examples/fixtures/minimal.scip --out /tmp/baseline.db
