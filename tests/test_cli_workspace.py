@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import sqlite3
 from pathlib import Path
 
@@ -188,7 +189,9 @@ def test_info_workspace_rejects_run_id(tmp_path: Path) -> None:
     )
 
     assert result.exit_code != 0
-    assert "--workspace cannot be combined with --run-id" in (result.stdout + result.stderr)
+    output = re.sub(r"\x1b\[[0-9;]*m", "", result.stdout + result.stderr)
+    assert "workspace cannot be combined with" in output
+    assert "run-id" in output
 
 
 def test_list_symbols_kind_filters(tmp_path: Path) -> None:
