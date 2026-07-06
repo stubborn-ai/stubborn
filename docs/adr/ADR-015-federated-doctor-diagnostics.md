@@ -46,7 +46,8 @@ executes or impersonates sibling checks.
 | **stubborn-mcp** | `stubborn-mcp doctor` | `STUBBORN_DB` / configured `db_path`; DB readable by `stubborn.api`; minimal tool surface smoke (`workspace_info` or equivalent); `.cursor/mcp.json` shape **when present** (parse only, no IDE RPC). |
 | **stubborn-watch** | `stubborn-watch doctor` | Watch root, debounce, target DB, indexer command on `PATH`, merge prerequisites; workspace manifest when used. |
 | **stubborn-indexer** (future repo) | `stubborn-indexer doctor` | scip-java / scip-* on `PATH`, versions, Maven/Gradle signals, suggested **user-run** index commands. **Not** implemented in core. |
-| **vscode-stubborn** (planned) | extension “Check setup” or `stubborn doctor` in extension host | Editor settings, MCP sidecar registration — IDE layer only. |
+| **stubborn-status** (future repo) | `stubborn-status` | Aggregate federated `doctor --json` reports via subprocess; terminal, CI, and IDE consumers. See [ADR-016](ADR-016-doctor-status-aggregation.md). |
+| **vscode-stubborn** (planned) | extension commands | Editor settings, MCP sidecar registration, **consumes** `stubborn-status --json` for setup panels — does not own merge logic. |
 
 Packages **must not** diagnose another package’s custody in depth. They may
 **delegate with a one-line hint**, e.g. “Run `stubborn-mcp doctor` for MCP
@@ -66,8 +67,8 @@ setup,” without importing sibling code or shelling out to sibling CLIs by defa
    - `1` — blocking issue (missing package, unreadable DB, incompatible schema)
    - `2` — non-blocking warnings (e.g. missing `[scip]` while only JSON
      fixtures exist)
-6. **Output** — human-readable sections by default; optional `--json` with
-   `{ "package", "checks": [{ "id", "status", "message", "hint?" }], "exit" }`.
+6. **Output** — human-readable sections by default; optional `--json` conforming
+   to **Doctor Report v1** (see [ADR-016](ADR-016-doctor-status-aggregation.md)).
 7. **Hints** — `--fix-hint` (default on) may print copy-paste commands; each
    hint must state **which package** owns the action.
 
@@ -121,8 +122,9 @@ added, it requires its own ADR defining precedence vs CLI flags and env vars.
 - Multiple commands to learn; mitigated by hub “setup checklist” doc
 - Risk of duplicated filesystem scanning (core and indexer both see `pom.xml`);
   acceptable if messages differ by custody
-- No single exit code for “whole program healthy”; CI must call doctors it cares
-  about explicitly
+- No single exit code for “whole program healthy”; use
+  [stubborn-status](ADR-016-doctor-status-aggregation.md) or call doctors
+  explicitly in CI
 - Sibling packages must implement `doctor` to stay symmetric; lag in one package
   leaves a gap in the checklist
 
@@ -133,7 +135,7 @@ added, it requires its own ADR defining precedence vs CLI flags and env vars.
 | **Monolithic `stubborn doctor` in core** | Violates ADR-001/008; core would own MCP, scip-java, and IDE checks |
 | **`stubborn init` / `quickstart` with auto index** | Orchestration belongs in `stubborn-indexer` or demo templates, not core; auto-ingest conflicts with explicit evidence (ADR-011/012) |
 | **Hub-only shell script** | Useful as doc, but not discoverable from `stubborn --help`; packages still need owned diagnostics |
-| **Meta-doctor that shells out to all siblings** | Hidden coupling, version skew, and failure attribution become unclear |
+| **Meta-doctor that shells out to all siblings** | Hidden coupling in **core**; rejected — aggregation belongs in **stubborn-status** ([ADR-016](ADR-016-doctor-status-aggregation.md)), not `stubborn-stub` |
 | **No doctor; docs only** | Friction remains; misses low-risk, testable onboarding win |
 
 ## Implementation notes (non-normative)
@@ -158,3 +160,4 @@ fixture DBs and temp project trees. MCP/watch mirror the same report schema.
 - [ADR-012](ADR-012-schema-v4-contract-evidence.md) — evidence tiers
 - [stubborn-hub DEMO-LAUNCHERS](https://github.com/stubborn-ai/stubborn-hub/blob/main/docs/DEMO-LAUNCHERS.md)
 - [stubborn-hub PETCLINIC-VALIDATION](https://github.com/stubborn-ai/stubborn-hub/blob/main/docs/PETCLINIC-VALIDATION.md)
+- [ADR-016](ADR-016-doctor-status-aggregation.md) — doctor status aggregation
