@@ -24,6 +24,7 @@ This project is built for **use and for reading**: ADRs are part of the public d
 | [ADR-012](ADR-012-schema-v4-contract-evidence.md) | Accepted | Schema v4 contract evidence model |
 | [ADR-013](ADR-013-source-neutral-contract-queries.md) | Accepted | Source-neutral workspace and contract endpoint queries |
 | [ADR-014](ADR-014-optional-scip-protobuf-runtime.md) | Accepted | Optional SCIP protobuf runtime boundary |
+| [ADR-015](ADR-015-federated-doctor-diagnostics.md) | Accepted | Federated `doctor` diagnostics per package |
 
 ## Status legend
 
