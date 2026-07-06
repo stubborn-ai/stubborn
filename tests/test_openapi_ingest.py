@@ -147,7 +147,10 @@ def test_openapi_loader_emits_endpoints_and_constraints(tmp_path: Path) -> None:
     assert owner.display_name == "getOwner"
     assert owner.bindings == ()
 
-    constraints = {(item.location, item.field_path, item.type_name, item.required) for item in owner.schema_constraints}
+    constraints = {
+        (item.location, item.field_path, item.type_name, item.required)
+        for item in owner.schema_constraints
+    }
     assert ("path", "ownerId", "integer", True) in constraints
     assert ("query", "includePets", "boolean", False) in constraints
     assert ("responseBody", "200.application/json", "Owner", None) in constraints

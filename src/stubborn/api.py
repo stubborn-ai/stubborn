@@ -282,9 +282,7 @@ def get_workspace_info(
         "contract_source_count": len(contract_sources),
         "symbol_count": sum(item.symbol_count for item in summaries),
         "edge_count": sum(item.edge_count for item in summaries),
-        "contract_endpoint_count": sum(
-            item.contract_endpoint_count for item in summaries
-        ),
+        "contract_endpoint_count": sum(item.contract_endpoint_count for item in summaries),
         "contract_binding_count": sum(item.contract_binding_count for item in summaries),
         "runs": [asdict(item) for item in summaries],
     }

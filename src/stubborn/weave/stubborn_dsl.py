@@ -148,9 +148,7 @@ def weave_stubborn_dsl(
         lines.append("contracts:")
         for endpoint_id in sorted(contract_endpoint_ids):
             endpoint = contract_endpoints.get(endpoint_id)
-            edges = [
-                edge for edge in contract_edges if edge.endpoint_stable_id == endpoint_id
-            ]
+            edges = [edge for edge in contract_edges if edge.endpoint_stable_id == endpoint_id]
             protocol = endpoint.protocol if endpoint is not None else edges[0].protocol
             lines.append(f"  {protocol} {endpoint_id}")
             if endpoint is not None:

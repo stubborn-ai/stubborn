@@ -673,11 +673,19 @@ def prune_context(
             endpoint_depths[target_stable_id] = 0
         for edge in pruned_contract_edges:
             from_depth = next(
-                (symbol.depth for symbol in pruned_symbols if symbol.stable_id == edge.from_stable_id),
+                (
+                    symbol.depth
+                    for symbol in pruned_symbols
+                    if symbol.stable_id == edge.from_stable_id
+                ),
                 0,
             )
             to_depth = next(
-                (symbol.depth for symbol in pruned_symbols if symbol.stable_id == edge.to_stable_id),
+                (
+                    symbol.depth
+                    for symbol in pruned_symbols
+                    if symbol.stable_id == edge.to_stable_id
+                ),
                 0,
             )
             edge_depth = min(from_depth, to_depth) + 1

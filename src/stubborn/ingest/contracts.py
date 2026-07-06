@@ -191,7 +191,9 @@ def _binding_from_manifest(
     )
 
 
-def _constraints_from_endpoint(endpoint: dict[str, Any]) -> tuple[ContractSchemaConstraintRecord, ...]:
+def _constraints_from_endpoint(
+    endpoint: dict[str, Any],
+) -> tuple[ContractSchemaConstraintRecord, ...]:
     explicit = [
         ContractSchemaConstraintRecord(
             location=item["location"],

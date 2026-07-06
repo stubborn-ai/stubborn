@@ -260,12 +260,8 @@ def info_cmd(
         typer.echo(f"Contract sources: {len(contract_sources)}")
         typer.echo(f"Symbols:        {sum(item.symbol_count for item in summaries)}")
         typer.echo(f"Edges:          {sum(item.edge_count for item in summaries)}")
-        typer.echo(
-            f"Contract endpoints: {sum(item.contract_endpoint_count for item in summaries)}"
-        )
-        typer.echo(
-            f"Contract bindings:  {sum(item.contract_binding_count for item in summaries)}"
-        )
+        typer.echo(f"Contract endpoints: {sum(item.contract_endpoint_count for item in summaries)}")
+        typer.echo(f"Contract bindings:  {sum(item.contract_binding_count for item in summaries)}")
         for item in summaries:
             typer.echo(
                 f"- {item.repo_key}: kind={item.run_kind}, run={item.index_run_id}, "
@@ -339,7 +335,9 @@ def list_contracts_cmd(
                 required = (
                     ""
                     if constraint.required is None
-                    else " required" if constraint.required else " optional"
+                    else " required"
+                    if constraint.required
+                    else " optional"
                 )
                 type_name = constraint.type_name or "unknown"
                 typer.echo(

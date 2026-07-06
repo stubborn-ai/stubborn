@@ -146,7 +146,13 @@ def test_info_run_id_selects_specific_run(tmp_path: Path) -> None:
                     kind="method",
                 ),
             ],
-            edges=[EdgeRecord("semanticdb maven com/example/Foo#bar().", "semanticdb maven com/example/Foo#", "reference")],
+            edges=[
+                EdgeRecord(
+                    "semanticdb maven com/example/Foo#bar().",
+                    "semanticdb maven com/example/Foo#",
+                    "reference",
+                )
+            ],
         ),
     )
 
