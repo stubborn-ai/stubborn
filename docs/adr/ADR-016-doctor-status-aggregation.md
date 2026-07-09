@@ -220,7 +220,7 @@ ADR. ADR-015’s rejection of “meta-doctor in core” remains unchanged.
 1. ✅ Per-package `doctor --json` (Doctor Report v1) per ADR-015 — `stubborn`,
    `stubborn-mcp`, `stubborn-watch`
 2. ✅ [`stubborn-status`](https://github.com/stubborn-ai/stubborn-status) repo
-   **`0.1.0b1`** — registry, subprocess merge, tests (PyPI publish pending)
+   **`0.1.0b1`** on [PyPI](https://pypi.org/project/stubborn-status/) — registry, subprocess merge, tests
 3. ✅ Documented in hub [DEMO-LAUNCHERS](https://github.com/stubborn-ai/stubborn-hub/blob/main/docs/DEMO-LAUNCHERS.md) setup checklist
 4. 📋 vscode-stubborn doctor panel **after** sidecar stub path works — consumes
    `stubborn-status --json`

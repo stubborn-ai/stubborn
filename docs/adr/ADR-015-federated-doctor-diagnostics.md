@@ -46,7 +46,7 @@ executes or impersonates sibling checks.
 | **stubborn-mcp** | `stubborn-mcp doctor` | `STUBBORN_DB` / configured `db_path`; DB readable by `stubborn.api`; minimal tool surface smoke (`workspace_info` or equivalent); `.cursor/mcp.json` shape **when present** (parse only, no IDE RPC). |
 | **stubborn-watch** | `stubborn-watch doctor` | Watch root, debounce, target DB, indexer command on `PATH`, merge prerequisites; workspace manifest when used. |
 | **stubborn-indexer** (future repo) | `stubborn-indexer doctor` | scip-java / scip-* on `PATH`, versions, Maven/Gradle signals, suggested **user-run** index commands. **Not** implemented in core. |
-| **stubborn-status** ([stubborn-status](https://github.com/stubborn-ai/stubborn-status)) | `stubborn-status` | Aggregate federated `doctor --json` reports via subprocess; terminal, CI, and IDE consumers. See [ADR-016](ADR-016-doctor-status-aggregation.md). **Beta** `0.1.0b1` (repo; PyPI pending). |
+| **stubborn-status** ([stubborn-status](https://github.com/stubborn-ai/stubborn-status)) | `stubborn-status` | Aggregate federated `doctor --json` reports via subprocess; terminal, CI, and IDE consumers. See [ADR-016](ADR-016-doctor-status-aggregation.md). **Beta** [`0.1.0b1` on PyPI](https://pypi.org/project/stubborn-status/). |
 | **vscode-stubborn** (planned) | extension commands | Editor settings, MCP sidecar registration, **consumes** `stubborn-status --json` for setup panels — does not own merge logic. |
 
 Packages **must not** diagnose another package’s custody in depth. They may

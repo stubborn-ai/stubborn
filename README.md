@@ -232,7 +232,7 @@ Read-only checks per package ([ADR-015](docs/adr/ADR-015-federated-doctor-diagno
 stubborn doctor --json
 stubborn-mcp doctor        # if using agents
 stubborn-watch doctor      # if using dev watch loop
-stubborn-status --json     # aggregate (install from repo until PyPI ships)
+stubborn-status --json     # aggregate installed packages' doctor reports
 ```
 
 Full checklist: [stubborn-hub DEMO-LAUNCHERS](https://github.com/stubborn-ai/stubborn-hub/blob/main/docs/DEMO-LAUNCHERS.md).
