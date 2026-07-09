@@ -9,6 +9,8 @@ import typer
 
 from stubborn.api import index_contract_manifest, index_openapi_contract
 from stubborn.config import ContextBudget, apply_prune_mode, normalize_prune_mode
+from stubborn.doctor.report import format_json, format_text
+from stubborn.doctor.run import run_doctor
 from stubborn.graph.prune import prune_context
 from stubborn.ingest.scip import load_scip_index
 from stubborn.metrics import compute_compression
@@ -545,6 +547,48 @@ def list_symbols_cmd(
         name = symbol.display_name or "(anonymous)"
         kind_text = symbol.kind or "(unknown)"
         typer.echo(f"{symbol.stable_id}\t{name}\t{kind_text}")
+
+
+@app.command("doctor")
+def doctor_cmd(
+    path: Path = typer.Argument(
+        Path("."),
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        resolve_path=True,
+        help="Project root to inspect",
+    ),
+    db: Optional[Path] = typer.Option(
+        None,
+        "--db",
+        help="SQLite symbol graph to check (default: discover metadata/symbols.db)",
+    ),
+    workspace: Optional[str] = typer.Option(
+        None,
+        "--workspace",
+        help="Workspace name for multi-repo summary checks",
+    ),
+    json_output: bool = typer.Option(False, "--json", help="Emit Doctor Report v1 JSON"),
+    fix_hint: bool = typer.Option(
+        True,
+        "--fix-hint/--no-fix-hint",
+        help="Include copy-paste hints in human output",
+    ),
+    quiet: bool = typer.Option(False, "-q", "--quiet", help="Suppress output; exit code only"),
+) -> None:
+    """Diagnose stubborn-stub readiness and symbol graph health (read-only).
+
+    Does not invoke scip-java, start MCP, or auto-select index sources.
+    See ADR-015 for custody scope; use sibling package doctors for MCP/watch.
+    """
+    report = run_doctor(path, db_path=db, workspace=workspace, fix_hint=fix_hint)
+    if not quiet:
+        if json_output:
+            typer.echo(format_json(report))
+        else:
+            typer.echo(format_text(report, fix_hint=fix_hint))
+    raise typer.Exit(code=report.exit_code())
 
 
 @app.command("diff")
