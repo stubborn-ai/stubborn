@@ -34,7 +34,8 @@ packages and any aggregator.
 
 ### 1. Aggregation lives in a separate package/repo: `stubborn-status`
 
-Charter a thin program repo (PyPI name TBD, CLI entry **`stubborn-status`**) that:
+Charter a thin program repo (PyPI **`stubborn-status`**, CLI entry
+**`stubborn-status`**) that:
 
 1. **Discovers** installed ecosystem `doctor` commands (see registry below).
 2. **Invokes each as an external subprocess** with `--json` (never `import`
@@ -131,7 +132,7 @@ ignore unknown fields.
 {
   "schema": "stubborn.status-report/v1",
   "aggregator": "stubborn-status",
-  "version": "0.1.0",
+  "version": "0.1.0b1",
   "cwd": "/path/to/project",
   "exit": 1,
   "doctors": [
@@ -214,12 +215,15 @@ ADR. ADR-015’s rejection of “meta-doctor in core” remains unchanged.
 
 ## Implementation notes (non-normative)
 
-Suggested ship order:
+**Status (2026-07):**
 
-1. Implement per-package `doctor --json` (Doctor Report v1) per ADR-015
-2. Scaffold `stubborn-status` repo with registry + merge + tests using mocked subprocess output
-3. Document `stubborn-status` in hub DEMO-LAUNCHERS setup checklist
-4. vscode-stubborn doctor panel **after** sidecar stub path works — consumes `stubborn-status --json`
+1. ✅ Per-package `doctor --json` (Doctor Report v1) per ADR-015 — `stubborn`,
+   `stubborn-mcp`, `stubborn-watch`
+2. ✅ [`stubborn-status`](https://github.com/stubborn-ai/stubborn-status) repo
+   **`0.1.0b1`** — registry, subprocess merge, tests (PyPI publish pending)
+3. ✅ Documented in hub [DEMO-LAUNCHERS](https://github.com/stubborn-ai/stubborn-hub/blob/main/docs/DEMO-LAUNCHERS.md) setup checklist
+4. 📋 vscode-stubborn doctor panel **after** sidecar stub path works — consumes
+   `stubborn-status --json`
 
 Normative schema files may later live in `stubborn-hub/schemas/` or `stubborn/docs/schemas/`; this ADR is the initial spec.
 

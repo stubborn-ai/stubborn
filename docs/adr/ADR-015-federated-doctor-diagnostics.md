@@ -46,7 +46,7 @@ executes or impersonates sibling checks.
 | **stubborn-mcp** | `stubborn-mcp doctor` | `STUBBORN_DB` / configured `db_path`; DB readable by `stubborn.api`; minimal tool surface smoke (`workspace_info` or equivalent); `.cursor/mcp.json` shape **when present** (parse only, no IDE RPC). |
 | **stubborn-watch** | `stubborn-watch doctor` | Watch root, debounce, target DB, indexer command on `PATH`, merge prerequisites; workspace manifest when used. |
 | **stubborn-indexer** (future repo) | `stubborn-indexer doctor` | scip-java / scip-* on `PATH`, versions, Maven/Gradle signals, suggested **user-run** index commands. **Not** implemented in core. |
-| **stubborn-status** (future repo) | `stubborn-status` | Aggregate federated `doctor --json` reports via subprocess; terminal, CI, and IDE consumers. See [ADR-016](ADR-016-doctor-status-aggregation.md). |
+| **stubborn-status** ([stubborn-status](https://github.com/stubborn-ai/stubborn-status)) | `stubborn-status` | Aggregate federated `doctor --json` reports via subprocess; terminal, CI, and IDE consumers. See [ADR-016](ADR-016-doctor-status-aggregation.md). **Beta** `0.1.0b1` (repo; PyPI pending). |
 | **vscode-stubborn** (planned) | extension commands | Editor settings, MCP sidecar registration, **consumes** `stubborn-status --json` for setup panels — does not own merge logic. |
 
 Packages **must not** diagnose another package’s custody in depth. They may
@@ -55,7 +55,9 @@ setup,” without importing sibling code or shelling out to sibling CLIs by defa
 
 ### Shared protocol (all `doctor` commands)
 
-1. **Read-only by default** — no ingest, merge, index, or MCP server start.
+1. **Read-only by default** — no ingest, merge, index, MCP server start, or
+   **schema migration** on `symbols.db` (inspect legacy schema versions; warn
+   rather than upgrade in place).
 2. **No auto-orchestration** — do not invoke `scip-java`, `mvn`, `gradle`, or
    `stubborn index` on the user’s behalf.
 3. **No source selection** — if multiple index sources exist, list them and
@@ -64,9 +66,9 @@ setup,” without importing sibling code or shelling out to sibling CLIs by defa
    `workspace` / `version` (ADR-011).
 5. **Exit codes** (consistent across packages):
    - `0` — ready, or only informational notes
-   - `1` — blocking issue (missing package, unreadable DB, incompatible schema)
+   - `1` — blocking issue (missing package, unreadable DB)
    - `2` — non-blocking warnings (e.g. missing `[scip]` while only JSON
-     fixtures exist)
+     fixtures exist; **legacy schema below current** — re-index recommended)
 6. **Output** — human-readable sections by default; optional `--json` conforming
    to **Doctor Report v1** (see [ADR-016](ADR-016-doctor-status-aggregation.md)).
 7. **Hints** — `--fix-hint` (default on) may print copy-paste commands; each
@@ -140,16 +142,21 @@ added, it requires its own ADR defining precedence vs CLI flags and env vars.
 
 ## Implementation notes (non-normative)
 
-Suggested first ship order:
+**Status (2026-07):** items 1–3 below are **shipped** in beta repos. Item 4
+(`stubborn-indexer`) remains future.
 
-1. `stubborn doctor` — DB + core package + passive signals
-2. `stubborn-mcp doctor` — small surface, high agent-user value
-3. `stubborn-watch doctor` — dev-loop contributors
+Ship order (completed unless noted):
+
+1. ✅ `stubborn doctor` — DB + core package + passive signals (read-only inspect;
+   `read_info(..., migrate=False)`)
+2. ✅ `stubborn-mcp doctor` — MCP surface and config shape
+3. ✅ `stubborn-watch doctor` — dev-loop prerequisites
 4. `stubborn-indexer doctor` — when that repo is chartered (ADR for indexer
    boundary may precede or follow; this ADR does not create the repo)
 
-Core implementation may live under `src/stubborn/doctor/` with unit tests on
-fixture DBs and temp project trees. MCP/watch mirror the same report schema.
+Core implementation lives under `src/stubborn/doctor/` with unit tests on
+fixture DBs, legacy-schema regression tests, and temp project trees. MCP/watch
+mirror the same report schema.
 
 ## References
 
