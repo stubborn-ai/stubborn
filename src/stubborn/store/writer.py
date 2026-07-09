@@ -28,6 +28,75 @@ def _schema_version(conn: sqlite3.Connection) -> int | None:
         return None
 
 
+def read_schema_version(db_path: str | Path | sqlite3.Connection) -> int | None:
+    """Read the highest recorded schema version without migrating."""
+    if isinstance(db_path, sqlite3.Connection):
+        return _schema_version(db_path)
+    conn = sqlite3.connect(db_path)
+    try:
+        return _schema_version(conn)
+    finally:
+        conn.close()
+
+
+def _connect_db(db_path: Path, *, migrate: bool) -> sqlite3.Connection:
+    if migrate:
+        return sqlite3.connect(db_path)
+    return sqlite3.connect(f"file:{db_path.as_posix()}?mode=ro", uri=True)
+
+
+def _fetch_index_run_row(
+    conn: sqlite3.Connection,
+    index_run_id: int,
+    schema_version: int | None,
+) -> sqlite3.Row:
+    if schema_version is None or schema_version < 2:
+        run = conn.execute(
+            """
+            SELECT ir.id, ir.scip_source, ir.language, ir.indexed_at
+            FROM index_run ir
+            WHERE ir.id = ?
+            """,
+            (index_run_id,),
+        ).fetchone()
+    elif schema_version < 3:
+        run = conn.execute(
+            """
+            SELECT ir.id, ir.scip_source, ir.language, ir.indexed_at, ir.mode, ir.merge_count
+            FROM index_run ir
+            WHERE ir.id = ?
+            """,
+            (index_run_id,),
+        ).fetchone()
+    elif schema_version < 4:
+        run = conn.execute(
+            """
+            SELECT ir.id, ir.scip_source, ir.language, ir.indexed_at, ir.mode, ir.merge_count,
+                   w.name AS workspace, r.repo_key
+            FROM index_run ir
+            LEFT JOIN repo r ON r.id = ir.repo_id
+            LEFT JOIN workspace w ON w.id = r.workspace_id
+            WHERE ir.id = ?
+            """,
+            (index_run_id,),
+        ).fetchone()
+    else:
+        run = conn.execute(
+            """
+            SELECT ir.id, ir.scip_source, ir.language, ir.indexed_at, ir.mode, ir.merge_count,
+                   ir.run_kind, w.name AS workspace, r.repo_key
+            FROM index_run ir
+            LEFT JOIN repo r ON r.id = ir.repo_id
+            LEFT JOIN workspace w ON w.id = r.workspace_id
+            WHERE ir.id = ?
+            """,
+            (index_run_id,),
+        ).fetchone()
+    if run is None:
+        raise ValueError(f"index_run {index_run_id} not found")
+    return run
+
+
 def ensure_schema(conn: sqlite3.Connection) -> None:
     """Create or upgrade schema to v4."""
     version = _schema_version(conn)
@@ -204,13 +273,26 @@ def _repo_id_for_write(
     )
 
 
-def read_info(db_path: str | Path, index_run_id: int | None = None) -> IndexInfo:
-    """Read summary for latest or specific index run."""
-    conn = sqlite3.connect(db_path)
+def read_info(
+    db_path: str | Path,
+    index_run_id: int | None = None,
+    *,
+    migrate: bool = True,
+) -> IndexInfo:
+    """Read summary for latest or specific index run.
+
+    When ``migrate`` is False, the database file is opened read-only and schema
+    upgrades are not applied (for doctor / inspection paths per ADR-015).
+    """
+    path = Path(db_path)
+    conn = _connect_db(path, migrate=migrate)
     conn.row_factory = sqlite3.Row
     try:
-        ensure_schema(conn)
-        conn.commit()
+        if migrate:
+            ensure_schema(conn)
+            conn.commit()
+
+        schema_version = _schema_version(conn)
 
         if index_run_id is None:
             row = conn.execute("SELECT id FROM index_run ORDER BY id DESC LIMIT 1").fetchone()
@@ -218,19 +300,7 @@ def read_info(db_path: str | Path, index_run_id: int | None = None) -> IndexInfo
                 raise ValueError(f"No index runs found in {db_path}")
             index_run_id = row["id"]
 
-        run = conn.execute(
-            """
-            SELECT ir.id, ir.scip_source, ir.language, ir.indexed_at, ir.mode, ir.merge_count,
-                   ir.run_kind, w.name AS workspace, r.repo_key
-            FROM index_run ir
-            LEFT JOIN repo r ON r.id = ir.repo_id
-            LEFT JOIN workspace w ON w.id = r.workspace_id
-            WHERE ir.id = ?
-            """,
-            (index_run_id,),
-        ).fetchone()
-        if run is None:
-            raise ValueError(f"index_run {index_run_id} not found in {db_path}")
+        run = _fetch_index_run_row(conn, index_run_id, schema_version)
 
         symbol_count = conn.execute(
             "SELECT COUNT(*) FROM scip_symbol WHERE index_run_id = ?",
@@ -241,6 +311,7 @@ def read_info(db_path: str | Path, index_run_id: int | None = None) -> IndexInfo
             (index_run_id,),
         ).fetchone()[0]
 
+        keys = set(run.keys())
         return IndexInfo(
             index_run_id=run["id"],
             scip_source=run["scip_source"],
@@ -248,11 +319,11 @@ def read_info(db_path: str | Path, index_run_id: int | None = None) -> IndexInfo
             indexed_at=run["indexed_at"],
             symbol_count=symbol_count,
             edge_count=edge_count,
-            mode=run["mode"] or "snapshot",
-            merge_count=int(run["merge_count"] or 0),
-            workspace=run["workspace"],
-            repo_key=run["repo_key"],
-            run_kind=run["run_kind"] or "code",
+            mode=(run["mode"] or "snapshot") if "mode" in keys else "snapshot",
+            merge_count=int(run["merge_count"] or 0) if "merge_count" in keys else 0,
+            workspace=run["workspace"] if "workspace" in keys else None,
+            repo_key=run["repo_key"] if "repo_key" in keys else None,
+            run_kind=run["run_kind"] if "run_kind" in keys else "code",
         )
     finally:
         conn.close()

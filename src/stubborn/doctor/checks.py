@@ -12,7 +12,7 @@ from stubborn import __version__
 from stubborn.doctor.models import Check
 from stubborn.doctor.signals import ProjectSignal, discover_project_signals
 from stubborn.store.reader import list_contract_bindings, workspace_run_summaries
-from stubborn.store.writer import ensure_schema, read_info
+from stubborn.store.writer import read_info, read_schema_version
 
 _SCIP_EXTRA_HINT = (
     "Install binary SCIP support with: pip install 'stubborn-stub[scip]' "
@@ -192,12 +192,9 @@ def database_checks(
     )
 
     try:
-        conn = sqlite3.connect(resolved)
+        conn = sqlite3.connect(f"file:{resolved.as_posix()}?mode=ro", uri=True)
         try:
-            ensure_schema(conn)
-            conn.commit()
-            row = conn.execute("SELECT MAX(version) FROM meta_schema_version").fetchone()
-            schema_version = int(row[0]) if row and row[0] is not None else None
+            schema_version = read_schema_version(conn)
         finally:
             conn.close()
     except sqlite3.Error as exc:
@@ -220,40 +217,53 @@ def database_checks(
     )
 
     if workspace is not None:
-        try:
-            summaries = workspace_run_summaries(resolved, workspace=workspace)
-        except ValueError as exc:
+        if schema_version is None or schema_version < 3:
             checks.append(
                 Check(
                     id="db.workspace",
-                    status="fail",
-                    message=str(exc),
+                    status="warn",
+                    message=(
+                        "workspace view requires schema v3+, found "
+                        f"v{schema_version if schema_version is not None else 'unknown'}"
+                    ),
+                    hint="Re-index with the current stubborn-stub release",
                 )
             )
-            return checks
-        repo_keys = sorted(item.repo_key for item in summaries)
-        checks.append(
-            Check(
-                id="db.workspace",
-                status="pass",
-                message=f"workspace {workspace!r}: {len(repo_keys)} repo(s)",
-            )
-        )
-        for repo_key in repo_keys:
-            item = next(s for s in summaries if s.repo_key == repo_key)
+        else:
+            try:
+                summaries = workspace_run_summaries(resolved, workspace=workspace)
+            except ValueError as exc:
+                checks.append(
+                    Check(
+                        id="db.workspace",
+                        status="fail",
+                        message=str(exc),
+                    )
+                )
+                return checks
+            repo_keys = sorted(item.repo_key for item in summaries)
             checks.append(
                 Check(
-                    id=f"db.workspace.repo.{repo_key}",
-                    status="info",
-                    message=(
-                        f"kind={item.run_kind}, symbols={item.symbol_count}, "
-                        f"edges={item.edge_count}, contract_bindings={item.contract_binding_count}"
-                    ),
+                    id="db.workspace",
+                    status="pass",
+                    message=f"workspace {workspace!r}: {len(repo_keys)} repo(s)",
                 )
             )
+            for repo_key in repo_keys:
+                item = next(s for s in summaries if s.repo_key == repo_key)
+                checks.append(
+                    Check(
+                        id=f"db.workspace.repo.{repo_key}",
+                        status="info",
+                        message=(
+                            f"kind={item.run_kind}, symbols={item.symbol_count}, "
+                            f"edges={item.edge_count}, contract_bindings={item.contract_binding_count}"
+                        ),
+                    )
+                )
     else:
         try:
-            info = read_info(resolved)
+            info = read_info(resolved, migrate=False)
         except ValueError as exc:
             checks.append(
                 Check(
@@ -283,17 +293,18 @@ def database_checks(
                 )
             )
 
-    bindings = list_contract_bindings(resolved, workspace=workspace)
-    if bindings:
-        tiers = Counter(binding.evidence for binding in bindings)
-        tier_text = ", ".join(f"{key}={value}" for key, value in sorted(tiers.items()))
-        checks.append(
-            Check(
-                id="db.contract_bindings",
-                status="info",
-                message=f"contract bindings: {len(bindings)} ({tier_text})",
+    if schema_version == 4:
+        bindings = list_contract_bindings(resolved, workspace=workspace)
+        if bindings:
+            tiers = Counter(binding.evidence for binding in bindings)
+            tier_text = ", ".join(f"{key}={value}" for key, value in sorted(tiers.items()))
+            checks.append(
+                Check(
+                    id="db.contract_bindings",
+                    status="info",
+                    message=f"contract bindings: {len(bindings)} ({tier_text})",
+                )
             )
-        )
     return checks
 
 
