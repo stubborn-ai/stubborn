@@ -12,6 +12,7 @@
 | [SCIP-INGEST.md](SCIP-INGEST.md) | Index authors | Supported SCIP formats and ingest behavior |
 | [CONTRACT-GRAPH.md](CONTRACT-GRAPH.md) | Adapter authors | Planned distributed contract IR, evidence tiers, and REST/OpenAPI boundaries |
 | [MCP.md](MCP.md) | Agent / Cursor users | Pointer to **stubborn-mcp** package |
+| [adr/ADR-015-federated-doctor-diagnostics.md](adr/ADR-015-federated-doctor-diagnostics.md) | Adopters, CI owners | Federated read-only `doctor` setup diagnostics |
 | [STUBBORN-DSL-GUIDE.md](STUBBORN-DSL-GUIDE.md) | Prompt authors | When to use java-stub vs stubborn-dsl |
 | [STUBBORN-DSL.md](STUBBORN-DSL.md) | LLM context authors | Stubborn-DSL v1 grammar and CLI usage |
 | [STUBBORN-DSL-LLM.txt](STUBBORN-DSL-LLM.txt) | Prompt engineers | Short system-prompt snippet for `format=stubborn-dsl` |

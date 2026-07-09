@@ -224,6 +224,19 @@ stubborn-mcp
 
 Tools: `get_context`, `list_symbols`, `metrics`. See [stubborn-mcp docs](https://github.com/stubborn-ai/stubborn-mcp/blob/main/docs/MCP.md).
 
+### 6. Setup diagnostics (federated doctor)
+
+Read-only checks per package ([ADR-015](docs/adr/ADR-015-federated-doctor-diagnostics.md)) — no ingest, merge, or **schema migration** on `symbols.db`:
+
+```bash
+stubborn doctor --json
+stubborn-mcp doctor        # if using agents
+stubborn-watch doctor      # if using dev watch loop
+stubborn-status --json     # aggregate (install from repo until PyPI ships)
+```
+
+Full checklist: [stubborn-hub DEMO-LAUNCHERS](https://github.com/stubborn-ai/stubborn-hub/blob/main/docs/DEMO-LAUNCHERS.md).
+
 ## CLI
 
 | Command | Description |
@@ -239,6 +252,7 @@ Tools: `get_context`, `list_symbols`, `metrics`. See [stubborn-mcp docs](https:/
 | `list-symbols` | Browse symbols in a legacy, repo, or workspace view |
 | `metrics` | Compression KPI: stub vs full Java sources |
 | `diff` | Symbol set reconcile (missing/extra) |
+| `doctor` | Read-only setup diagnostics — DB health, project signals, delegation hints ([ADR-015](docs/adr/ADR-015-federated-doctor-diagnostics.md)) |
 
 ## Architecture
 
@@ -286,6 +300,7 @@ SQLite schema: [`src/stubborn/store/schema/v4.sql`](src/stubborn/store/schema/v4
 | [docs/STUBBORN-DSL-GUIDE.md](docs/STUBBORN-DSL-GUIDE.md) | java-stub vs stubborn-dsl decision guide |
 | [docs/STUBBORN-DSL-LLM.txt](docs/STUBBORN-DSL-LLM.txt) | LLM system-prompt snippet |
 | [docs/MCP.md](docs/MCP.md) | Cursor / agent integration |
+| [docs/adr/ADR-015-federated-doctor-diagnostics.md](docs/adr/ADR-015-federated-doctor-diagnostics.md) | Federated `doctor` setup diagnostics |
 | [docs/SCIP-INGEST.md](docs/SCIP-INGEST.md) | SCIP ingest |
 | [examples/README.md](examples/README.md) | E2E examples |
 

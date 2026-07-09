@@ -44,6 +44,7 @@ See [POSITIONING.md](POSITIONING.md) for the full primary/secondary split.
 - [x] STUBBORN-DSL grammar, LLM snippet, format guide
 - [x] PyPI `stubborn-stub` published (`0.9.0b5`)
 - [x] ADRs + honest positioning ([POSITIONING.md](POSITIONING.md))
+- [x] Federated `doctor` read-only diagnostics ([ADR-015](adr/ADR-015-federated-doctor-diagnostics.md)); aggregation via [`stubborn-status`](https://github.com/stubborn-ai/stubborn-status) ([ADR-016](adr/ADR-016-doctor-status-aggregation.md), repo `0.1.0b1`, PyPI pending)
 
 ### Quality bar
 

@@ -6,6 +6,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **`stubborn doctor`** — read-only setup diagnostics per [ADR-015](docs/adr/ADR-015-federated-doctor-diagnostics.md) (`--json`, Doctor Report v1).
+
+### Fixed
+
+- **`stubborn doctor`** no longer migrates legacy `symbols.db` schema during inspection (`read_info(..., migrate=False)`).
+
 ## [0.9.0b5] - 2026-07-04
 
 ### Added
