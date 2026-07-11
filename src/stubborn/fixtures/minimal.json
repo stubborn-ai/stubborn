@@ -1,0 +1,42 @@
+{
+  "language": "java",
+  "project_root": "/example",
+  "symbols": [
+    {
+      "stable_id": "semanticdb maven com/example/OrderService#",
+      "display_name": "OrderService",
+      "kind": "class",
+      "signature": "public class OrderService"
+    },
+    {
+      "stable_id": "semanticdb maven com/example/OrderService#process().",
+      "display_name": "process",
+      "kind": "method",
+      "signature": "public void process(Order order)"
+    },
+    {
+      "stable_id": "semanticdb maven com/example/Order#",
+      "display_name": "Order",
+      "kind": "class",
+      "signature": "public class Order"
+    },
+    {
+      "stable_id": "semanticdb maven com/example/OrderRepository#findById().",
+      "display_name": "findById",
+      "kind": "method",
+      "signature": "public Optional<Order> findById(String id)"
+    }
+  ],
+  "edges": [
+    {
+      "from": "semanticdb maven com/example/OrderService#process().",
+      "to": "semanticdb maven com/example/Order#",
+      "edge_kind": "type"
+    },
+    {
+      "from": "semanticdb maven com/example/OrderService#",
+      "to": "semanticdb maven com/example/OrderRepository#findById().",
+      "edge_kind": "reference"
+    }
+  ]
+}

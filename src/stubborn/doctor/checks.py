@@ -165,8 +165,9 @@ def database_checks(
                 status="warn",
                 message="no symbols.db found (single-repo legacy mode needs no workspace)",
                 hint=(
-                    "Try fixture path: stubborn index --scip examples/fixtures/minimal.json "
-                    "--out metadata/symbols.db (stubborn-stub)"
+                    "Try bundled fixture: FIXTURE=$(stubborn fixture-path minimal) && "
+                    "stubborn index --scip \"$FIXTURE\" --out metadata/symbols.db "
+                    "(stubborn-stub)"
                 ),
             )
         )

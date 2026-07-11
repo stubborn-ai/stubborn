@@ -65,6 +65,38 @@ def test_cli_index_json_fixture(tmp_path: Path) -> None:
     assert db.is_file()
 
 
+def test_cli_index_bundled_fixture(tmp_path: Path) -> None:
+    runner = CliRunner()
+    db = tmp_path / "symbols.db"
+
+    result = runner.invoke(
+        app,
+        ["index", "--fixture", "minimal", "--out", str(db)],
+    )
+    assert result.exit_code == 0, result.stdout + result.stderr
+    assert db.is_file()
+
+    info = runner.invoke(app, ["info", str(db)])
+    assert info.exit_code == 0, info.stdout + info.stderr
+    assert "Symbols" in info.stdout
+
+
+def test_cli_fixture_path() -> None:
+    runner = CliRunner()
+    result = runner.invoke(app, ["fixture-path", "minimal"])
+    assert result.exit_code == 0, result.stdout + result.stderr
+    path = Path(result.stdout.strip())
+    assert path.is_file()
+    assert path.name == "minimal.json"
+
+
+def test_cli_fixtures_list() -> None:
+    runner = CliRunner()
+    result = runner.invoke(app, ["fixtures"])
+    assert result.exit_code == 0, result.stdout + result.stderr
+    assert "minimal" in result.stdout
+
+
 def test_cli_index_merge(tmp_path: Path) -> None:
     runner = CliRunner()
     db = tmp_path / "symbols.db"

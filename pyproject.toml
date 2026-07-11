@@ -52,6 +52,9 @@ stub = "stubborn.cli:app"
 [tool.hatch.build.targets.wheel]
 packages = ["src/stubborn"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"src/stubborn/fixtures/minimal.json" = "stubborn/fixtures/minimal.json"
+
 [tool.hatch.build.targets.sdist]
 include = ["src/stubborn", "README.md", "LICENSE"]
 

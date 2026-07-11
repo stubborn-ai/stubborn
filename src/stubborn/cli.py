@@ -11,6 +11,8 @@ from stubborn.api import index_contract_manifest, index_openapi_contract
 from stubborn.config import ContextBudget, apply_prune_mode, normalize_prune_mode
 from stubborn.doctor.report import format_json, format_text
 from stubborn.doctor.run import run_doctor
+from stubborn.fixtures import fixture_path as resolve_fixture_path
+from stubborn.fixtures import list_fixtures
 from stubborn.graph.prune import prune_context
 from stubborn.ingest.scip import load_scip_index
 from stubborn.metrics import compute_compression
@@ -58,6 +60,28 @@ def workspace_register_repo_cmd(
     typer.echo(f"Registered repo {repo!r} in workspace {workspace!r} (repo_id={repo_id})")
 
 
+@app.command("fixture-path")
+def fixture_path_cmd(
+    name: str = typer.Argument(
+        "minimal",
+        help="Bundled fixture name (see `stubborn fixtures`)",
+    ),
+) -> None:
+    """Print the path to a bundled SCIP JSON fixture (works after pip install)."""
+    try:
+        path = resolve_fixture_path(name)
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+    typer.echo(path)
+
+
+@app.command("fixtures")
+def fixtures_cmd() -> None:
+    """List bundled SCIP JSON fixtures shipped with stubborn-stub."""
+    for item in list_fixtures():
+        typer.echo(item)
+
+
 @app.command("init-db")
 def init_db_cmd(
     out: Path = typer.Option(..., "--out", "-o", help="SQLite file path to initialize"),
@@ -69,8 +93,15 @@ def init_db_cmd(
 
 @app.command("index")
 def index_cmd(
-    scip: Path = typer.Option(
-        ..., "--scip", help="SCIP index (.scip, .scip.ndjson, or .json fixture)"
+    scip: Optional[Path] = typer.Option(
+        None,
+        "--scip",
+        help="SCIP index (.scip, .scip.ndjson, or .json fixture)",
+    ),
+    fixture: Optional[str] = typer.Option(
+        None,
+        "--fixture",
+        help="Bundled JSON fixture name (see `stubborn fixtures`; no [scip] extra needed)",
     ),
     out: Path = typer.Option(..., "--out", "-o", help="Output SQLite file path"),
     project_root: Optional[str] = typer.Option(
@@ -100,7 +131,19 @@ def index_cmd(
     ),
 ) -> None:
     """Ingest a SCIP index into a local symbol graph SQLite database."""
-    snapshot = load_scip_index(scip, project_root=project_root)
+    if fixture and scip is not None:
+        raise typer.BadParameter("Use either --scip or --fixture, not both")
+    if fixture:
+        try:
+            scip_path = resolve_fixture_path(fixture)
+        except (ValueError, FileNotFoundError) as exc:
+            raise typer.BadParameter(str(exc)) from exc
+    elif scip is not None:
+        scip_path = scip
+    else:
+        raise typer.BadParameter("One of --scip or --fixture is required")
+
+    snapshot = load_scip_index(scip_path, project_root=project_root)
     writer = IndexWriter(out)
     path_set: set[str] | None = None
     if paths:

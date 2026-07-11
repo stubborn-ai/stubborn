@@ -8,7 +8,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Bundled fixtures** — `stubborn fixtures`, `stubborn fixture-path`, and `stubborn index --fixture minimal` for pip-install quickstart without cloning the git repo.
 - **`stubborn doctor`** — read-only setup diagnostics per [ADR-015](docs/adr/ADR-015-federated-doctor-diagnostics.md) (`--json`, Doctor Report v1).
+- **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** — common external-user setup failures and fixes.
 
 ### Fixed
 

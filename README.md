@@ -108,16 +108,20 @@ pip install -e ".[dev]"
 
 ### Try in 30 seconds (no Java required)
 
-Uses the bundled minimal SCIP fixture — no JDK, Maven, or scip-java needed:
+Uses the bundled minimal SCIP fixture — no JDK, Maven, scip-java, or git clone needed:
 
 ```bash
 pip install stubborn-stub
-stubborn index --scip examples/fixtures/minimal.json --out /tmp/symbols.db
+stubborn index --fixture minimal --out /tmp/symbols.db
 stubborn info /tmp/symbols.db
 stubborn context /tmp/symbols.db \
   --target "semanticdb maven com/example/OrderService#" \
   --out /tmp/order-service.stub.java
 ```
+
+`--fixture minimal` reads a JSON snapshot shipped inside the PyPI package. From a
+git checkout you can still use `examples/fixtures/minimal.json`, or run
+`stubborn fixture-path minimal` to print the installed path.
 
 ## Quick start
 
@@ -301,6 +305,8 @@ SQLite schema: [`src/stubborn/store/schema/v4.sql`](src/stubborn/store/schema/v4
 | [docs/STUBBORN-DSL-LLM.txt](docs/STUBBORN-DSL-LLM.txt) | LLM system-prompt snippet |
 | [docs/MCP.md](docs/MCP.md) | Cursor / agent integration |
 | [docs/adr/ADR-015-federated-doctor-diagnostics.md](docs/adr/ADR-015-federated-doctor-diagnostics.md) | Federated `doctor` setup diagnostics |
+| [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Common setup failures and copy-paste fixes |
+| [stubborn-hub USER-JOURNEY](https://github.com/stubborn-ai/stubborn-hub/blob/main/docs/USER-JOURNEY.md) | Goal-oriented paths for external users |
 | [docs/SCIP-INGEST.md](docs/SCIP-INGEST.md) | SCIP ingest |
 | [examples/README.md](examples/README.md) | E2E examples |
 

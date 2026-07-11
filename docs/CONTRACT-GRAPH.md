@@ -1,7 +1,9 @@
 # Contract Graph
 
-Contract Graph is Stubborn's planned internal representation for distributed
-system facts that are not code-symbol references.
+Contract Graph is Stubborn's internal representation for distributed system
+facts that are not code-symbol references. REST v1 ingest ships in-core as
+`stubborn index-openapi` and `stubborn index-contract` ([ADR-011](adr/ADR-011-openapi-contract-graph.md),
+[ADR-012](adr/ADR-012-schema-v4-contract-evidence.md)).
 
 SCIP remains the canonical input for language symbols. Contract Graph facts come
 from stable interface-protocol inputs such as OpenAPI YAML/JSON, explicit
