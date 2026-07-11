@@ -6,6 +6,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.9.0b6] - 2026-07-12
+
 ### Added
 
 - **Bundled fixtures** — `stubborn fixtures`, `stubborn fixture-path`, and `stubborn index --fixture minimal` for pip-install quickstart without cloning the git repo.
@@ -90,6 +92,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 See [GitHub Releases](https://github.com/stubborn-ai/stubborn/releases) for earlier tags and migration history.
 
+[0.9.0b6]: https://github.com/stubborn-ai/stubborn/compare/v0.9.0b5...v0.9.0b6
 [0.9.0b5]: https://github.com/stubborn-ai/stubborn/compare/v0.9.0b4...v0.9.0b5
 [0.9.0b4]: https://github.com/stubborn-ai/stubborn/compare/v0.9.0b3...v0.9.0b4
 [0.9.0b3]: https://github.com/stubborn-ai/stubborn/compare/v0.9.0b2...v0.9.0b3
