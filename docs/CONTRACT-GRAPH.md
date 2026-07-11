@@ -153,21 +153,23 @@ annotations, URL strings, or hand-written clients. Cross-service traversal still
 requires `contract_binding` rows from an explicit manifest, generated client
 traceability, or another evidence-producing adapter.
 
-## Weave Direction
+## Weave direction
 
-Future `stubborn-dsl` output can add a contract section without breaking the
-code-symbol privacy contract:
+`stubborn-dsl` output includes a `contracts:` block for endpoint facts, schema
+constraints, and evidence-tiered bindings. Java stubs stay Java-shaped; contract
+facts belong in `stubborn-dsl` or structured API fields, not fake Java declarations.
+
+Example:
 
 ```text
 contracts:
   http openapi customers-service:v1 GET /owners/{ownerId}
-    provider strong OwnerResource
-    consumer declared CustomersServiceClient
-    schema path.ownerId Integer required
+    provider declared OwnerResource
+    consumer declared CustomersClient
+    schema path.ownerId integer required
 ```
 
-Java stubs should stay Java-shaped. Contract facts fit better in
-`stubborn-dsl` or sidecar sections than in fake Java declarations.
+Playbook: [stubborn-hub CONTRACT-GRAPH-PLAYBOOK](https://github.com/stubborn-ai/stubborn-hub/blob/main/docs/CONTRACT-GRAPH-PLAYBOOK.md).
 
 ## Boundaries
 

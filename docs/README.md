@@ -10,7 +10,8 @@
 | [POSITIONING.md](POSITIONING.md) | Architects, adopters | Primary/secondary audience; honest comparison; SCIP prerequisite |
 | [INTEGRATION.md](INTEGRATION.md) | Optional adopters | How anchor-migration consumes Stubborn |
 | [SCIP-INGEST.md](SCIP-INGEST.md) | Index authors | Supported SCIP formats and ingest behavior |
-| [CONTRACT-GRAPH.md](CONTRACT-GRAPH.md) | Adapter authors | Planned distributed contract IR, evidence tiers, and REST/OpenAPI boundaries |
+| [CONTRACT-GRAPH.md](CONTRACT-GRAPH.md) | Adapter authors | Contract graph IR, evidence tiers, and REST/OpenAPI boundaries |
+| [stubborn-hub CONTRACT-GRAPH-PLAYBOOK](https://github.com/stubborn-ai/stubborn-hub/blob/main/docs/CONTRACT-GRAPH-PLAYBOOK.md) | Adopters | Step-by-step mixed workspace ingest and query |
 | [MCP.md](MCP.md) | Agent / Cursor users | Pointer to **stubborn-mcp** package |
 | [adr/ADR-015-federated-doctor-diagnostics.md](adr/ADR-015-federated-doctor-diagnostics.md) | Adopters, CI owners | Federated read-only `doctor` setup diagnostics |
 | [STUBBORN-DSL-GUIDE.md](STUBBORN-DSL-GUIDE.md) | Prompt authors | When to use java-stub vs stubborn-dsl |

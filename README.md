@@ -307,6 +307,7 @@ SQLite schema: [`src/stubborn/store/schema/v4.sql`](src/stubborn/store/schema/v4
 | [docs/adr/ADR-015-federated-doctor-diagnostics.md](docs/adr/ADR-015-federated-doctor-diagnostics.md) | Federated `doctor` setup diagnostics |
 | [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Common setup failures and copy-paste fixes |
 | [stubborn-hub USER-JOURNEY](https://github.com/stubborn-ai/stubborn-hub/blob/main/docs/USER-JOURNEY.md) | Goal-oriented paths for external users |
+| [stubborn-hub CONTRACT-GRAPH-PLAYBOOK](https://github.com/stubborn-ai/stubborn-hub/blob/main/docs/CONTRACT-GRAPH-PLAYBOOK.md) | Mixed workspace contract ingest |
 | [docs/SCIP-INGEST.md](docs/SCIP-INGEST.md) | SCIP ingest |
 | [examples/README.md](examples/README.md) | E2E examples |
 
