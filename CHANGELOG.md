@@ -6,6 +6,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.9.0b7] - 2026-07-12
+
+### Added
+
+- **`stubborn try`** — one-command bundled-fixture demo (`index` → `list-symbols` → `context` on stdout).
+
 ## [0.9.0b6] - 2026-07-12
 
 ### Added
@@ -92,6 +98,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 See [GitHub Releases](https://github.com/stubborn-ai/stubborn/releases) for earlier tags and migration history.
 
+[0.9.0b7]: https://github.com/stubborn-ai/stubborn/compare/v0.9.0b6...v0.9.0b7
 [0.9.0b6]: https://github.com/stubborn-ai/stubborn/compare/v0.9.0b5...v0.9.0b6
 [0.9.0b5]: https://github.com/stubborn-ai/stubborn/compare/v0.9.0b4...v0.9.0b5
 [0.9.0b4]: https://github.com/stubborn-ai/stubborn/compare/v0.9.0b3...v0.9.0b4

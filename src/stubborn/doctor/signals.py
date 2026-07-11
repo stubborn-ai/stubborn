@@ -11,9 +11,7 @@ BUILD_SIGNALS = (
     "build.gradle.kts",
 )
 
-SCIP_SIGNALS = (
-    "index.scip",
-)
+SCIP_SIGNALS = ("index.scip",)
 
 OPENAPI_RELATIVE = (
     "openapi.yaml",

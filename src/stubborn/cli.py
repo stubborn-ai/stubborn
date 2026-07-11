@@ -60,6 +60,77 @@ def workspace_register_repo_cmd(
     typer.echo(f"Registered repo {repo!r} in workspace {workspace!r} (repo_id={repo_id})")
 
 
+TRY_FIXTURE = "minimal"
+TRY_TARGET = "semanticdb maven com/example/OrderService#"
+TRY_DEFAULT_DB = Path("stubborn-try.symbols.db")
+
+
+@app.command("try")
+def try_cmd(
+    out: Path = typer.Option(
+        TRY_DEFAULT_DB,
+        "--out",
+        "-o",
+        help="SQLite symbol graph output path",
+    ),
+    fixture: str = typer.Option(
+        TRY_FIXTURE,
+        "--fixture",
+        help="Bundled JSON fixture name (see `stubborn fixtures`)",
+    ),
+    target: str = typer.Option(
+        TRY_TARGET,
+        "--target",
+        "-t",
+        help="Target stable_id for the demo context",
+    ),
+    format: str = typer.Option(
+        "java-stub",
+        "--format",
+        "-f",
+        help="Output format: java-stub | stubborn-dsl",
+    ),
+    quiet: bool = typer.Option(
+        False,
+        "-q",
+        "--quiet",
+        help="Print only the woven context text",
+    ),
+) -> None:
+    """Run a bundled-fixture demo: index → list symbols → print context.
+
+    Uses the PyPI-shipped minimal fixture only. Does not invoke scip-java or
+    auto-select project sources (see ADR-015). For real repos, use `stubborn index`.
+    """
+    try:
+        scip_path = resolve_fixture_path(fixture)
+    except (ValueError, FileNotFoundError) as exc:
+        raise typer.BadParameter(str(exc)) from exc
+
+    if not quiet:
+        typer.echo(f"Indexing bundled fixture {fixture!r} -> {out}")
+    snapshot = load_scip_index(scip_path)
+    IndexWriter(out).write(snapshot)
+
+    symbols = list_symbols(out, query="OrderService", limit=10)
+    if not quiet:
+        info = read_info(out)
+        typer.echo(f"Indexed {info.symbol_count} symbol(s). Database: {out.resolve()}")
+        typer.echo("Symbols matching OrderService:")
+        for symbol in symbols:
+            name = symbol.display_name or "(anonymous)"
+            typer.echo(f"  {symbol.stable_id}\t{name}")
+        typer.echo(f"Context for target {target!r}:")
+        typer.echo("---")
+
+    budget = apply_prune_mode(ContextBudget(call_closure_depth=2, max_symbols=200))
+    graph = prune_context(out, target, budget=budget)
+    result = weave_context(graph, format=format, max_tokens=budget.max_tokens)
+    typer.echo(result.text, nl=False)
+    if not result.text.endswith("\n"):
+        typer.echo()
+
+
 @app.command("fixture-path")
 def fixture_path_cmd(
     name: str = typer.Argument(

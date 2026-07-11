@@ -58,6 +58,12 @@ Use a bundled fixture instead:
 
 ```bash
 pip install stubborn-stub
+stubborn try
+```
+
+Or manual steps:
+
+```bash
 stubborn index --fixture minimal --out /tmp/symbols.db
 ```
 

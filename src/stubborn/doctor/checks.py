@@ -15,8 +15,7 @@ from stubborn.store.reader import list_contract_bindings, workspace_run_summarie
 from stubborn.store.writer import read_info, read_schema_version
 
 _SCIP_EXTRA_HINT = (
-    "Install binary SCIP support with: pip install 'stubborn-stub[scip]' "
-    "(stubborn-stub package)"
+    "Install binary SCIP support with: pip install 'stubborn-stub[scip]' (stubborn-stub package)"
 )
 
 
@@ -126,8 +125,7 @@ def signal_checks(root: Path) -> list[Check]:
                 id="project.index_sources",
                 status="info",
                 message=(
-                    "multiple index sources detected; stubborn does not auto-select "
-                    "SCIP vs OpenAPI"
+                    "multiple index sources detected; stubborn does not auto-select SCIP vs OpenAPI"
                 ),
                 hint=(
                     "Code graph: stubborn index --scip <file> --out <db> (stubborn-stub). "
@@ -165,8 +163,8 @@ def database_checks(
                 status="warn",
                 message="no symbols.db found (single-repo legacy mode needs no workspace)",
                 hint=(
-                    "Try bundled fixture: FIXTURE=$(stubborn fixture-path minimal) && "
-                    "stubborn index --scip \"$FIXTURE\" --out metadata/symbols.db "
+                    "Quick demo: stubborn try  "
+                    "or: stubborn index --fixture minimal --out metadata/symbols.db "
                     "(stubborn-stub)"
                 ),
             )

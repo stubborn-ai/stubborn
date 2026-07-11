@@ -97,6 +97,32 @@ def test_cli_fixtures_list() -> None:
     assert "minimal" in result.stdout
 
 
+def test_cli_try_quiet(tmp_path: Path) -> None:
+    runner = CliRunner()
+    db = tmp_path / "try.db"
+    result = runner.invoke(
+        app,
+        ["try", "--out", str(db), "-q"],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0, result.stdout + result.stderr
+    assert db.is_file()
+    assert "OrderService" in result.stdout
+
+
+def test_cli_try_verbose(tmp_path: Path) -> None:
+    runner = CliRunner()
+    db = tmp_path / "try.db"
+    result = runner.invoke(
+        app,
+        ["try", "--out", str(db)],
+    )
+    assert result.exit_code == 0, result.stdout + result.stderr
+    assert "Indexed" in result.stdout
+    assert "OrderService" in result.stdout
+    assert "class OrderService" in result.stdout or "OrderService" in result.stdout
+
+
 def test_cli_index_merge(tmp_path: Path) -> None:
     runner = CliRunner()
     db = tmp_path / "symbols.db"
