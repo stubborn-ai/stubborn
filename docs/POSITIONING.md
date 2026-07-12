@@ -178,6 +178,6 @@ They complement each other. Stubborn does not replace java-ast-ssot for migratio
 
 ## Status
 
-**Beta `0.10.0b1` (Java-first for code weave, source-neutral for contract graph)** — see [BETA.md](BETA.md).
+**Beta `0.10.0b2` (Java-first for code weave, source-neutral for contract graph)** — see [BETA.md](BETA.md).
 
 Built with **architecture-led, AI-assisted development** — see [DEVELOPMENT-MODEL.md](DEVELOPMENT-MODEL.md).

@@ -92,6 +92,13 @@ def test_doctor_detects_build_signal(tmp_path: Path) -> None:
     assert any(check.id == "project.signal.build" for check in report.checks)
 
 
+def test_doctor_journey_hints_java_without_scip(tmp_path: Path) -> None:
+    (tmp_path / "pom.xml").write_text("<project/>", encoding="utf-8")
+    report = run_doctor(tmp_path, fix_hint=True)
+    assert any(check.id == "journey.java_index" and check.status == "warn" for check in report.checks)
+    assert any(check.id == "journey.docs" for check in report.checks)
+
+
 def test_cli_doctor_json(tmp_path: Path) -> None:
     runner = CliRunner()
     db = tmp_path / "symbols.db"

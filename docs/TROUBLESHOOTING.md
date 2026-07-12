@@ -14,6 +14,27 @@ stubborn-status --json          # after: pip install stubborn-status
 Doctors are **read-only** — they do not run scip-java, ingest, or migrate your
 database ([ADR-015](adr/ADR-015-federated-doctor-diagnostics.md)).
 
+```bash
+stubborn-status --json --require stubborn-stub,stubborn-mcp   # MCP workflows
+```
+
+Full federated report across `stubborn-stub`, `stubborn-mcp`, `stubborn-watch`.
+See [ADR-016](adr/ADR-016-doctor-status-aggregation.md).
+
+---
+
+## Which journey am I on?
+
+| Your goal | Journey | First command |
+|-----------|---------|---------------|
+| Smoke test, no Java | [A](https://github.com/stubborn-ai/stubborn-hub/blob/main/docs/USER-JOURNEY.md#journey-a--try-in-30-seconds-no-java) | `stubborn try` |
+| Cursor / MCP agent | [B](https://github.com/stubborn-ai/stubborn-hub/blob/main/docs/USER-JOURNEY.md#journey-b--cursor--mcp-agents) | `stubborn-mcp doctor` after `STUBBORN_DB` is set |
+| Real Java / Spring repo | [C](https://github.com/stubborn-ai/stubborn-hub/blob/main/docs/USER-JOURNEY.md#journey-c--real-java--spring-project) | `scip-java index` → `stubborn index` |
+| Microservices + OpenAPI | [D](https://github.com/stubborn-ai/stubborn-hub/blob/main/docs/USER-JOURNEY.md#journey-d--microservices--contract-graph) | `index-openapi` / `index-contract` |
+| CI / release maintainer | [E](https://github.com/stubborn-ai/stubborn-hub/blob/main/docs/USER-JOURNEY.md#journey-e--ci-doctor-release-matrix) | `stubborn-status --json` |
+
+`stubborn doctor` prints journey hints when `--fix-hint` is enabled (default).
+
 ---
 
 ## Installation and naming
@@ -96,8 +117,20 @@ Stubborn does not compile Java. You need a working toolchain **before** Stubborn
 1. `mvn -q package` (or your build) succeeds
 2. `scip-java index --build-tool maven` produces `index.scip`
 3. `stubborn index --scip index.scip --out metadata/symbols.db`
+4. `stubborn doctor` — expect `db.present` pass; warnings about missing `[scip]` mean
+   install `pip install "stubborn-stub[scip]"` for binary `.scip` (NDJSON/JSON may work without)
+
+**Common failures:**
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| `scip-java: command not found` | CLI not on PATH | [scip-java install](https://github.com/sourcegraph/scip-java) |
+| `index.scip` missing after index | Maven build failed | Fix `mvn package` first |
+| `protobuf` / decode error on index | Missing `[scip]` extra | `pip install "stubborn-stub[scip]"` |
+| Doctor: `index.scip` but no DB | Skipped `stubborn index` | Run step 3 above |
 
 Validated reference: [`stubborn-demo/demo-spring`](https://github.com/stubborn-ai/stubborn-demo/tree/main/demo-spring).
+Host launcher runs `stubborn-preflight.sh` before E2E (see [DEMO-LAUNCHERS](https://github.com/stubborn-ai/stubborn-hub/blob/main/docs/DEMO-LAUNCHERS.md)).
 
 ### `--merge` / `--paths` errors
 
@@ -131,6 +164,19 @@ That is normal.
 ---
 
 ## MCP (stubborn-mcp)
+
+### Checklist before opening Cursor
+
+1. **Indexed DB exists** — Journey A (`stubborn try`) or Journey C (`stubborn index`).
+2. **`STUBBORN_DB` points at that file** — absolute or `${workspaceFolder}/metadata/symbols.db`.
+3. **Same venv on PATH** — `which stubborn-mcp` matches where you `pip install`ed.
+4. **Federated check:**
+
+   ```bash
+   export STUBBORN_DB=metadata/symbols.db
+   stubborn-mcp doctor
+   stubborn-status --json --require stubborn-stub,stubborn-mcp
+   ```
 
 ### MCP server starts but tools return errors
 

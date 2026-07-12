@@ -63,6 +63,7 @@ def workspace_register_repo_cmd(
 TRY_FIXTURE = "minimal"
 TRY_TARGET = "semanticdb maven com/example/OrderService#"
 TRY_DEFAULT_DB = Path("stubborn-try.symbols.db")
+TRY_USER_JOURNEY_URL = "https://github.com/stubborn-ai/stubborn-hub/blob/main/docs/USER-JOURNEY.md"
 
 
 @app.command("try")
@@ -129,6 +130,16 @@ def try_cmd(
     typer.echo(result.text, nl=False)
     if not result.text.endswith("\n"):
         typer.echo()
+    if not quiet:
+        typer.echo("---")
+        typer.echo("Next steps:")
+        typer.echo("  Journey B (Cursor/MCP): pip install stubborn-mcp")
+        typer.echo("    → index a symbols.db, set STUBBORN_DB, run stubborn-mcp doctor")
+        typer.echo('  Journey C (Java/Spring): pip install "stubborn-stub[scip]"')
+        typer.echo(
+            "    → scip-java index, then stubborn index --scip index.scip --out metadata/symbols.db"
+        )
+        typer.echo(f"  Full paths: {TRY_USER_JOURNEY_URL}")
 
 
 @app.command("fixture-path")

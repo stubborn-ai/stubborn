@@ -14,6 +14,8 @@ from stubborn.doctor.signals import ProjectSignal, discover_project_signals
 from stubborn.store.reader import list_contract_bindings, workspace_run_summaries
 from stubborn.store.writer import read_info, read_schema_version
 
+_USER_JOURNEY_URL = "https://github.com/stubborn-ai/stubborn-hub/blob/main/docs/USER-JOURNEY.md"
+_TROUBLESHOOTING_URL = "https://github.com/stubborn-ai/stubborn/blob/main/docs/TROUBLESHOOTING.md"
 _SCIP_EXTRA_HINT = (
     "Install binary SCIP support with: pip install 'stubborn-stub[scip]' (stubborn-stub package)"
 )
@@ -165,7 +167,7 @@ def database_checks(
                 hint=(
                     "Quick demo: stubborn try  "
                     "or: stubborn index --fixture minimal --out metadata/symbols.db "
-                    "(stubborn-stub)"
+                    "(stubborn-stub). Journeys: see USER-JOURNEY.md"
                 ),
             )
         )
@@ -316,7 +318,10 @@ def delegation_hints(signals: list[ProjectSignal]) -> list[Check]:
                 id="delegate.mcp",
                 status="info",
                 message="MCP setup is diagnosed by stubborn-mcp",
-                hint="Run: stubborn-mcp doctor (stubborn-mcp package)",
+                hint=(
+                    "Set STUBBORN_DB to your symbols.db, then: stubborn-mcp doctor "
+                    "(stubborn-mcp package). See USER-JOURNEY Journey B."
+                ),
             )
         )
     if kinds & {"build", "scip"} or not kinds:
@@ -331,4 +336,89 @@ def delegation_hints(signals: list[ProjectSignal]) -> list[Check]:
                 ),
             )
         )
+    return hints
+
+
+def journey_hints(
+    signals: list[ProjectSignal],
+    *,
+    has_indexed_db: bool,
+) -> list[Check]:
+    """Copy-paste next-step hints for common external-user paths (read-only)."""
+    hints: list[Check] = []
+    kinds = {signal.kind for signal in signals}
+
+    hints.append(
+        Check(
+            id="journey.docs",
+            status="info",
+            message="goal-oriented setup paths (try / MCP / Java / contracts)",
+            hint=_USER_JOURNEY_URL,
+        )
+    )
+
+    if not kinds and not has_indexed_db:
+        hints.append(
+            Check(
+                id="journey.try",
+                status="info",
+                message="no project index signals yet",
+                hint=(f"Smoke test: stubborn try  Troubleshooting: {_TROUBLESHOOTING_URL}"),
+            )
+        )
+
+    if "build" in kinds and "scip" not in kinds:
+        hints.append(
+            Check(
+                id="journey.java_index",
+                status="warn",
+                message="Java build files detected but no index.scip in project root",
+                hint=(
+                    "Journey C: mvn package, then scip-java index, then "
+                    "stubborn index --scip index.scip --out metadata/symbols.db. "
+                    + _SCIP_EXTRA_HINT
+                ),
+            )
+        )
+
+    if "scip" in kinds and not has_indexed_db:
+        hints.append(
+            Check(
+                id="journey.scip_not_indexed",
+                status="warn",
+                message="index.scip present but symbols.db not indexed for this project",
+                hint=(
+                    "Run: stubborn index --scip index.scip --out metadata/symbols.db "
+                    "(stubborn-stub)"
+                ),
+            )
+        )
+
+    if "openapi" in kinds or "contract_manifest" in kinds:
+        if not has_indexed_db:
+            hints.append(
+                Check(
+                    id="journey.contract_index",
+                    status="info",
+                    message="contract sources detected (OpenAPI or manifest)",
+                    hint=(
+                        "Journey D: stubborn index-openapi / index-contract — "
+                        "contract facts are not created by SCIP alone"
+                    ),
+                )
+            )
+
+    if "mcp_config" in kinds and not has_indexed_db:
+        hints.append(
+            Check(
+                id="journey.mcp_needs_db",
+                status="warn",
+                message="MCP config present but no symbols.db discovered",
+                hint=(
+                    "Build metadata/symbols.db first (Journey A fixture or Journey C scip-java), "
+                    "then set STUBBORN_DB in .cursor/mcp.json"
+                ),
+            )
+        )
+
     return hints

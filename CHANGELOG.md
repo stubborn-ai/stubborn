@@ -6,6 +6,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.10.0b2] - 2026-07-12
+
+### Added
+
+- **Doctor journey hints** — read-only next-step signals for try / MCP / Java / contract paths (ADR-015).
+- **`stubborn try` next steps** — prints Journey B/C pointers after the bundled-fixture demo.
+
+### Changed
+
+- Expanded [TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) with journey map, MCP checklist, and scip-java failure table.
+
 ## [0.10.0b1] - 2026-07-12
 
 ### Changed
@@ -104,6 +115,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 See [GitHub Releases](https://github.com/stubborn-ai/stubborn/releases) for earlier tags and migration history.
 
+[0.10.0b2]: https://github.com/stubborn-ai/stubborn/compare/v0.10.0b1...v0.10.0b2
 [0.10.0b1]: https://github.com/stubborn-ai/stubborn/compare/v0.9.0b7...v0.10.0b1
 [0.9.0b7]: https://github.com/stubborn-ai/stubborn/compare/v0.9.0b6...v0.9.0b7
 [0.9.0b6]: https://github.com/stubborn-ai/stubborn/compare/v0.9.0b5...v0.9.0b6

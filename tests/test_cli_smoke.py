@@ -120,6 +120,8 @@ def test_cli_try_verbose(tmp_path: Path) -> None:
     assert result.exit_code == 0, result.stdout + result.stderr
     assert "Indexed" in result.stdout
     assert "OrderService" in result.stdout
+    assert "Next steps:" in result.stdout
+    assert "Journey B" in result.stdout
     assert "class OrderService" in result.stdout or "OrderService" in result.stdout
 
 
