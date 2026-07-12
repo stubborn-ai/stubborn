@@ -26,6 +26,7 @@ This project is built for **use and for reading**: ADRs are part of the public d
 | [ADR-014](ADR-014-optional-scip-protobuf-runtime.md) | Accepted | Optional SCIP protobuf runtime boundary |
 | [ADR-015](ADR-015-federated-doctor-diagnostics.md) | Accepted | Federated `doctor` diagnostics per package |
 | [ADR-016](ADR-016-doctor-status-aggregation.md) | Accepted | Doctor status aggregation (`stubborn-status`) |
+| [ADR-017](ADR-017-program-versioning-policy.md) | Accepted | Program versioning policy (multi-repo PyPI line) |
 
 ## Status legend
 
@@ -89,6 +90,7 @@ What we chose, in one or two paragraphs.
 | [DEVELOPMENT-MODEL.md](../DEVELOPMENT-MODEL.md) | Architecture-led, AI-assisted build; human vs AI roles |
 | [POSITIONING.md](../POSITIONING.md) | Product positioning (what it is / is not) |
 | [BETA.md](../BETA.md) | Release scope and KPI baselines |
+| [ADR-017](ADR-017-program-versioning-policy.md) | Program version bumps, beta suffix, coordinated PyPI line |
 | [SCIP-INGEST.md](../SCIP-INGEST.md) | Ingest behavior spec |
 | [STUBBORN-DSL.md](../STUBBORN-DSL.md) | Stubborn-DSL grammar spec |
 | [INTEGRATION.md](../INTEGRATION.md) | Optional anchor-migration consumer pattern |
