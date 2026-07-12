@@ -1,6 +1,6 @@
 # Beta readiness (Java-first)
 
-**Current: Beta `0.9.0b7`** — Java/Spring E2E validated; `Development Status :: 4 - Beta`.
+**Current: Beta `0.10.0b1`** — Java/Spring E2E validated; `Development Status :: 4 - Beta`.
 
 Pre-beta (`0.9.0a1`) completed the checklist; this tag flips the PyPI classifier and version line.
 
@@ -19,7 +19,7 @@ See [POSITIONING.md](POSITIONING.md) for the full primary/secondary split.
 | Stage | Version | Classifier |
 |-------|---------|------------|
 | Pre-beta | `0.9.0a1` | Alpha |
-| **Beta (now)** | **`0.9.0b7`** | **Beta** |
+| **Beta (now)** | **`0.10.0b1`** | **Beta** |
 | Stable | `1.0.0` | Stable |
 
 ## Beta checklist (complete)
@@ -42,9 +42,9 @@ See [POSITIONING.md](POSITIONING.md) for the full primary/secondary split.
 ### Agent / docs
 
 - [x] STUBBORN-DSL grammar, LLM snippet, format guide
-- [x] PyPI `stubborn-stub` published (`0.9.0b7`)
+- [x] PyPI `stubborn-stub` published (`0.10.0b1`)
 - [x] ADRs + honest positioning ([POSITIONING.md](POSITIONING.md))
-- [x] Federated `doctor` read-only diagnostics ([ADR-015](adr/ADR-015-federated-doctor-diagnostics.md)); aggregation via [`stubborn-status`](https://pypi.org/project/stubborn-status/) **0.1.0b1** ([ADR-016](adr/ADR-016-doctor-status-aggregation.md))
+- [x] Federated `doctor` read-only diagnostics ([ADR-015](adr/ADR-015-federated-doctor-diagnostics.md)); aggregation via [`stubborn-status`](https://pypi.org/project/stubborn-status/) **0.10.0b1** ([ADR-016](adr/ADR-016-doctor-status-aggregation.md))
 
 ### Quality bar
 

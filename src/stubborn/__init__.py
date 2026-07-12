@@ -1,3 +1,3 @@
 """Stubborn — deterministic code context from symbol graphs."""
 
-__version__ = "0.9.0b7"
+__version__ = "0.10.0b1"

@@ -6,6 +6,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.10.0b1] - 2026-07-12
+
+### Changed
+
+- Align program-wide PyPI version line to **0.10.0b1** (unified release matrix across core and satellite packages).
+
 ## [0.9.0b7] - 2026-07-12
 
 ### Added
@@ -98,6 +104,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 See [GitHub Releases](https://github.com/stubborn-ai/stubborn/releases) for earlier tags and migration history.
 
+[0.10.0b1]: https://github.com/stubborn-ai/stubborn/compare/v0.9.0b7...v0.10.0b1
 [0.9.0b7]: https://github.com/stubborn-ai/stubborn/compare/v0.9.0b6...v0.9.0b7
 [0.9.0b6]: https://github.com/stubborn-ai/stubborn/compare/v0.9.0b5...v0.9.0b6
 [0.9.0b5]: https://github.com/stubborn-ai/stubborn/compare/v0.9.0b4...v0.9.0b5
