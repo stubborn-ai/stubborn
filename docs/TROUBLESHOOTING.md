@@ -124,12 +124,13 @@ Stubborn does not compile Java. You need a working toolchain **before** Stubborn
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
-| `scip-java: command not found` | CLI not on PATH | [scip-java install](https://github.com/sourcegraph/scip-java) |
+| `scip-java: command not found` | CLI not on PATH | [scip-java install](https://github.com/sourcegraph/scip-java#installation) (`cs install scip-java`); or reuse `index.scip` with `index-java-project.sh --no-build` |
 | `index.scip` missing after index | Maven build failed | Fix `mvn package` first |
 | `protobuf` / decode error on index | Missing `[scip]` extra | `pip install "stubborn-stub[scip]"` |
 | Doctor: `index.scip` but no DB | Skipped `stubborn index` | Run step 3 above |
 
 Validated reference: [`stubborn-demo/demo-spring`](https://github.com/stubborn-ai/stubborn-demo/tree/main/demo-spring).
+For your own repo, use [`stubborn-demo/scripts/index-java-project.sh`](https://github.com/stubborn-ai/stubborn-demo/blob/main/scripts/index-java-project.sh).
 Host launcher runs `stubborn-preflight.sh` before E2E (see [DEMO-LAUNCHERS](https://github.com/stubborn-ai/stubborn-hub/blob/main/docs/DEMO-LAUNCHERS.md)).
 
 ### `--merge` / `--paths` errors
